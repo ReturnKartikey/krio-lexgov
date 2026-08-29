@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { Shield, FileText, Database, Scale, ArrowUpRight } from "lucide-react";
+import { MascotSentinel } from "@/components/motion/MascotSentinel";
 
 export function Footer() {
   return (
@@ -85,11 +86,9 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Center Emblem Graphic */}
-        <div className="pt-8 border-t border-white/5 flex flex-col items-center justify-center space-y-4">
-          <div className="w-10 h-10 rounded-full border border-white/15 bg-brivo-navy/60 flex items-center justify-center text-brivo-paper">
-            <span className="font-serif italic text-lg text-brivo-cyan">k</span>
-          </div>
+        {/* Center Mascot & Emblem Graphic */}
+        <div className="pt-8 border-t border-white/5 flex flex-col items-center justify-center space-y-2">
+          <MascotSentinel />
           <span className="font-mono text-[0.65rem] tracking-[0.25em] text-brivo-slate uppercase">
             Precision Becomes Clarity
           </span>

@@ -104,6 +104,7 @@ export function IntelligenceModal({
 
           {/* Modal Container */}
           <motion.div
+            data-lenis-prevent="true"
             initial={{ opacity: 0, scale: 0.96, y: 12 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.97, y: 8 }}
@@ -176,36 +177,53 @@ export function IntelligenceModal({
 
               {/* Mode Pills & Quick Prompts */}
               <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 p-1 rounded-full bg-brivo-paper border border-brivo-navy/10">
                   <button
                     onClick={() => setMode("risk_brief")}
-                    className={`px-3 py-1 rounded-full text-xs font-mono transition-all ${
-                      mode === "risk_brief"
-                        ? "bg-brivo-navy text-brivo-paper font-semibold shadow-sm"
-                        : "bg-brivo-paper text-brivo-slate hover:text-brivo-navy border border-brivo-navy/10"
-                    }`}
+                    className="relative px-3 py-1 rounded-full text-xs font-mono transition-colors"
                   >
-                    Executive Risk Brief
+                    {mode === "risk_brief" && (
+                      <motion.div
+                        layoutId="aiModePill"
+                        className="absolute inset-0 rounded-full bg-brivo-navy shadow-sm"
+                        transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                      />
+                    )}
+                    <span className={`relative z-10 ${mode === "risk_brief" ? "text-brivo-paper font-semibold" : "text-brivo-slate hover:text-brivo-navy"}`}>
+                      Executive Risk Brief
+                    </span>
                   </button>
+
                   <button
                     onClick={() => setMode("precedent_analysis")}
-                    className={`px-3 py-1 rounded-full text-xs font-mono transition-all ${
-                      mode === "precedent_analysis"
-                        ? "bg-brivo-navy text-brivo-paper font-semibold shadow-sm"
-                        : "bg-brivo-paper text-brivo-slate hover:text-brivo-navy border border-brivo-navy/10"
-                    }`}
+                    className="relative px-3 py-1 rounded-full text-xs font-mono transition-colors"
                   >
-                    Precedent Analysis
+                    {mode === "precedent_analysis" && (
+                      <motion.div
+                        layoutId="aiModePill"
+                        className="absolute inset-0 rounded-full bg-brivo-navy shadow-sm"
+                        transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                      />
+                    )}
+                    <span className={`relative z-10 ${mode === "precedent_analysis" ? "text-brivo-paper font-semibold" : "text-brivo-slate hover:text-brivo-navy"}`}>
+                      Precedent Analysis
+                    </span>
                   </button>
+
                   <button
                     onClick={() => setMode("entity_exposure")}
-                    className={`px-3 py-1 rounded-full text-xs font-mono transition-all ${
-                      mode === "entity_exposure"
-                        ? "bg-brivo-navy text-brivo-paper font-semibold shadow-sm"
-                        : "bg-brivo-paper text-brivo-slate hover:text-brivo-navy border border-brivo-navy/10"
-                    }`}
+                    className="relative px-3 py-1 rounded-full text-xs font-mono transition-colors"
                   >
-                    Noticee Liability Matrix
+                    {mode === "entity_exposure" && (
+                      <motion.div
+                        layoutId="aiModePill"
+                        className="absolute inset-0 rounded-full bg-brivo-navy shadow-sm"
+                        transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                      />
+                    )}
+                    <span className={`relative z-10 ${mode === "entity_exposure" ? "text-brivo-paper font-semibold" : "text-brivo-slate hover:text-brivo-navy"}`}>
+                      Noticee Liability Matrix
+                    </span>
                   </button>
                 </div>
 
@@ -246,7 +264,11 @@ export function IntelligenceModal({
             </div>
 
             {/* Results Content Area */}
-            <div className="p-6 overflow-y-auto space-y-6 flex-1 bg-editorial-grid">
+            <div
+              data-lenis-prevent="true"
+              className="p-6 overflow-y-auto space-y-6 flex-1 bg-editorial-grid max-h-[55vh]"
+              style={{ overscrollBehavior: "contain" }}
+            >
               {loading ? (
                 <div className="py-16 flex flex-col items-center justify-center space-y-4">
                   <div className="w-10 h-10 rounded-full border-2 border-brivo-navy/10 border-t-brivo-navy animate-spin" />

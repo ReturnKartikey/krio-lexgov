@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import {
   Search,
   ArrowRight,
@@ -26,23 +25,12 @@ import {
 } from "lucide-react";
 import { MicroLabel } from "@/components/common/MicroLabel";
 import { IntelligenceModal } from "@/components/ai/IntelligenceModal";
+import { QuickLookModal } from "@/components/motion/QuickLookModal";
+import { MagneticButton } from "@/components/motion/MagneticButton";
+import { TiltCard } from "@/components/motion/TiltCard";
 import { getRecords, getTrends, getProcessingStats, getHealth } from "@/lib/api";
 import { formatINR, formatDate, truncateText } from "@/lib/utils";
-
-const FADE_UP = {
-  initial: { opacity: 0, y: 16 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
-};
-
-const STAGGER_CONTAINER = {
-  initial: {},
-  animate: {
-    transition: {
-      staggerChildren: 0.08,
-    },
-  },
-};
+import { gsap, ScrollTrigger, SplitType, animateHeroHeadline, animateCounter, prefersReducedMotion } from "@/lib/motion";
 
 export default function LandingPage() {
   const [stats, setStats] = useState({
@@ -54,7 +42,15 @@ export default function LandingPage() {
   const [recentRecords, setRecentRecords] = useState<any[]>([]);
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const [aiInitialQuery, setAiInitialQuery] = useState("");
+  const [quickLookRecord, setQuickLookRecord] = useState<any>(null);
+  const [isQuickLookOpen, setIsQuickLookOpen] = useState(false);
 
+  const heroHeadlineRef = useRef<HTMLHeadingElement>(null);
+  const heroWatermarkRef = useRef<HTMLDivElement>(null);
+  const manifestoHeadingRef = useRef<HTMLHeadingElement>(null);
+  const statsNumberRef = useRef<HTMLSpanElement>(null);
+
+  // Fetch backend data
   useEffect(() => {
     async function loadData() {
       try {
@@ -91,10 +87,91 @@ export default function LandingPage() {
           }));
         }
       } catch (e) {
-        // graceful
+        // graceful fallback
       }
     }
     loadData();
+  }, []);
+
+  // Motion design animations via GSAP & ScrollTrigger
+  useEffect(() => {
+    if (prefersReducedMotion()) return;
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    // 1. Hero Headline SplitType animation
+    let splitInstance: any = null;
+    if (heroHeadlineRef.current) {
+      splitInstance = animateHeroHeadline(heroHeadlineRef.current);
+    }
+
+    // 2. Parallax vertical drift for background giant 'K' watermark
+    if (heroWatermarkRef.current) {
+      gsap.to(heroWatermarkRef.current, {
+        yPercent: 35,
+        opacity: 0.08,
+        ease: "none",
+        scrollTrigger: {
+          trigger: heroWatermarkRef.current,
+          start: "top top",
+          end: "bottom top",
+          scrub: 1.2,
+        },
+      });
+    }
+
+    // 3. Staggered reveals for Section Headings and Cards
+    const revealSections = document.querySelectorAll(".scroll-reveal-section");
+    revealSections.forEach((section) => {
+      gsap.fromTo(
+        section.querySelectorAll(".scroll-reveal-item"),
+        {
+          opacity: 0,
+          y: 28,
+          filter: "blur(4px)",
+        },
+        {
+          opacity: 1,
+          y: 0,
+          filter: "blur(0px)",
+          duration: 0.75,
+          stagger: 0.08,
+          ease: "power3.out",
+          clearProps: "filter,transform",
+          scrollTrigger: {
+            trigger: section,
+            start: "top 85%",
+            once: true,
+          },
+        }
+      );
+    });
+
+    // 4. Sequential table row reveals
+    const tableRows = document.querySelectorAll(".dispatch-table-row");
+    if (tableRows.length > 0) {
+      gsap.fromTo(
+        tableRows,
+        { opacity: 0, y: 14 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.5,
+          stagger: 0.05,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: ".dispatch-table-container",
+            start: "top 85%",
+            once: true,
+          },
+        }
+      );
+    }
+
+    return () => {
+      ScrollTrigger.getAll().forEach((t) => t.kill());
+      splitInstance?.split?.revert?.();
+    };
   }, []);
 
   const openAiWithQuery = (q: string) => {
@@ -106,101 +183,101 @@ export default function LandingPage() {
     <div className="w-full flex flex-col selection:bg-brivo-mist selection:text-brivo-navy">
       {/* 1. HERO SECTION */}
       <section className="relative pt-8 sm:pt-12 pb-14 sm:pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-        {/* Subtle Watermark in top right */}
-        <div className="absolute top-2 right-6 sm:right-12 select-none pointer-events-none opacity-[0.04] hidden lg:block">
-          <span className="font-serif italic font-bold text-[20rem] leading-none text-brivo-navy">
+        {/* Subtle Watermark in top right with Parallax Scroll */}
+        <div
+          ref={heroWatermarkRef}
+          className="absolute top-0 right-6 sm:right-12 select-none pointer-events-none opacity-[0.035] hidden lg:block will-change-transform"
+        >
+          <span className="font-serif italic font-bold text-[22rem] leading-none text-brivo-navy">
             K
           </span>
         </div>
 
-        <motion.div
-          initial="initial"
-          animate="animate"
-          variants={STAGGER_CONTAINER}
-          className="relative z-10 space-y-6 max-w-3xl"
-        >
-          <motion.div variants={FADE_UP}>
+        <div className="relative z-10 space-y-6 max-w-3xl">
+          <div>
             <MicroLabel number="N°01" label="PUBLIC REGULATORY INTELLIGENCE" />
-          </motion.div>
+          </div>
 
-          <motion.h1
-            variants={FADE_UP}
+          <h1
+            ref={heroHeadlineRef}
             className="text-4xl sm:text-6xl lg:text-7xl font-light tracking-[-0.03em] text-brivo-navy leading-[1.05] font-sans"
           >
             Decisions you can{" "}
-            <span className="font-serif italic font-normal">defend</span>.<br />
+            <span className="font-serif italic font-normal editorial-interactive-italic">
+              defend.
+            </span>
+            <br />
             Data you can{" "}
-            <span className="font-serif italic font-normal">trust</span>.
-          </motion.h1>
+            <span className="font-serif italic font-normal editorial-interactive-italic">
+              trust.
+            </span>
+          </h1>
 
-          <motion.p
-            variants={FADE_UP}
-            className="text-base sm:text-lg text-brivo-slate font-normal max-w-xl leading-relaxed"
-          >
+          <p className="text-base sm:text-lg text-brivo-slate font-normal max-w-xl leading-relaxed">
             Krio Intelligence Explorer normalizes, indexes, and analyzes public enforcement orders from the Securities and Exchange Board of India (SEBI) with audit-grade provenance and full-text precision.
-          </motion.p>
+          </p>
 
-          <motion.div variants={FADE_UP} className="flex flex-wrap items-center gap-4 pt-2">
-            <Link
-              href="/explorer"
-              className="px-6 py-3 rounded-full bg-brivo-navy hover:bg-brivo-navy/90 text-brivo-paper font-medium text-xs tracking-wider uppercase transition-all duration-300 flex items-center gap-2 shadow-sm hover:shadow-md group active:scale-95"
-            >
-              <span>Launch Explorer</span>
-              <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1 text-brivo-cyan" />
+          <div className="flex flex-wrap items-center gap-4 pt-2">
+            <Link href="/explorer">
+              <MagneticButton className="px-6 py-3 rounded-full bg-brivo-navy hover:bg-brivo-navy/90 text-brivo-paper font-medium text-xs tracking-wider uppercase flex items-center gap-2 shadow-sm hover:shadow-md group active:scale-95 transition-all">
+                <span>Launch Explorer</span>
+                <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1 text-brivo-cyan" />
+              </MagneticButton>
             </Link>
 
             {/* AI Synthesizer Trigger Button */}
-            <button
+            <MagneticButton
               onClick={() => openAiWithQuery("")}
-              className="px-6 py-3 rounded-full bg-white hover:bg-brivo-paper border border-brivo-navy/15 text-brivo-navy font-medium text-xs tracking-wider uppercase transition-all duration-300 flex items-center gap-2 shadow-sm hover:shadow-md hover:border-brivo-cyan/50 active:scale-95 group"
+              className="px-6 py-3 rounded-full bg-white hover:bg-brivo-paper border border-brivo-navy/15 text-brivo-navy font-medium text-xs tracking-wider uppercase flex items-center gap-2 shadow-sm hover:shadow-md hover:border-brivo-cyan/50 active:scale-95 group transition-all"
             >
               <span className="w-2 h-2 rounded-full bg-brivo-cyan animate-pulse" />
               <span>Synthesize Precedents</span>
-            </button>
+            </MagneticButton>
 
             <Link
               href="/analytics"
-              className="px-5 py-3 text-brivo-slate hover:text-brivo-navy font-mono text-xs transition-colors flex items-center gap-1"
+              className="px-4 py-2 text-brivo-slate hover:text-brivo-navy font-mono text-xs transition-colors flex items-center gap-1 group"
             >
-              <span>Market Analytics →</span>
+              <span>Market Analytics</span>
+              <span className="transition-transform group-hover:translate-x-1">→</span>
             </Link>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </section>
 
       {/* 2. REGISTRY DATA SOURCE BADGES */}
-      <section className="w-full border-y border-brivo-navy/10 bg-white py-6 px-4 sm:px-6 lg:px-8">
+      <section className="w-full border-y border-brivo-navy/10 bg-white py-6 px-4 sm:px-6 lg:px-8 scroll-reveal-section">
         <div className="max-w-7xl mx-auto space-y-4">
           <div className="flex items-center justify-between">
             <span className="text-[0.65rem] font-mono tracking-[0.2em] uppercase text-brivo-slate">
               FEDERATED REGISTRY PIPELINES // INDIA CAPITAL MARKETS
             </span>
-            <span className="text-[0.65rem] font-mono text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1.5">
+            <span className="text-[0.65rem] font-mono text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1.5 shadow-sm">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               <span>SYNC ACTIVE</span>
             </span>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-2 border-t border-brivo-navy/5 text-xs font-mono">
-            <div className="p-3.5 rounded-xl border border-brivo-navy/10 bg-brivo-paper/40 flex flex-col justify-between hover:border-brivo-navy/20 transition-all">
+            <div className="scroll-reveal-item p-3.5 rounded-xl border border-brivo-navy/10 bg-brivo-paper/40 flex flex-col justify-between hover:border-brivo-navy/25 transition-all">
               <span className="text-[0.65rem] text-brivo-slate uppercase">Registry Source</span>
               <span className="font-semibold text-brivo-navy mt-1">SEBI Adjudication Orders</span>
               <span className="text-[0.65rem] text-emerald-600 font-normal mt-2">100% Ingested & Verified</span>
             </div>
 
-            <div className="p-3.5 rounded-xl border border-brivo-navy/10 bg-brivo-paper/40 flex flex-col justify-between hover:border-brivo-navy/20 transition-all">
+            <div className="scroll-reveal-item p-3.5 rounded-xl border border-brivo-navy/10 bg-brivo-paper/40 flex flex-col justify-between hover:border-brivo-navy/25 transition-all">
               <span className="text-[0.65rem] text-brivo-slate uppercase">Secondary Registry</span>
               <span className="font-semibold text-brivo-navy mt-1">BSE Corporate Filings</span>
               <span className="text-[0.65rem] text-brivo-slate font-normal mt-2">Adapter Ready</span>
             </div>
 
-            <div className="p-3.5 rounded-xl border border-brivo-navy/10 bg-brivo-paper/40 flex flex-col justify-between hover:border-brivo-navy/20 transition-all">
+            <div className="scroll-reveal-item p-3.5 rounded-xl border border-brivo-navy/10 bg-brivo-paper/40 flex flex-col justify-between hover:border-brivo-navy/25 transition-all">
               <span className="text-[0.65rem] text-brivo-slate uppercase">Market Monitor</span>
               <span className="font-semibold text-brivo-navy mt-1">NSE Enforcement Feed</span>
               <span className="text-[0.65rem] text-brivo-slate font-normal mt-2">Adapter Ready</span>
             </div>
 
-            <div className="p-3.5 rounded-xl border border-brivo-navy/10 bg-brivo-paper/40 flex flex-col justify-between hover:border-brivo-navy/20 transition-all">
+            <div className="scroll-reveal-item p-3.5 rounded-xl border border-brivo-navy/10 bg-brivo-paper/40 flex flex-col justify-between hover:border-brivo-navy/25 transition-all">
               <span className="text-[0.65rem] text-brivo-slate uppercase">Corporate Registry</span>
               <span className="font-semibold text-brivo-navy mt-1">MCA-21 RoC Orders</span>
               <span className="text-[0.65rem] text-brivo-slate font-normal mt-2">In Pipeline</span>
@@ -210,17 +287,27 @@ export default function LandingPage() {
       </section>
 
       {/* 3. EDITORIAL MANIFESTO SECTION */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-16">
+      <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-16 scroll-reveal-section">
         <div className="space-y-4 max-w-2xl">
           <MicroLabel number="N°02" label="THE OPERATING PRINCIPLE" />
-          <h2 className="text-3xl sm:text-5xl font-light tracking-[-0.02em] text-brivo-navy leading-tight font-sans">
-            Intelligence used to be a <span className="font-serif italic font-normal">moat</span>.<br />
-            We&apos;re making it a <span className="font-serif italic font-normal">utility</span>.
+          <h2
+            ref={manifestoHeadingRef}
+            className="text-3xl sm:text-5xl font-light tracking-[-0.02em] text-brivo-navy leading-tight font-sans"
+          >
+            Intelligence used to be a{" "}
+            <span className="font-serif italic font-normal editorial-interactive-italic">
+              moat.
+            </span>
+            <br />
+            We&apos;re making it a{" "}
+            <span className="font-serif italic font-normal editorial-interactive-italic">
+              utility.
+            </span>
           </h2>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 pt-8 border-t border-brivo-navy/10">
-          <div className="space-y-3 group">
+          <div className="scroll-reveal-item space-y-3 group">
             <span className="font-mono text-xs text-brivo-slate uppercase tracking-wider block">
               01 / NORMALIZATION
             </span>
@@ -232,7 +319,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="space-y-3 group">
+          <div className="scroll-reveal-item space-y-3 group">
             <span className="font-mono text-xs text-brivo-slate uppercase tracking-wider block">
               02 / PROVENANCE
             </span>
@@ -244,7 +331,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="space-y-3 group">
+          <div className="scroll-reveal-item space-y-3 group">
             <span className="font-mono text-xs text-brivo-slate uppercase tracking-wider block">
               03 / FTS ENGINE
             </span>
@@ -256,7 +343,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="space-y-3 group">
+          <div className="scroll-reveal-item space-y-3 group">
             <span className="font-mono text-xs text-brivo-slate uppercase tracking-wider block">
               04 / DEDUPLICATION
             </span>
@@ -271,16 +358,19 @@ export default function LandingPage() {
       </section>
 
       {/* 4. WHAT WE'RE BUILT ON */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-12">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-12 scroll-reveal-section">
         <div className="space-y-2">
           <MicroLabel number="N°03" label="CORE ARCHITECTURE" />
           <h2 className="text-3xl sm:text-4xl font-light text-brivo-navy font-sans tracking-tight">
-            What we&apos;re <span className="font-serif italic font-normal">built on</span>.
+            What we&apos;re{" "}
+            <span className="font-serif italic font-normal editorial-interactive-italic">
+              built on.
+            </span>
           </h2>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="p-6 rounded-2xl bg-white border border-brivo-navy/10 space-y-4 hover:border-brivo-navy/30 transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-md">
+          <TiltCard className="scroll-reveal-item p-6 rounded-2xl bg-white border border-brivo-navy/10 space-y-4 hover:border-brivo-navy/30 transition-all duration-300 shadow-sm hover:shadow-md">
             <span className="font-mono text-[0.65rem] text-brivo-slate uppercase tracking-widest block">
               N°01 // AUDIT
             </span>
@@ -290,9 +380,9 @@ export default function LandingPage() {
             <p className="text-xs text-brivo-slate leading-relaxed">
               Verifiable SHA-256 hashes and timestamped raw snapshots ensure every record can withstand institutional audit.
             </p>
-          </div>
+          </TiltCard>
 
-          <div className="p-6 rounded-2xl bg-white border border-brivo-navy/10 space-y-4 hover:border-brivo-navy/30 transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-md">
+          <TiltCard className="scroll-reveal-item p-6 rounded-2xl bg-white border border-brivo-navy/10 space-y-4 hover:border-brivo-navy/30 transition-all duration-300 shadow-sm hover:shadow-md">
             <span className="font-mono text-[0.65rem] text-brivo-slate uppercase tracking-widest block">
               N°02 // PLUGGABLE
             </span>
@@ -302,9 +392,9 @@ export default function LandingPage() {
             <p className="text-xs text-brivo-slate leading-relaxed">
               Clean abstract contracts make registering new registries (MahaRERA, NCLT, CCI) a straightforward 10-line integration.
             </p>
-          </div>
+          </TiltCard>
 
-          <div className="p-6 rounded-2xl bg-white border border-brivo-navy/10 space-y-4 hover:border-brivo-navy/30 transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-md">
+          <TiltCard className="scroll-reveal-item p-6 rounded-2xl bg-white border border-brivo-navy/10 space-y-4 hover:border-brivo-navy/30 transition-all duration-300 shadow-sm hover:shadow-md">
             <span className="font-mono text-[0.65rem] text-brivo-slate uppercase tracking-widest block">
               N°03 // CLUSTERING
             </span>
@@ -314,9 +404,9 @@ export default function LandingPage() {
             <p className="text-xs text-brivo-slate leading-relaxed">
               Fuzzy title similarity, penalty parity, and shared noticees connect related proceedings automatically.
             </p>
-          </div>
+          </TiltCard>
 
-          <div className="p-6 rounded-2xl bg-white border border-brivo-navy/10 space-y-4 hover:border-brivo-navy/30 transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-md">
+          <TiltCard className="scroll-reveal-item p-6 rounded-2xl bg-white border border-brivo-navy/10 space-y-4 hover:border-brivo-navy/30 transition-all duration-300 shadow-sm hover:shadow-md">
             <span className="font-mono text-[0.65rem] text-brivo-slate uppercase tracking-widest block">
               N°04 // COMPLIANT
             </span>
@@ -326,17 +416,20 @@ export default function LandingPage() {
             <p className="text-xs text-brivo-slate leading-relaxed">
               Token-bucket rate limiting (1.0 req/sec) and automated robots.txt respect registry server capacity.
             </p>
-          </div>
+          </TiltCard>
         </div>
       </section>
 
       {/* 5. A WORKBENCH FOR THE SERIOUS ANALYST */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-16 border-t border-brivo-navy/10">
+      <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-16 border-t border-brivo-navy/10 scroll-reveal-section">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div className="space-y-2">
             <MicroLabel number="N°04" label="INTERACTIVE CASE DOSSIERS" />
             <h2 className="text-3xl sm:text-5xl font-light text-brivo-navy font-sans tracking-tight">
-              A workbench for the <span className="font-serif italic font-normal">serious analyst</span>.
+              A workbench for the{" "}
+              <span className="font-serif italic font-normal editorial-interactive-italic">
+                serious analyst.
+              </span>
             </h2>
           </div>
           <Link
@@ -353,7 +446,7 @@ export default function LandingPage() {
           {recentRecords.slice(0, 3).map((record, index) => (
             <div
               key={record.id}
-              className="p-8 rounded-2xl bg-white border border-brivo-navy/10 hover:border-brivo-navy/30 transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-md grid grid-cols-1 lg:grid-cols-12 gap-8 items-start"
+              className="scroll-reveal-item p-8 rounded-2xl bg-white border border-brivo-navy/10 hover:border-brivo-navy/30 transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-md grid grid-cols-1 lg:grid-cols-12 gap-8 items-start"
             >
               {/* Left Big Number */}
               <div className="lg:col-span-3 space-y-2">
@@ -418,7 +511,7 @@ export default function LandingPage() {
 
                   <button
                     onClick={() => openAiWithQuery(record.title)}
-                    className="w-full px-4 py-2 rounded-full bg-white hover:bg-brivo-paper border border-brivo-navy/10 text-brivo-slate hover:text-brivo-navy text-[0.7rem] font-mono flex items-center justify-center gap-1.5 transition-colors"
+                    className="w-full px-4 py-2 rounded-full bg-white hover:bg-brivo-paper border border-brivo-navy/10 text-brivo-slate hover:text-brivo-navy text-[0.7rem] font-mono flex items-center justify-center gap-1.5 transition-colors active:scale-95"
                   >
                     <Sparkles className="w-3 h-3 text-brivo-cyan" />
                     <span>Synthesize Risk Pattern</span>
@@ -431,12 +524,15 @@ export default function LandingPage() {
       </section>
 
       {/* 6. BUILT BY PRACTITIONERS, FOR PRACTITIONERS */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-8 border-t border-brivo-navy/10">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-8 border-t border-brivo-navy/10 scroll-reveal-section">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div className="space-y-2">
             <MicroLabel number="N°05" label="LIVE ENFORCEMENT DISPATCH" />
             <h2 className="text-3xl font-light text-brivo-navy font-sans">
-              Built by practitioners, <span className="font-serif italic font-normal">for practitioners</span>.
+              Built by practitioners,{" "}
+              <span className="font-serif italic font-normal editorial-interactive-italic">
+                for practitioners.
+              </span>
             </h2>
           </div>
           <Link
@@ -449,7 +545,7 @@ export default function LandingPage() {
         </div>
 
         {/* Directory Table Layout */}
-        <div className="border border-brivo-navy/10 rounded-2xl overflow-hidden bg-white shadow-sm">
+        <div className="dispatch-table-container border border-brivo-navy/10 rounded-2xl overflow-hidden bg-white shadow-sm">
           <table className="w-full text-left text-xs">
             <thead className="bg-brivo-paper text-brivo-slate font-mono uppercase text-[0.65rem] tracking-wider border-b border-brivo-navy/10">
               <tr>
@@ -463,34 +559,53 @@ export default function LandingPage() {
             </thead>
             <tbody className="divide-y divide-brivo-navy/5">
               {recentRecords.map((r) => (
-                <tr key={r.id} className="hover:bg-brivo-paper/60 transition-colors">
-                  <td className="px-5 py-3 font-mono text-brivo-navy font-medium">
+                <tr
+                  key={r.id}
+                  onClick={() => {
+                    setQuickLookRecord(r);
+                    setIsQuickLookOpen(true);
+                  }}
+                  className="dispatch-table-row cursor-pointer transition-all duration-300 hover:bg-white hover:shadow-[0_8px_24px_rgba(26,35,51,0.08)] hover:-translate-y-0.5 group"
+                >
+                  <td className="px-5 py-3.5 font-mono text-brivo-navy font-medium">
                     {r.external_id}
                   </td>
-                  <td className="px-5 py-3 font-mono text-brivo-slate whitespace-nowrap">
+                  <td className="px-5 py-3.5 font-mono text-brivo-slate whitespace-nowrap">
                     {formatDate(r.published_date)}
                   </td>
-                  <td className="px-5 py-3 text-brivo-navy max-w-md">
-                    <Link
-                      href={`/explorer/${r.id}`}
-                      className="hover:text-brivo-cyan transition-colors font-medium line-clamp-1"
-                    >
+                  <td className="px-5 py-3.5 text-brivo-navy max-w-md">
+                    <span className="group-hover:text-brivo-cyan transition-colors font-medium line-clamp-1">
                       {r.title}
-                    </Link>
+                    </span>
                   </td>
-                  <td className="px-5 py-3 font-mono text-brivo-slate whitespace-nowrap">
+                  <td className="px-5 py-3.5 font-mono text-brivo-slate whitespace-nowrap">
                     {r.state || "Maharashtra"}
                   </td>
-                  <td className="px-5 py-3 font-mono text-right text-brivo-navy font-semibold whitespace-nowrap">
+                  <td className="px-5 py-3.5 font-mono text-right text-brivo-navy font-semibold whitespace-nowrap">
                     {r.amount ? formatINR(r.amount) : "Non-Monetary"}
                   </td>
-                  <td className="px-5 py-3 text-right">
-                    <Link
-                      href={`/explorer/${r.id}`}
-                      className="text-brivo-slate hover:text-brivo-navy font-mono text-[0.7rem] hover:underline"
-                    >
-                      Audit →
-                    </Link>
+                  <td className="px-5 py-3.5 text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setQuickLookRecord(r);
+                          setIsQuickLookOpen(true);
+                        }}
+                        className="px-2 py-0.5 rounded bg-brivo-paper hover:bg-brivo-mist text-[0.65rem] font-mono text-brivo-slate hover:text-brivo-navy border border-brivo-navy/10 transition-colors"
+                        title="Quick Look preview (or press Space)"
+                      >
+                        ⎵ Peek
+                      </button>
+                      <Link
+                        href={`/explorer/${r.id}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-brivo-slate hover:text-brivo-navy font-mono text-[0.7rem] hover:underline"
+                      >
+                        Audit →
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -500,12 +615,15 @@ export default function LandingPage() {
       </section>
 
       {/* 7. THE WORKSHOP, OUT BACK */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full scroll-reveal-section">
         <div className="p-8 sm:p-12 rounded-2xl bg-brivo-paper border border-brivo-navy/15 relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-8 shadow-sm">
           <div className="space-y-3 max-w-xl">
             <MicroLabel number="N°06" label="DEVELOPER & API PLATFORM" />
             <h2 className="text-2xl sm:text-3xl font-light text-brivo-navy font-sans">
-              The workshop, <span className="font-serif italic font-normal">out back</span>.
+              The workshop,{" "}
+              <span className="font-serif italic font-normal editorial-interactive-italic">
+                out back.
+              </span>
             </h2>
             <p className="text-xs sm:text-sm text-brivo-slate leading-relaxed">
               Every search query, aggregate calculation, and AI risk synthesis is exposed via an async, self-documenting FastAPI REST architecture.
@@ -513,19 +631,19 @@ export default function LandingPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <button
+            <MagneticButton
               onClick={() => openAiWithQuery("")}
               className="px-5 py-3 rounded-full bg-white hover:bg-brivo-paper border border-brivo-navy/15 text-brivo-navy text-xs font-mono flex items-center gap-2 shadow-sm transition-all hover:border-brivo-cyan/50"
             >
               <Sparkles className="w-3.5 h-3.5 text-brivo-cyan" />
               <span>Live AI Briefing</span>
-            </button>
+            </MagneticButton>
 
             <a
               href="http://127.0.0.1:8005/docs"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-6 py-3 rounded-full bg-brivo-navy hover:bg-brivo-navy/90 text-brivo-paper text-xs font-mono flex items-center gap-2 shadow-sm transition-all"
+              className="px-6 py-3 rounded-full bg-brivo-navy hover:bg-brivo-navy/90 text-brivo-paper text-xs font-mono flex items-center gap-2 shadow-sm transition-all active:scale-95"
             >
               <span>Swagger / OpenAPI UI</span>
               <ArrowUpRight className="w-3.5 h-3.5 text-brivo-cyan" />
@@ -535,78 +653,84 @@ export default function LandingPage() {
       </section>
 
       {/* 8. WHERE WOULD YOU LIKE TO START */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-10 border-t border-brivo-navy/10">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-10 border-t border-brivo-navy/10 scroll-reveal-section">
         <div className="space-y-2">
           <MicroLabel number="N°07" label="NAVIGATION INDEX" />
           <h2 className="text-3xl sm:text-4xl font-light text-brivo-navy font-sans">
-            Where would you like to <span className="font-serif italic font-normal">start</span>?
+            Where would you like to{" "}
+            <span className="font-serif italic font-normal editorial-interactive-italic">
+              start?
+            </span>
           </h2>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Link
-            href="/explorer"
-            className="p-6 rounded-2xl bg-white border border-brivo-navy/10 hover:border-brivo-navy/30 transition-all duration-300 hover:-translate-y-1 space-y-3 group shadow-sm hover:shadow-md"
-          >
-            <span className="font-mono text-[0.65rem] text-brivo-slate uppercase">01 / ARCHIVE</span>
-            <h3 className="text-base font-semibold text-brivo-navy group-hover:text-brivo-cyan transition-colors flex items-center justify-between">
-              <span>Record Explorer</span>
-              <ArrowRight className="w-4 h-4 text-brivo-slate group-hover:translate-x-1 transition-transform" />
-            </h3>
-            <p className="text-xs text-brivo-slate leading-relaxed">
-              Full-text vector search and multi-facet filtering over SEBI adjudication orders.
-            </p>
+          <Link href="/explorer">
+            <TiltCard className="scroll-reveal-item p-6 rounded-2xl bg-white border border-brivo-navy/10 hover:border-brivo-navy/30 transition-all duration-300 space-y-3 group shadow-sm hover:shadow-md">
+              <span className="font-mono text-[0.65rem] text-brivo-slate uppercase">01 / ARCHIVE</span>
+              <h3 className="text-base font-semibold text-brivo-navy group-hover:text-brivo-cyan transition-colors flex items-center justify-between">
+                <span>Record Explorer</span>
+                <ArrowRight className="w-4 h-4 text-brivo-slate group-hover:translate-x-1 transition-transform" />
+              </h3>
+              <p className="text-xs text-brivo-slate leading-relaxed">
+                Full-text vector search and multi-facet filtering over SEBI adjudication orders.
+              </p>
+            </TiltCard>
           </Link>
 
-          <Link
-            href="/analytics"
-            className="p-6 rounded-2xl bg-white border border-brivo-navy/10 hover:border-brivo-navy/30 transition-all duration-300 hover:-translate-y-1 space-y-3 group shadow-sm hover:shadow-md"
-          >
-            <span className="font-mono text-[0.65rem] text-brivo-slate uppercase">02 / TRENDS</span>
-            <h3 className="text-base font-semibold text-brivo-navy group-hover:text-brivo-cyan transition-colors flex items-center justify-between">
-              <span>Market Analytics</span>
-              <ArrowRight className="w-4 h-4 text-brivo-slate group-hover:translate-x-1 transition-transform" />
-            </h3>
-            <p className="text-xs text-brivo-slate leading-relaxed">
-              Period-over-period velocity changes, penalty distributions, and duplicate detector.
-            </p>
+          <Link href="/analytics">
+            <TiltCard className="scroll-reveal-item p-6 rounded-2xl bg-white border border-brivo-navy/10 hover:border-brivo-navy/30 transition-all duration-300 space-y-3 group shadow-sm hover:shadow-md">
+              <span className="font-mono text-[0.65rem] text-brivo-slate uppercase">02 / TRENDS</span>
+              <h3 className="text-base font-semibold text-brivo-navy group-hover:text-brivo-cyan transition-colors flex items-center justify-between">
+                <span>Market Analytics</span>
+                <ArrowRight className="w-4 h-4 text-brivo-slate group-hover:translate-x-1 transition-transform" />
+              </h3>
+              <p className="text-xs text-brivo-slate leading-relaxed">
+                Period-over-period velocity changes, penalty distributions, and duplicate detector.
+              </p>
+            </TiltCard>
           </Link>
 
-          <Link
-            href="/jobs"
-            className="p-6 rounded-2xl bg-white border border-brivo-navy/10 hover:border-brivo-navy/30 transition-all duration-300 hover:-translate-y-1 space-y-3 group shadow-sm hover:shadow-md"
-          >
-            <span className="font-mono text-[0.65rem] text-brivo-slate uppercase">03 / PIPELINE</span>
-            <h3 className="text-base font-semibold text-brivo-navy group-hover:text-brivo-cyan transition-colors flex items-center justify-between">
-              <span>Crawler Jobs</span>
-              <ArrowRight className="w-4 h-4 text-brivo-slate group-hover:translate-x-1 transition-transform" />
-            </h3>
-            <p className="text-xs text-brivo-slate leading-relaxed">
-              Execution audit logs, sync rate limits, and live scheduler trigger controls.
-            </p>
+          <Link href="/jobs">
+            <TiltCard className="scroll-reveal-item p-6 rounded-2xl bg-white border border-brivo-navy/10 hover:border-brivo-navy/30 transition-all duration-300 space-y-3 group shadow-sm hover:shadow-md">
+              <span className="font-mono text-[0.65rem] text-brivo-slate uppercase">03 / PIPELINE</span>
+              <h3 className="text-base font-semibold text-brivo-navy group-hover:text-brivo-cyan transition-colors flex items-center justify-between">
+                <span>Crawler Jobs</span>
+                <ArrowRight className="w-4 h-4 text-brivo-slate group-hover:translate-x-1 transition-transform" />
+              </h3>
+              <p className="text-xs text-brivo-slate leading-relaxed">
+                Execution audit logs, sync rate limits, and live scheduler trigger controls.
+              </p>
+            </TiltCard>
           </Link>
 
-          <Link
-            href="/api-explorer"
-            className="p-6 rounded-2xl bg-white border border-brivo-navy/10 hover:border-brivo-navy/30 transition-all duration-300 hover:-translate-y-1 space-y-3 group shadow-sm hover:shadow-md"
-          >
-            <span className="font-mono text-[0.65rem] text-brivo-slate uppercase">04 / TERMINAL</span>
-            <h3 className="text-base font-semibold text-brivo-navy group-hover:text-brivo-cyan transition-colors flex items-center justify-between">
-              <span>API Sandbox</span>
-              <ArrowRight className="w-4 h-4 text-brivo-slate group-hover:translate-x-1 transition-transform" />
-            </h3>
-            <p className="text-xs text-brivo-slate leading-relaxed">
-              Interactive cURL builder, response inspector, and live JSON payload visualizer.
-            </p>
+          <Link href="/api-explorer">
+            <TiltCard className="scroll-reveal-item p-6 rounded-2xl bg-white border border-brivo-navy/10 hover:border-brivo-navy/30 transition-all duration-300 space-y-3 group shadow-sm hover:shadow-md">
+              <span className="font-mono text-[0.65rem] text-brivo-slate uppercase">04 / TERMINAL</span>
+              <h3 className="text-base font-semibold text-brivo-navy group-hover:text-brivo-cyan transition-colors flex items-center justify-between">
+                <span>API Sandbox</span>
+                <ArrowRight className="w-4 h-4 text-brivo-slate group-hover:translate-x-1 transition-transform" />
+              </h3>
+              <p className="text-xs text-brivo-slate leading-relaxed">
+                Interactive cURL builder, response inspector, and live JSON payload visualizer.
+              </p>
+            </TiltCard>
           </Link>
         </div>
       </section>
 
-      {/* Floating Modal */}
+      {/* Floating Intelligence Modal */}
       <IntelligenceModal
         isOpen={isAiModalOpen}
         onClose={() => setIsAiModalOpen(false)}
         initialQuery={aiInitialQuery}
+      />
+
+      {/* macOS-style Spacebar Quick Look Modal */}
+      <QuickLookModal
+        record={quickLookRecord}
+        isOpen={isQuickLookOpen}
+        onClose={() => setIsQuickLookOpen(false)}
       />
     </div>
   );

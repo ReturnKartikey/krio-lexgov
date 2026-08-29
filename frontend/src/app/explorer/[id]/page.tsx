@@ -19,6 +19,7 @@ import {
 import { MicroLabel } from "@/components/common/MicroLabel";
 import { JsonViewer } from "@/components/common/JsonViewer";
 import { SynthesizeButton } from "@/components/ai/SynthesizeButton";
+import { HashDescramble } from "@/components/motion/HashDescramble";
 import { getRecordDetail } from "@/lib/api";
 import { formatINR, formatDate } from "@/lib/utils";
 
@@ -204,11 +205,12 @@ export default async function RecordDetailPage({ params }: PageProps) {
             </p>
 
             <div className="space-y-2.5 text-xs font-mono">
-              <div className="space-y-1">
-                <span className="text-[0.65rem] text-brivo-slate uppercase">Cryptographic Digest</span>
-                <div className="p-2 rounded bg-brivo-void text-[0.65rem] text-brivo-mist break-all select-all font-mono">
-                  {record.raw_document?.content_hash || "sha256:verified"}
-                </div>
+              <div className="space-y-1.5">
+                <span className="text-[0.65rem] text-brivo-slate uppercase block">Cryptographic Digest</span>
+                <HashDescramble
+                  hash={record.raw_document?.content_hash || "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}
+                  className="w-full justify-between"
+                />
               </div>
 
               <div className="space-y-1">

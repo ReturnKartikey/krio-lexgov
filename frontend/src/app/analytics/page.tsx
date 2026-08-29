@@ -24,6 +24,7 @@ import {
 } from "recharts";
 import { MicroLabel } from "@/components/common/MicroLabel";
 import { SynthesizeButton } from "@/components/ai/SynthesizeButton";
+import { motion } from "framer-motion";
 import {
   getTrends,
   getRecordsPerDay,
@@ -126,26 +127,50 @@ export default function AnalyticsPage() {
             className="shadow-sm"
           />
 
-          <button
-            onClick={() => setInterval("week")}
-            className={`px-3.5 py-1.5 rounded-full text-xs font-mono transition-colors shadow-sm ${
-              interval === "week"
-                ? "bg-brivo-navy text-brivo-paper font-semibold"
-                : "bg-white text-brivo-slate hover:text-brivo-navy border border-brivo-navy/15"
-            }`}
-          >
-            Weekly Horizon
-          </button>
-          <button
-            onClick={() => setInterval("month")}
-            className={`px-3.5 py-1.5 rounded-full text-xs font-mono transition-colors shadow-sm ${
-              interval === "month"
-                ? "bg-brivo-navy text-brivo-paper font-semibold"
-                : "bg-white text-brivo-slate hover:text-brivo-navy border border-brivo-navy/15"
-            }`}
-          >
-            Monthly Horizon
-          </button>
+          <div className="flex items-center p-1 rounded-full bg-white border border-brivo-navy/15 shadow-sm">
+            <button
+              onClick={() => setInterval("week")}
+              className="relative px-3.5 py-1 rounded-full text-xs font-mono transition-colors"
+            >
+              {interval === "week" && (
+                <motion.div
+                  layoutId="analyticsIntervalPill"
+                  className="absolute inset-0 rounded-full bg-brivo-navy shadow-sm"
+                  transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                />
+              )}
+              <span
+                className={`relative z-10 ${
+                  interval === "week"
+                    ? "text-brivo-paper font-semibold"
+                    : "text-brivo-slate hover:text-brivo-navy"
+                }`}
+              >
+                Weekly Horizon
+              </span>
+            </button>
+            <button
+              onClick={() => setInterval("month")}
+              className="relative px-3.5 py-1 rounded-full text-xs font-mono transition-colors"
+            >
+              {interval === "month" && (
+                <motion.div
+                  layoutId="analyticsIntervalPill"
+                  className="absolute inset-0 rounded-full bg-brivo-navy shadow-sm"
+                  transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                />
+              )}
+              <span
+                className={`relative z-10 ${
+                  interval === "month"
+                    ? "text-brivo-paper font-semibold"
+                    : "text-brivo-slate hover:text-brivo-navy"
+                }`}
+              >
+                Monthly Horizon
+              </span>
+            </button>
+          </div>
         </div>
       </div>
 

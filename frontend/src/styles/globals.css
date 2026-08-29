@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  /* Brivo Brand Colour Tokens */
+  /* Brivo / Krio Brand Colour Tokens */
   --brivo-navy: #1a2333;
   --brivo-void: #0b1020;
   --brivo-cyan: #00c2d1;
@@ -27,6 +27,10 @@
   border-color: var(--border);
 }
 
+html {
+  scroll-behavior: initial;
+}
+
 body {
   background-color: var(--background);
   color: var(--foreground);
@@ -34,6 +38,23 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+}
+
+/* Lenis Smooth Scroll Rules */
+html.lenis, html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
 }
 
 /* Subtle editorial graph paper background */
@@ -44,7 +65,7 @@ body {
     linear-gradient(to bottom, rgba(26, 35, 51, 0.035) 1px, transparent 1px);
 }
 
-/* Hairline border styling with Brivo slate tone */
+/* Hairline border styling */
 .border-hairline {
   border: 1px solid rgba(26, 35, 51, 0.10);
 }
@@ -57,15 +78,7 @@ body {
   border-bottom: 1px solid rgba(26, 35, 51, 0.10);
 }
 
-.border-hairline-r {
-  border-right: 1px solid rgba(26, 35, 51, 0.10);
-}
-
-.border-hairline-l {
-  border-left: 1px solid rgba(26, 35, 51, 0.10);
-}
-
-/* Editorial Serif emphasis */
+/* Editorial Typography */
 .font-display {
   font-family: var(--font-serif), Georgia, serif;
 }
@@ -77,6 +90,32 @@ body {
   letter-spacing: -0.01em;
 }
 
+/* Alive Italic Words Hover Interaction */
+.editorial-interactive-italic {
+  display: inline-block;
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), color 0.45s ease, filter 0.45s ease;
+  will-change: transform, filter;
+  cursor: default;
+}
+.editorial-interactive-italic:hover {
+  transform: translateY(-5px) skewX(-4deg);
+  filter: drop-shadow(0 2px 8px rgba(0, 194, 209, 0.2));
+}
+
+/* SplitType typography classes */
+.split-line {
+  overflow: hidden;
+  display: block;
+}
+.split-word {
+  display: inline-block;
+  white-space: nowrap;
+}
+.split-char {
+  display: inline-block;
+  will-change: transform, opacity, filter;
+}
+
 /* Monospace micro label */
 .micro-label {
   font-family: var(--font-mono), monospace;
@@ -84,6 +123,32 @@ body {
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--brivo-slate);
+}
+
+/* Button shine sweep animation */
+.btn-shine-sweep {
+  position: relative;
+  overflow: hidden;
+}
+.btn-shine-sweep::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -100%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    60deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.18) 50%,
+    transparent 70%
+  );
+  transform: translateX(-100%);
+  transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+.btn-shine-sweep:hover::after {
+  transform: translateX(100%);
 }
 
 /* Custom scrollbar */
@@ -105,4 +170,14 @@ body {
 /* Subtle glow effects */
 .glow-accent {
   box-shadow: 0 0 40px -8px rgba(0, 194, 209, 0.25);
+}
+
+/* Respect user's motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
