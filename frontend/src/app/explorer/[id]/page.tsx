@@ -160,12 +160,52 @@ export default async function RecordDetailPage({ params }: PageProps) {
             </h3>
 
             <div className="space-y-1">
-              <span className="text-2xl font-bold font-mono text-brivo-navy block">
-                {formatINR(record.amount)}
-              </span>
-              <span className="text-[0.65rem] font-mono text-brivo-slate uppercase">
-                Total Monetary Penalty
-              </span>
+              {record.amount && record.amount > 0 ? (
+                <>
+                  <span className="text-2xl font-bold font-mono text-brivo-navy block">
+                    {formatINR(record.amount)}
+                  </span>
+                  <span className="text-[0.65rem] font-mono text-brivo-slate uppercase">
+                    Total Monetary Sanction
+                  </span>
+                </>
+              ) : record.record_type === "exemption_order" ? (
+                <>
+                  <span className="text-xl font-bold font-mono text-emerald-700 block">
+                    Takeover Relief
+                  </span>
+                  <span className="text-[0.65rem] font-mono text-brivo-slate uppercase">
+                    Exemption from Open Offer
+                  </span>
+                </>
+              ) : record.record_type === "revocation_order" ? (
+                <>
+                  <span className="text-xl font-bold font-mono text-emerald-700 block">
+                    Restraint Revoked
+                  </span>
+                  <span className="text-[0.65rem] font-mono text-brivo-slate uppercase">
+                    Directional Ban Withdrawn
+                  </span>
+                </>
+              ) : record.record_type === "interim_order" ? (
+                <>
+                  <span className="text-xl font-bold font-mono text-amber-700 block">
+                    Interim Direction
+                  </span>
+                  <span className="text-[0.65rem] font-mono text-brivo-slate uppercase">
+                    Market Restraint / Injunction
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="text-xl font-bold font-mono text-brivo-navy block">
+                    Non-Monetary
+                  </span>
+                  <span className="text-[0.65rem] font-mono text-brivo-slate uppercase">
+                    Directional Finding / Debarment
+                  </span>
+                </>
+              )}
             </div>
 
             <div className="pt-3 border-t border-brivo-navy/10 space-y-2 text-xs">

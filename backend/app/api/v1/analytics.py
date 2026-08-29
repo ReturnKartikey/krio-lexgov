@@ -5,7 +5,7 @@ from sqlalchemy import select, func, desc, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
-from app.db.models import Record, Entity, IngestionRun
+from app.db.models import Record, Entity, RecordEntity, IngestionRun
 from app.etl.deduplication import detect_near_duplicates
 from app.api.schemas import (
     DailyCount,
@@ -144,22 +144,31 @@ async def get_entity_frequency(
 ):
     """List top noticees and entities by case frequency and penalty sum."""
     stmt = (
-        select(Entity)
-        .order_by(desc(Entity.record_count), desc(Entity.total_penalty_amount))
+        select(
+            Entity.id,
+            Entity.name,
+            Entity.entity_type,
+            func.count(func.distinct(RecordEntity.record_id)).label("record_count"),
+            func.coalesce(func.sum(Record.amount), 0.0).label("total_penalty"),
+        )
+        .join(RecordEntity, Entity.id == RecordEntity.entity_id)
+        .join(Record, RecordEntity.record_id == Record.id)
+        .group_by(Entity.id, Entity.name, Entity.entity_type)
+        .order_by(desc("record_count"), desc("total_penalty"))
         .limit(top)
     )
     result = await db.execute(stmt)
-    entities = result.scalars().all()
+    rows = result.all()
 
     return [
         EntityFrequencyItem(
-            id=e.id,
-            name=e.name,
-            entity_type=e.entity_type,
-            record_count=e.record_count,
-            total_penalty=float(e.total_penalty_amount or 0.0),
+            id=r[0],
+            name=r[1],
+            entity_type=r[2],
+            record_count=r[3],
+            total_penalty=float(r[4] or 0.0),
         )
-        for e in entities
+        for r in rows
     ]
 
 

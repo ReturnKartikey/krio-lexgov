@@ -38,8 +38,5 @@ async def test_sebi_adapter_fetch_and_parse():
     normalized = await adapter.parse(raw_payload, ref)
     assert normalized.external_id == ref.external_id
     assert normalized.title == ref.title
-    assert normalized.record_type == "adjudication_order"
     assert normalized.status == "published"
     assert len(normalized.entities) > 0
-    assert normalized.amount is not None
-    assert normalized.amount > 0

@@ -1,6 +1,6 @@
 import math
 import uuid
-from datetime import date
+from datetime import date, datetime
 from typing import Optional, List
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select, func, or_, desc, asc, cast, String
@@ -48,7 +48,7 @@ async def list_records(
     # Apply filters
     filters = []
 
-    if q and q.strip():
+    if isinstance(q, str) and q.strip():
         search_term = q.strip()
         # Dialect agnostic search: uses ILIKE on title/summary or TSVector if on postgres
         search_filter = or_(
@@ -59,16 +59,16 @@ async def list_records(
         )
         filters.append(search_filter)
 
-    if state and state.strip():
+    if isinstance(state, str) and state.strip():
         filters.append(Record.state.ilike(state.strip()))
 
-    if record_type and record_type.strip():
+    if isinstance(record_type, str) and record_type.strip():
         filters.append(Record.record_type == record_type.strip())
 
-    if status and status.strip():
+    if isinstance(status, str) and status.strip():
         filters.append(Record.status == status.strip())
 
-    if entity and entity.strip():
+    if isinstance(entity, str) and entity.strip():
         ent_term = entity.strip()
         filters.append(
             or_(
@@ -77,16 +77,16 @@ async def list_records(
             )
         )
 
-    if date_from:
+    if isinstance(date_from, (date, datetime)):
         filters.append(Record.published_date >= date_from)
 
-    if date_to:
+    if isinstance(date_to, (date, datetime)):
         filters.append(Record.published_date <= date_to)
 
-    if min_amount is not None:
+    if isinstance(min_amount, (int, float)):
         filters.append(Record.amount >= min_amount)
 
-    if max_amount is not None:
+    if isinstance(max_amount, (int, float)):
         filters.append(Record.amount <= max_amount)
 
     if filters:
@@ -99,32 +99,37 @@ async def list_records(
     total_count = total_res.scalar_one() or 0
 
     # Sorting
-    order_func = desc if sort_order.lower() == "desc" else asc
+    s_order = sort_order if isinstance(sort_order, str) else "desc"
+    s_by = sort_by if isinstance(sort_by, str) else "published_date"
+    p_num = page if isinstance(page, int) else 1
+    p_size = page_size if isinstance(page_size, int) else 10
+
+    order_func = desc if s_order.lower() == "desc" else asc
     sort_column = Record.published_date
-    if sort_by == "amount":
+    if s_by == "amount":
         sort_column = Record.amount
-    elif sort_by == "ingested_at":
+    elif s_by == "ingested_at":
         sort_column = Record.ingested_at
-    elif sort_by == "title":
+    elif s_by == "title":
         sort_column = Record.title
 
     stmt = stmt.order_by(order_func(sort_column).nulls_last())
 
     # Pagination
-    offset = (page - 1) * page_size
-    stmt = stmt.offset(offset).limit(page_size)
+    offset = (p_num - 1) * p_size
+    stmt = stmt.offset(offset).limit(p_size)
 
     result = await db.execute(stmt)
     records = result.scalars().all()
 
-    total_pages = math.ceil(total_count / page_size) if page_size > 0 else 1
+    total_pages = math.ceil(total_count / p_size) if p_size > 0 else 1
 
     return EnvelopeResponse(
         data=[RecordListItem.model_validate(r) for r in records],
         meta=PaginationMeta(
             total=total_count,
-            page=page,
-            page_size=page_size,
+            page=p_num,
+            page_size=p_size,
             total_pages=total_pages,
         ),
     )

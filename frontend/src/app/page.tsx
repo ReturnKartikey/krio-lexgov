@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Search,
   ArrowRight,
@@ -23,6 +24,7 @@ import {
   CheckCircle2,
   Zap,
 } from "lucide-react";
+import { motion } from "framer-motion";
 import { MicroLabel } from "@/components/common/MicroLabel";
 import { IntelligenceModal } from "@/components/ai/IntelligenceModal";
 import { QuickLookModal } from "@/components/motion/QuickLookModal";
@@ -34,9 +36,9 @@ import { gsap, ScrollTrigger, SplitType, animateHeroHeadline, animateCounter, pr
 
 export default function LandingPage() {
   const [stats, setStats] = useState({
-    totalRecords: 10,
-    totalPenalties: 440000000,
-    totalEntities: 61,
+    totalRecords: 35,
+    totalPenalties: 6404691270,
+    totalEntities: 612,
     successRate: 100.0,
   });
   const [recentRecords, setRecentRecords] = useState<any[]>([]);
@@ -186,11 +188,16 @@ export default function LandingPage() {
         {/* Subtle Watermark in top right with Parallax Scroll */}
         <div
           ref={heroWatermarkRef}
-          className="absolute top-0 right-6 sm:right-12 select-none pointer-events-none opacity-[0.035] hidden lg:block will-change-transform"
+          className="absolute top-2 right-6 sm:right-12 select-none pointer-events-none opacity-[0.06] hidden lg:block will-change-transform"
         >
-          <span className="font-serif italic font-bold text-[22rem] leading-none text-brivo-navy">
-            K
-          </span>
+          <Image
+            src="/k_glyph.png"
+            alt="Hero Watermark"
+            width={340}
+            height={340}
+            className="w-72 h-72 xl:w-80 xl:h-80 object-contain filter contrast-125"
+            priority
+          />
         </div>
 
         <div className="relative z-10 space-y-6 max-w-3xl">
@@ -245,12 +252,12 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 2. REGISTRY DATA SOURCE BADGES */}
+      {/* 2. REGULATORY DATA SOURCE BADGES */}
       <section className="w-full border-y border-brivo-navy/10 bg-white py-6 px-4 sm:px-6 lg:px-8 scroll-reveal-section">
         <div className="max-w-7xl mx-auto space-y-4">
           <div className="flex items-center justify-between">
             <span className="text-[0.65rem] font-mono tracking-[0.2em] uppercase text-brivo-slate">
-              FEDERATED REGISTRY PIPELINES // INDIA CAPITAL MARKETS
+              PUBLIC REGULATORY ARCHIVE // OFFICIAL INDIAN REGULATORY DISCLOSURES
             </span>
             <span className="text-[0.65rem] font-mono text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1.5 shadow-sm">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -260,27 +267,27 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-2 border-t border-brivo-navy/5 text-xs font-mono">
             <div className="scroll-reveal-item p-3.5 rounded-xl border border-brivo-navy/10 bg-brivo-paper/40 flex flex-col justify-between hover:border-brivo-navy/25 transition-all">
-              <span className="text-[0.65rem] text-brivo-slate uppercase">Registry Source</span>
-              <span className="font-semibold text-brivo-navy mt-1">SEBI Adjudication Orders</span>
-              <span className="text-[0.65rem] text-emerald-600 font-normal mt-2">100% Ingested & Verified</span>
+              <span className="text-[0.65rem] text-brivo-slate uppercase">Primary Source</span>
+              <span className="font-semibold text-brivo-navy mt-1">SEBI Enforcement Orders</span>
+              <span className="text-[0.65rem] text-emerald-600 font-normal mt-2">Ingested & Verified</span>
             </div>
 
             <div className="scroll-reveal-item p-3.5 rounded-xl border border-brivo-navy/10 bg-brivo-paper/40 flex flex-col justify-between hover:border-brivo-navy/25 transition-all">
-              <span className="text-[0.65rem] text-brivo-slate uppercase">Secondary Registry</span>
-              <span className="font-semibold text-brivo-navy mt-1">BSE Corporate Filings</span>
+              <span className="text-[0.65rem] text-brivo-slate uppercase">Exchange Filings</span>
+              <span className="font-semibold text-brivo-navy mt-1">BSE Corporate Disclosures</span>
               <span className="text-[0.65rem] text-brivo-slate font-normal mt-2">Adapter Ready</span>
             </div>
 
             <div className="scroll-reveal-item p-3.5 rounded-xl border border-brivo-navy/10 bg-brivo-paper/40 flex flex-col justify-between hover:border-brivo-navy/25 transition-all">
-              <span className="text-[0.65rem] text-brivo-slate uppercase">Market Monitor</span>
-              <span className="font-semibold text-brivo-navy mt-1">NSE Enforcement Feed</span>
+              <span className="text-[0.65rem] text-brivo-slate uppercase">Market Surveillance</span>
+              <span className="font-semibold text-brivo-navy mt-1">NSE Member Bulletins</span>
               <span className="text-[0.65rem] text-brivo-slate font-normal mt-2">Adapter Ready</span>
             </div>
 
             <div className="scroll-reveal-item p-3.5 rounded-xl border border-brivo-navy/10 bg-brivo-paper/40 flex flex-col justify-between hover:border-brivo-navy/25 transition-all">
-              <span className="text-[0.65rem] text-brivo-slate uppercase">Corporate Registry</span>
+              <span className="text-[0.65rem] text-brivo-slate uppercase">Corporate Filings</span>
               <span className="font-semibold text-brivo-navy mt-1">MCA-21 RoC Orders</span>
-              <span className="text-[0.65rem] text-brivo-slate font-normal mt-2">In Pipeline</span>
+              <span className="text-[0.65rem] text-brivo-slate font-normal mt-2">Planned Roadmap</span>
             </div>
           </div>
         </div>
@@ -315,7 +322,7 @@ export default function LandingPage() {
               From Raw PDF to Clean Data
             </h3>
             <p className="text-xs text-brivo-slate leading-relaxed">
-              Unsearchable scanned government PDFs and unstructured order tables are automatically converted into typed, schema-validated records.
+              Publicly available regulatory orders and unstructured disclosures are automatically converted into typed, schema-validated records.
             </p>
           </div>
 
@@ -324,10 +331,10 @@ export default function LandingPage() {
               02 / PROVENANCE
             </span>
             <h3 className="text-sm font-semibold text-brivo-navy group-hover:text-brivo-cyan transition-colors">
-              Immutable Cryptography
+              Cryptographic Provenance
             </h3>
             <p className="text-xs text-brivo-slate leading-relaxed">
-              Every penalty, fine, and noticee finding links directly to an immutable SHA-256 cryptographic digest of the original government document.
+              Every indexed order provides reproducible document verification and integrity tracking through SHA-256 cryptographic hashing.
             </p>
           </div>
 

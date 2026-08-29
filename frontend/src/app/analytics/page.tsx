@@ -53,6 +53,7 @@ export default function AnalyticsPage() {
   const [geoData, setGeoData] = useState<GeoDistributionItem[]>([]);
   const [duplicates, setDuplicates] = useState<DuplicateMatch[]>([]);
   const [processingStats, setProcessingStats] = useState<ProcessingStats | null>(null);
+  const [geoScope, setGeoScope] = useState<"head_office" | "regional">("head_office");
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -130,7 +131,7 @@ export default function AnalyticsPage() {
           <div className="flex items-center p-1 rounded-full bg-white border border-brivo-navy/15 shadow-sm">
             <button
               onClick={() => setInterval("week")}
-              className="relative px-3.5 py-1 rounded-full text-xs font-mono transition-colors"
+              className="relative px-3.5 py-1 rounded-full text-xs font-mono font-medium transition-colors select-none"
             >
               {interval === "week" && (
                 <motion.div
@@ -140,9 +141,9 @@ export default function AnalyticsPage() {
                 />
               )}
               <span
-                className={`relative z-10 ${
+                className={`relative z-10 transition-colors ${
                   interval === "week"
-                    ? "text-brivo-paper font-semibold"
+                    ? "text-brivo-paper"
                     : "text-brivo-slate hover:text-brivo-navy"
                 }`}
               >
@@ -151,7 +152,7 @@ export default function AnalyticsPage() {
             </button>
             <button
               onClick={() => setInterval("month")}
-              className="relative px-3.5 py-1 rounded-full text-xs font-mono transition-colors"
+              className="relative px-3.5 py-1 rounded-full text-xs font-mono font-medium transition-colors select-none"
             >
               {interval === "month" && (
                 <motion.div
@@ -161,9 +162,9 @@ export default function AnalyticsPage() {
                 />
               )}
               <span
-                className={`relative z-10 ${
+                className={`relative z-10 transition-colors ${
                   interval === "month"
-                    ? "text-brivo-paper font-semibold"
+                    ? "text-brivo-paper"
                     : "text-brivo-slate hover:text-brivo-navy"
                 }`}
               >
@@ -212,24 +213,39 @@ export default function AnalyticsPage() {
               <Hash className="w-4 h-4 text-brivo-slate" />
             </div>
             <div className="flex items-baseline gap-3">
-              <span className="text-2xl font-bold font-mono text-brivo-navy">
-                {formatINR(trends.total_penalties_trend.current_value)}
-              </span>
-              <span
-                className={`text-xs font-mono flex items-center gap-0.5 ${
-                  trends.total_penalties_trend.percentage_change >= 0 ? "text-emerald-600" : "text-rose-600"
-                }`}
-              >
-                {trends.total_penalties_trend.percentage_change >= 0 ? (
-                  <TrendingUp className="w-3.5 h-3.5" />
-                ) : (
-                  <TrendingDown className="w-3.5 h-3.5" />
-                )}
-                <span>{trends.total_penalties_trend.percentage_change}% vs prior</span>
-              </span>
+              {trends.total_penalties_trend.current_value > 0 ? (
+                <>
+                  <span className="text-2xl font-bold font-mono text-brivo-navy">
+                    {formatINR(trends.total_penalties_trend.current_value)}
+                  </span>
+                  <span
+                    className={`text-xs font-mono flex items-center gap-0.5 ${
+                      trends.total_penalties_trend.percentage_change >= 0 ? "text-emerald-600" : "text-rose-600"
+                    }`}
+                  >
+                    {trends.total_penalties_trend.percentage_change >= 0 ? (
+                      <TrendingUp className="w-3.5 h-3.5" />
+                    ) : (
+                      <TrendingDown className="w-3.5 h-3.5" />
+                    )}
+                    <span>{trends.total_penalties_trend.percentage_change}% vs prior</span>
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="text-xl font-bold font-mono text-brivo-navy">
+                    Non-Monetary
+                  </span>
+                  <span className="text-xs font-mono text-brivo-slate">
+                    Directional Orders Active
+                  </span>
+                </>
+              )}
             </div>
             <p className="text-[0.65rem] font-mono text-brivo-slate">
-              Prior period: {formatINR(trends.total_penalties_trend.previous_value)}
+              {trends.total_penalties_trend.previous_value > 0
+                ? `Prior period: ${formatINR(trends.total_penalties_trend.previous_value)}`
+                : "Capturing market debarments & statutory relief"}
             </p>
           </div>
 
@@ -335,7 +351,7 @@ export default function AnalyticsPage() {
               <span>Top Entities by Enforcement Frequency</span>
             </h2>
             <p className="text-xs text-brivo-slate">
-              Noticees with the highest aggregate penalty actions.
+              Noticees categorized by enforcement frequency and sanction exposure.
             </p>
           </div>
 
@@ -356,8 +372,18 @@ export default function AnalyticsPage() {
                 </div>
 
                 <div className="flex items-center gap-3 font-mono text-[0.7rem]">
-                  <span className="text-brivo-slate">{ent.record_count} orders</span>
-                  <span className="text-brivo-navy font-semibold">{formatINR(ent.total_penalty)}</span>
+                  {ent.record_count > 1 && (
+                    <span className="px-1.5 py-0.5 rounded text-[0.65rem] bg-amber-50 text-amber-800 border border-amber-200/60 font-semibold">
+                      {ent.record_count} orders
+                    </span>
+                  )}
+                  {ent.total_penalty > 0 ? (
+                    <span className="text-brivo-navy font-semibold">{formatINR(ent.total_penalty)}</span>
+                  ) : (
+                    <span className="px-2 py-0.5 rounded text-[0.65rem] bg-white text-brivo-slate border border-brivo-navy/10 font-normal">
+                      Non-Monetary
+                    </span>
+                  )}
                 </div>
               </Link>
             ))}
@@ -366,32 +392,97 @@ export default function AnalyticsPage() {
 
         {/* Geographic Distribution */}
         <div className="p-6 rounded-lg bg-white border border-brivo-navy/10 space-y-4 shadow-sm">
-          <div className="space-y-1">
-            <h2 className="text-sm font-semibold text-brivo-navy flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-brivo-navy" />
-              <span>State-Level Enforcement Distribution</span>
-            </h2>
-            <p className="text-xs text-brivo-slate">
-              Order volume across principal state jurisdictions and benches.
-            </p>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="space-y-1">
+              <h2 className="text-sm font-semibold text-brivo-navy flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-brivo-navy" />
+                <span>State-Level Enforcement Distribution</span>
+              </h2>
+              <p className="text-xs text-brivo-slate">
+                Regulatory volume across principal state jurisdictions and regional registries.
+              </p>
+            </div>
+
+            {/* Jurisdiction / Bench Scope Switcher */}
+            <div className="flex items-center gap-1 font-mono text-[0.65rem] bg-brivo-paper p-0.5 rounded border border-brivo-navy/10 self-start sm:self-auto">
+              <button
+                onClick={() => setGeoScope("head_office")}
+                className={`px-2.5 py-1 rounded transition-colors ${
+                  geoScope === "head_office"
+                    ? "bg-brivo-navy text-brivo-paper font-semibold shadow-xs"
+                    : "text-brivo-slate hover:text-brivo-navy"
+                }`}
+              >
+                Head Office (Mumbai)
+              </button>
+              <button
+                onClick={() => setGeoScope("regional")}
+                className={`px-2.5 py-1 rounded transition-colors ${
+                  geoScope === "regional"
+                    ? "bg-brivo-navy text-brivo-paper font-semibold shadow-xs"
+                    : "text-brivo-slate hover:text-brivo-navy"
+                }`}
+              >
+                Regional Benches
+              </button>
+            </div>
           </div>
 
           <div className="space-y-3 pt-2">
-            {geoData.map((item) => (
-              <div
-                key={item.state}
-                className="p-3 rounded bg-brivo-paper border border-brivo-navy/10 space-y-1.5 text-xs"
-              >
+            {geoScope === "head_office" ? (
+              // Head Office Specific View
+              <div className="p-4 rounded bg-brivo-paper border border-brivo-navy/10 space-y-3 text-xs">
                 <div className="flex items-center justify-between font-mono">
-                  <span className="text-brivo-navy font-semibold">{item.state}</span>
-                  <span className="text-brivo-navy">{formatINR(item.total_penalty)}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="px-1.5 py-0.5 rounded bg-brivo-navy text-brivo-paper text-[0.6rem] font-bold">
+                      HO
+                    </span>
+                    <span className="text-brivo-navy font-semibold text-sm">Maharashtra (Head Office)</span>
+                  </div>
+                  <span className="text-brivo-navy font-bold text-sm">
+                    {formatINR(geoData.find((g) => g.state === "Maharashtra")?.total_penalty || 0)}
+                  </span>
                 </div>
-                <div className="flex items-center justify-between text-[0.65rem] text-brivo-slate font-mono">
-                  <span>{item.record_count} total order(s)</span>
-                  <span>Top hubs: {item.top_cities?.join(", ") || "State Bench"}</span>
+                <div className="flex items-center justify-between text-[0.7rem] text-brivo-slate font-mono">
+                  <span>{geoData.find((g) => g.state === "Maharashtra")?.record_count || 0} central orders & rulings</span>
+                  <span>Bandra Kurla Complex (BKC), Mumbai</span>
                 </div>
+                <p className="text-[0.65rem] text-brivo-slate pt-2 border-t border-brivo-navy/5">
+                  Primary registry for Whole Time Members, Chairperson, Takeover Relief Panel & Settlement Division proceedings.
+                </p>
               </div>
-            ))}
+            ) : (
+              // Regional Benches View
+              <div className="space-y-2.5">
+                {[
+                  { state: "Delhi (NRO)", code: "NRO", hub: "New Delhi", coverage: "Northern Region (DL, HR, PB, UP, UK)" },
+                  { state: "Gujarat (WRO)", code: "WRO", hub: "Ahmedabad", coverage: "Western Region (GJ, RJ, MP, GA)" },
+                  { state: "West Bengal (ERO)", code: "ERO", hub: "Kolkata", coverage: "Eastern Region (WB, BR, OD, NE)" },
+                  { state: "Tamil Nadu (SRO)", code: "SRO", hub: "Chennai", coverage: "Southern Region (TN, KL, PY)" },
+                  { state: "Telangana & AP", code: "HRO", hub: "Hyderabad", coverage: "Deccan & Central Regional Hub" },
+                  { state: "Karnataka", code: "KRO", hub: "Bengaluru", coverage: "Tech & Fintech Intermediary Bench" },
+                ].map((bench) => (
+                  <div
+                    key={bench.code}
+                    className="p-2.5 rounded bg-brivo-paper border border-brivo-navy/10 flex items-center justify-between text-xs"
+                  >
+                    <div className="space-y-0.5 max-w-[65%]">
+                      <div className="flex items-center gap-1.5">
+                        <span className="px-1 py-0.2 rounded bg-brivo-mist/80 text-brivo-navy font-mono text-[0.55rem] font-bold">
+                          {bench.code}
+                        </span>
+                        <span className="text-brivo-navy font-medium truncate">{bench.state}</span>
+                      </div>
+                      <p className="text-[0.6rem] text-brivo-slate truncate">{bench.coverage}</p>
+                    </div>
+                    <div className="text-right font-mono text-[0.65rem] text-brivo-slate">
+                      <div className="text-brivo-navy font-semibold">Active Registry</div>
+                      <div>Hub: {bench.hub}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -3,8 +3,19 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Search, BarChart3, Clock, Terminal, Activity, ShieldCheck, RefreshCw, ChevronDown } from "lucide-react";
+import { motion } from "framer-motion";
+import {
+  Search,
+  BarChart3,
+  Clock,
+  Terminal,
+  RefreshCw,
+  ChevronDown,
+  Sparkles,
+  Activity,
+} from "lucide-react";
 import { getHealth, triggerSyncJob } from "@/lib/api";
+import Image from "next/image";
 import { IntelligenceModal } from "@/components/ai/IntelligenceModal";
 
 export function Navbar() {
@@ -15,7 +26,6 @@ export function Navbar() {
   const [totalEntities, setTotalEntities] = useState<number>(612);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
   const [showTelemetryPopover, setShowTelemetryPopover] = useState(false);
 
   useEffect(() => {
@@ -27,28 +37,6 @@ export function Navbar() {
       })
       .catch(() => setHealthStatus("degraded"));
   }, []);
-
-  // Smooth scroll listener with hysteresis to prevent jumpiness
-  useEffect(() => {
-    let ticking = false;
-    const handleScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const scrollPos = window.scrollY;
-          if (scrollPos > 40 && !isScrolled) {
-            setIsScrolled(true);
-          } else if (scrollPos <= 20 && isScrolled) {
-            setIsScrolled(false);
-          }
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [isScrolled]);
 
   // Global Cmd+K shortcut
   useEffect(() => {
@@ -64,15 +52,15 @@ export function Navbar() {
 
   const handleManualSync = async () => {
     setIsSyncing(true);
-    setSyncMessage("Syncing SEBI Feed...");
+    setSyncMessage("Syncing...");
     try {
       const res = await triggerSyncJob({ incremental: true, limit: 20 });
-      setSyncMessage(`Synced: ${res.status.toUpperCase()}`);
+      setSyncMessage(`Synced (${res.status})`);
     } catch (err: any) {
-      setSyncMessage("Sync Failed");
+      setSyncMessage("Failed");
     } finally {
       setIsSyncing(false);
-      setTimeout(() => setSyncMessage(null), 3500);
+      setTimeout(() => setSyncMessage(null), 3000);
     }
   };
 
@@ -85,36 +73,34 @@ export function Navbar() {
 
   return (
     <>
-      <header
-        className={`sticky top-0 z-40 w-full transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-          isScrolled
-            ? "py-2.5 px-4 pointer-events-none"
-            : "py-0 px-0 bg-white/95 backdrop-blur-xl border-b border-brivo-navy/12 shadow-[0_1px_8px_rgba(26,35,51,0.04)]"
-        }`}
-      >
-        <div
-          className={`mx-auto flex items-center justify-between transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] pointer-events-auto ${
-            isScrolled
-              ? "max-w-4xl h-12 px-4 sm:px-6 rounded-full bg-white/95 backdrop-blur-2xl border border-brivo-navy/15 shadow-[0_12px_36px_-6px_rgba(26,35,51,0.12)]"
-              : "max-w-7xl h-16 px-4 sm:px-6 lg:px-8"
-          }`}
-        >
-          {/* Brand Logo (Clean KRIO.LEXGOV without SEBI tag) */}
-          <div className="flex items-center gap-3">
-            <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="w-7 h-7 rounded border border-brivo-navy/20 bg-brivo-paper flex items-center justify-center text-brivo-navy group-hover:border-brivo-cyan transition-colors shadow-2xs">
-                <span className="font-serif italic font-bold text-base leading-none text-brivo-navy">K</span>
-              </div>
-              <div className="flex flex-col">
-                <span className="font-semibold text-sm tracking-tight text-brivo-navy flex items-center gap-1 font-sans">
-                  KRIO<span className="text-brivo-slate font-light">.LEXGOV</span>
-                </span>
-              </div>
-            </Link>
-          </div>
+      {/* Floating Island Navigation Container */}
+      <header className="sticky top-4 z-40 w-full px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
+        <div className="w-full h-16 px-5 sm:px-6 rounded-2xl bg-white/95 backdrop-blur-2xl border border-brivo-navy/15 shadow-[0_16px_40px_-10px_rgba(11,16,32,0.12)] flex items-center justify-between gap-4 transition-all duration-300">
+          
+          {/* Brand Monogram & Name */}
+          <Link href="/" className="flex items-center gap-3 group shrink-0">
+            <div className="w-9 h-9 rounded-xl border border-brivo-navy/15 bg-brivo-paper flex items-center justify-center text-brivo-navy group-hover:border-brivo-cyan group-hover:scale-105 transition-all shadow-xs overflow-hidden p-1">
+              <Image
+                src="/icon_logo.png"
+                alt="KRIO Icon"
+                width={32}
+                height={32}
+                className="w-full h-full object-contain"
+                priority
+              />
+            </div>
+            <div className="flex items-baseline gap-1.5">
+              <span className="font-bold text-base tracking-tight text-brivo-navy font-sans">
+                KRIO
+              </span>
+              <span className="text-brivo-slate/70 text-xs font-mono font-medium tracking-wide">
+                .LEXGOV
+              </span>
+            </div>
+          </Link>
 
-          {/* Center Nav Links */}
-          <nav className="hidden md:flex items-center gap-1">
+          {/* Center Navigation Links with Smooth Liquid Pill */}
+          <nav className="hidden md:flex items-center gap-1 bg-brivo-paper/80 p-1.5 rounded-xl border border-brivo-navy/10">
             {navLinks.map((link) => {
               const Icon = link.icon;
               const isActive = pathname.startsWith(link.href);
@@ -122,60 +108,75 @@ export function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`px-3.5 py-1.5 rounded-full text-xs transition-all flex items-center gap-1.5 ${
-                    isActive
-                      ? "bg-brivo-navy text-brivo-paper font-medium shadow-sm"
-                      : "text-brivo-slate hover:text-brivo-navy hover:bg-brivo-navy/5"
-                  }`}
+                  className="relative px-3.5 py-1.5 rounded-lg text-xs font-medium font-sans transition-colors flex items-center gap-1.5 z-10 select-none"
                 >
-                  <Icon className={`w-3.5 h-3.5 ${isActive ? "text-brivo-cyan" : "text-brivo-slate"}`} />
-                  <span>{link.label}</span>
+                  {isActive && (
+                    <motion.div
+                      layoutId="navbarActiveIndicator"
+                      className="absolute inset-0 rounded-lg bg-brivo-navy shadow-sm -z-10"
+                      transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                    />
+                  )}
+                  <Icon
+                    className={`w-3.5 h-3.5 ${
+                      isActive ? "text-brivo-cyan" : "text-brivo-slate"
+                    }`}
+                  />
+                  <span
+                    className={
+                      isActive
+                        ? "text-brivo-paper font-semibold"
+                        : "text-brivo-navy/80 hover:text-brivo-navy"
+                    }
+                  >
+                    {link.label}
+                  </span>
                 </Link>
               );
             })}
           </nav>
 
-          {/* Right Actions: AI Synthesizer & Telemetry Hub */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            {/* AI Synthesizer Button */}
+          {/* Right Action Group */}
+          <div className="flex items-center gap-2.5 shrink-0">
+            {/* AI Synthesizer Trigger Button */}
             <button
               onClick={() => setIsAiModalOpen(true)}
-              className="px-3.5 py-1.5 rounded-full bg-white hover:bg-brivo-paper border border-brivo-navy/15 text-brivo-navy text-xs font-mono transition-all flex items-center gap-1.5 shadow-sm group hover:border-brivo-cyan active:scale-95"
+              className="h-9 px-3.5 rounded-xl bg-brivo-paper hover:bg-brivo-mist/80 border border-brivo-navy/15 text-brivo-navy text-xs font-mono transition-all flex items-center gap-2 shadow-2xs group hover:border-brivo-cyan active:scale-95 cursor-pointer"
               title="Open AI Precedent & Risk Synthesizer (Cmd+K)"
             >
-              <span className="w-2 h-2 rounded-full bg-brivo-cyan animate-pulse" />
-              <span className="font-semibold hidden sm:inline">Synthesize</span>
-              <kbd className="hidden sm:inline-flex items-center text-[0.6rem] px-1.5 py-0.2 rounded bg-brivo-paper border border-brivo-navy/10 text-brivo-slate">
+              <Sparkles className="w-3.5 h-3.5 text-brivo-cyan group-hover:rotate-12 transition-transform" />
+              <span className="font-semibold hidden sm:inline text-xs">Synthesize</span>
+              <kbd className="hidden sm:inline-flex items-center text-[0.65rem] px-1.5 py-0.5 rounded bg-white border border-brivo-navy/15 text-brivo-slate font-mono font-medium shadow-2xs">
                 ⌘K
               </kbd>
             </button>
 
-            {/* Live Registry Telemetry Beacon (Replaces the clunky sync button) */}
+            {/* Live Registry Telemetry Beacon */}
             <div className="relative">
               <button
                 onClick={() => setShowTelemetryPopover(!showTelemetryPopover)}
                 onMouseEnter={() => setShowTelemetryPopover(true)}
-                className="px-3 py-1.5 rounded-full bg-brivo-navy/5 hover:bg-brivo-navy/10 border border-brivo-navy/12 font-mono text-[0.68rem] text-brivo-navy flex items-center gap-1.5 transition-all shadow-2xs group cursor-pointer"
+                className="h-9 px-3.5 rounded-xl bg-brivo-navy text-brivo-paper font-mono text-[0.72rem] flex items-center gap-2 transition-all shadow-sm hover:bg-brivo-navy/90 cursor-pointer"
                 title="Live Registry Ingestion Telemetry"
               >
                 <span
                   className={`w-2 h-2 rounded-full ${
                     healthStatus === "healthy"
-                      ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.7)] animate-pulse"
-                      : "bg-amber-500 animate-ping"
+                      ? "bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.9)] animate-pulse"
+                      : "bg-amber-400 animate-ping"
                   }`}
                 />
                 <span className="font-semibold tracking-wider hidden sm:inline">
                   {syncMessage ? syncMessage : "REGISTRY LIVE"}
                 </span>
-                <ChevronDown className="w-3 h-3 text-brivo-slate group-hover:text-brivo-navy transition-transform" />
+                <ChevronDown className="w-3.5 h-3.5 text-brivo-slate transition-transform" />
               </button>
 
-              {/* Interactive Telemetry Dropdown / Popover */}
+              {/* Telemetry Popover Menu */}
               {showTelemetryPopover && (
                 <div
                   onMouseLeave={() => setShowTelemetryPopover(false)}
-                  className="absolute right-0 top-full mt-2 w-64 p-4 rounded-xl bg-white border border-brivo-navy/15 shadow-2xl z-50 space-y-3 font-mono text-xs animate-fade-in"
+                  className="absolute right-0 top-full mt-2.5 w-64 p-4 rounded-2xl bg-white border border-brivo-navy/15 shadow-2xl z-50 space-y-3 font-mono text-xs animate-fade-in"
                 >
                   <div className="flex items-center justify-between border-b border-brivo-navy/10 pb-2">
                     <span className="text-[0.65rem] text-brivo-slate uppercase font-bold">
@@ -209,9 +210,13 @@ export function Navbar() {
                     <button
                       onClick={handleManualSync}
                       disabled={isSyncing}
-                      className="w-full py-1.5 rounded-lg bg-brivo-navy hover:bg-brivo-navy/90 text-brivo-paper text-[0.7rem] font-semibold flex items-center justify-center gap-1.5 transition-all shadow-sm disabled:opacity-50"
+                      className="w-full py-2 rounded-xl bg-brivo-navy hover:bg-brivo-navy/90 text-brivo-paper text-[0.7rem] font-semibold flex items-center justify-center gap-1.5 transition-all shadow-sm disabled:opacity-50 cursor-pointer"
                     >
-                      <RefreshCw className={`w-3 h-3 ${isSyncing ? "animate-spin text-brivo-cyan" : "text-brivo-cyan"}`} />
+                      <RefreshCw
+                        className={`w-3.5 h-3.5 ${
+                          isSyncing ? "animate-spin text-brivo-cyan" : "text-brivo-cyan"
+                        }`}
+                      />
                       <span>{isSyncing ? "Syncing Feed..." : "Trigger Incremental Sync"}</span>
                     </button>
                   </div>

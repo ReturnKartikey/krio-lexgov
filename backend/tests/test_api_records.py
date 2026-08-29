@@ -14,11 +14,11 @@ async def test_list_records_endpoint(client):
 
 @pytest.mark.asyncio
 async def test_search_records_query(client):
-    response = await client.get("/api/records?q=Reliance")
+    response = await client.get("/api/records?q=Debock")
     assert response.status_code == 200
     json_data = response.json()
     assert len(json_data["data"]) > 0
-    assert any("Reliance" in r["title"] for r in json_data["data"])
+    assert any("Debock" in r["title"] for r in json_data["data"])
 
 
 @pytest.mark.asyncio

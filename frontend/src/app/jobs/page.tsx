@@ -15,12 +15,14 @@ import {
   Activity,
 } from "lucide-react";
 import { MicroLabel } from "@/components/common/MicroLabel";
+import { MagneticButton } from "@/components/motion/MagneticButton";
+import { motion, AnimatePresence } from "framer-motion";
 import { getJobs, triggerSyncJob } from "@/lib/api";
-import { IngestionJobItem } from "@/lib/types";
+import { IngestionRunItem } from "@/lib/types";
 import { formatDate, formatRelativeTime } from "@/lib/utils";
 
 export default function JobsPage() {
-  const [jobs, setJobs] = useState<IngestionJobItem[]>([]);
+  const [jobs, setJobs] = useState<IngestionRunItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
   const [expandedJobId, setExpandedJobId] = useState<string | null>(null);
@@ -214,23 +216,31 @@ export default function JobsPage() {
                       </td>
                     </tr>
 
-                    {/* Expandable Error / Detail Row */}
+                    {/* Expandable Error / Detail Row with spring motion */}
                     {isExpanded && (
                       <tr className="bg-brivo-paper/80 border-b border-brivo-navy/10">
-                        <td colSpan={10} className="px-6 py-4 space-y-2">
-                          <div className="flex items-center justify-between text-[0.7rem] font-mono text-brivo-slate">
-                            <span>Ingestion Run Full ID: {job.id}</span>
-                            <span>Finished: {job.finished_at ? formatDate(job.finished_at) : "In Progress"}</span>
-                          </div>
-                          {job.error_log ? (
-                            <div className="p-3 rounded bg-white border border-rose-200 text-rose-800 font-mono text-[0.75rem] whitespace-pre-wrap max-h-48 overflow-y-auto shadow-sm">
-                              {job.error_log}
+                        <td colSpan={10} className="p-0">
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                            className="px-6 py-4 space-y-2 overflow-hidden"
+                          >
+                            <div className="flex items-center justify-between text-[0.7rem] font-mono text-brivo-slate">
+                              <span>Ingestion Run Full ID: {job.id}</span>
+                              <span>Finished: {job.finished_at ? formatDate(job.finished_at) : "In Progress"}</span>
                             </div>
-                          ) : (
-                            <div className="p-3 rounded bg-white border border-brivo-navy/10 text-brivo-slate font-mono text-[0.75rem] shadow-sm">
-                              Clean execution. No errors logged during discovery, parsing, or indexing phases.
-                            </div>
-                          )}
+                            {job.error_log ? (
+                              <div className="p-3 rounded bg-white border border-rose-200 text-rose-800 font-mono text-[0.75rem] whitespace-pre-wrap max-h-48 overflow-y-auto shadow-sm">
+                                {job.error_log}
+                              </div>
+                            ) : (
+                              <div className="p-3 rounded bg-white border border-brivo-navy/10 text-brivo-slate font-mono text-[0.75rem] shadow-sm">
+                                Clean execution. No errors logged during discovery, parsing, or indexing phases.
+                              </div>
+                            )}
+                          </motion.div>
                         </td>
                       </tr>
                     )}

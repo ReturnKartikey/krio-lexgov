@@ -35,134 +35,108 @@ def _days_ago(n: int) -> str:
 # Curated high-fidelity public SEBI enforcement orders for offline stability / seeding
 SAMPLE_SEBI_DATA = [
     {
-        "external_id": "ORDER/AO/BM/2024-25/1042",
-        "title": "Adjudication order in respect of Reliance Infrastructure Advisory Pvt Ltd and Noticees in the matter of Illiquid Stock Options",
+        "external_id": "SEBI-DEBOCK-AUG-2026",
+        "title": "Final Order in the matter of Debock Industries Limited",
         "published_date": _days_ago(2),
-        "source_url": "https://www.sebi.gov.in/enforcement/orders/mar-2024/adjudication-order-rel-infra-1042.pdf",
-        "amount": 2500000.0,
-        "summary": "Adjudication proceedings initiated under Section 15-I of the SEBI Act, 1992 read with Rule 3 of SEBI Adjudication Rules against the Noticees for engaging in non-genuine transactions and reversal trades creating artificial volume in the Stock Options segment of BSE in violation of Regulations 3(a), (b), (c), (d), 4(1) and 4(2)(a) of SEBI (Prohibition of Fraudulent and Unfair Trade Practices) Regulations, 2003. Total penalty of Rs. 25 Lakhs imposed on the Noticees.",
-        "jurisdiction": "Head Office, Mumbai Bench",
+        "source_url": "https://www.sebi.gov.in/enforcement/orders/aug-2026/final-order-in-the-matter-of-debock-industries-limited_104110.html",
+        "amount": None,
+        "summary": "Final Order under Sections 11(1), 11(4), 11(4A), 11A and 11B(1) read with Section 19 of the Securities and Exchange Board of India Act, 1992 in the matter of Debock Industries Limited.",
+        "jurisdiction": "Head Office, Mumbai",
         "state": "Maharashtra",
         "city": "Mumbai",
-        "entities": ["Reliance Infrastructure Advisory Pvt Ltd", "Shri Rajesh Agrawal", "Apex Securities LLP"],
-        "regulations": ["PFUTP Regulations, 2003", "Section 15HA", "Section 15-I"],
+        "entities": ["Debock Industries Limited"],
+        "regulations": ["PFUTP Regulations, 2003", "Section 11(4)", "Section 11B"],
     },
     {
-        "external_id": "ORDER/AO/SK/2024-25/1089",
-        "title": "Order in respect of Quant Capital Wealth Managers and Shri Arvind Shenoy in the matter of Front-Running Operations",
+        "external_id": "SEBI-TRAFIKSOL-AUG-2026",
+        "title": "Final Order in the matter of IPO of Trafiksol ITS Technologies Limited",
+        "published_date": _days_ago(2),
+        "source_url": "https://www.sebi.gov.in/enforcement/orders/aug-2026/final-order-in-the-matter-of-ipo-of-trafiksol-its-technologies-limited_104109.html",
+        "amount": None,
+        "summary": "Final Order under Section 11(1) and 11B(1) of the Securities and Exchange Board of India Act, 1992 in the matter of IPO of Trafiksol ITS Technologies Limited.",
+        "jurisdiction": "Head Office, Mumbai",
+        "state": "Maharashtra",
+        "city": "Mumbai",
+        "entities": ["Trafiksol ITS Technologies Limited"],
+        "regulations": ["SEBI (ICDR) Regulations, 2018", "Section 11B"],
+    },
+    {
+        "external_id": "SEBI-BHARAT-AUG-2026",
+        "title": "Revocation Order in the matter of Bharat Global Developers Limited",
+        "published_date": _days_ago(3),
+        "source_url": "https://www.sebi.gov.in/enforcement/orders/aug-2026/revocation-order-in-the-matter-of-bharat-global-developers-limited_104043.html",
+        "amount": None,
+        "summary": "Order under Sections 11(1), 11(4) and 11B(1) read with Section 19 of the SEBI Act, 1992 in the matter of Bharat Global Developers Limited revoking interim directions.",
+        "jurisdiction": "Head Office, Mumbai",
+        "state": "Maharashtra",
+        "city": "Mumbai",
+        "entities": ["Bharat Global Developers Limited"],
+        "regulations": ["Section 11(4)", "Section 11B"],
+    },
+    {
+        "external_id": "SEBI-VARANIUM-AUG-2026",
+        "title": "Final Order in respect of Varanium Cloud Limited",
         "published_date": _days_ago(5),
-        "source_url": "https://www.sebi.gov.in/enforcement/orders/mar-2024/order-quant-capital-1089.pdf",
-        "amount": 15000000.0,
-        "summary": "Adjudication order against Quant Capital Wealth Managers, Shri Arvind Shenoy, and affiliated mule accounts for systematic front-running of institutional trades. Impounded unlawful gains of Rs. 1.50 Crore along with penalty of Rs. 1.50 Crore under Section 15HA of the SEBI Act.",
-        "jurisdiction": "Mumbai Bench, Maharashtra",
+        "source_url": "https://www.sebi.gov.in/enforcement/orders/aug-2026/final-order-in-respect-of-varanium-cloud-limited_104019.html",
+        "amount": None,
+        "summary": "Final Order under Section 11(1), 11(4), 11A and 11B(1) read with Section 19 of the Securities and Exchange Board of India Act, 1992 in respect of Varanium Cloud Limited.",
+        "jurisdiction": "Head Office, Mumbai",
         "state": "Maharashtra",
         "city": "Mumbai",
-        "entities": ["Quant Capital Wealth Managers", "Shri Arvind Shenoy", "BlueFin Trading Corp"],
-        "regulations": ["PFUTP Regulations, 2003", "Intermediaries Regulations", "Section 15HA"],
+        "entities": ["Varanium Cloud Limited"],
+        "regulations": ["PFUTP Regulations, 2003", "Section 11B"],
     },
     {
-        "external_id": "ORDER/AO/DR/2024-25/1104",
-        "title": "Adjudication order in respect of Zenith Birla (India) Limited in the matter of GDR issue manipulation",
-        "published_date": _days_ago(9),
-        "source_url": "https://www.sebi.gov.in/enforcement/orders/apr-2024/zenith-birla-gdr-1104.pdf",
-        "amount": 50000000.0,
-        "summary": "Investigation into Global Depository Receipt (GDR) issues revealed fraudulent subscription schemes financed by European American Investment Bank AG through pledge agreements not disclosed to Indian stock exchanges. Penalty of Rs. 5.00 Crore levied under Section 15HA.",
-        "jurisdiction": "New Delhi Bench",
-        "state": "Delhi",
-        "city": "New Delhi",
-        "entities": ["Zenith Birla (India) Limited", "Shri Yash Birla", "Pinnacle Capital Holding"],
-        "regulations": ["PFUTP Regulations, 2003", "LODR Regulations, 2015", "Section 15HA"],
-    },
-    {
-        "external_id": "ORDER/AO/AK/2024-25/1142",
-        "title": "Adjudication order in the matter of Zee Entertainment Enterprises Limited and Essel Group Promoters",
-        "published_date": _days_ago(14),
-        "source_url": "https://www.sebi.gov.in/enforcement/orders/apr-2024/zeel-essel-group-1142.pdf",
-        "amount": 35000000.0,
-        "summary": "Adjudication order against former promoters of Zee Entertainment Enterprises Limited regarding siphoning of corporate funds through layered related-party transactions and fictitious loan comfort letters. Penalty of Rs. 3.5 Crore imposed under SEBI Act Section 15HA and 15HB.",
-        "jurisdiction": "Mumbai Bench, Maharashtra",
+        "external_id": "SEBI-3ONE4-AUG-2026",
+        "title": "Settlement Order in the matter of 3One 4 Capital Continuum IE",
+        "published_date": _days_ago(18),
+        "source_url": "https://www.sebi.gov.in/enforcement/orders/aug-2026/settlement-order-in-the-matter-of-3one-4-capital-continuum-ie_103642.html",
+        "amount": 1500000.0,
+        "summary": "Settlement Order in terms of SEBI (Settlement Proceedings) Regulations, 2018 in the matter of 3One 4 Capital Continuum IE.",
+        "jurisdiction": "Head Office, Mumbai",
         "state": "Maharashtra",
         "city": "Mumbai",
-        "entities": ["Zee Entertainment Enterprises Limited", "Shri Subhash Chandra", "Shri Punit Goenka", "Essel Holdings Ltd"],
-        "regulations": ["LODR Regulations, 2015", "PFUTP Regulations, 2003", "Section 15HA", "Section 15HB"],
+        "entities": ["3One 4 Capital Continuum IE"],
+        "regulations": ["SEBI (Settlement Proceedings) Regulations, 2018"],
     },
     {
-        "external_id": "ORDER/AO/PK/2024-25/1190",
-        "title": "Order in the matter of Karvy Stock Broking Limited for misappropriation of client securities",
-        "published_date": _days_ago(19),
-        "source_url": "https://www.sebi.gov.in/enforcement/orders/may-2024/karvy-stock-broking-1190.pdf",
-        "amount": 210000000.0,
-        "summary": "Final order and penalty against Karvy Stock Broking Limited and Shri C. Parthasarathy for unauthorized pledging of client power of attorney securities to raise loans for real estate entity Karvy Realty. Aggregate penalty of Rs. 21 Crore imposed along with permanent ban from capital markets.",
-        "jurisdiction": "Hyderabad Bench, Telangana",
-        "state": "Telangana",
-        "city": "Hyderabad",
-        "entities": ["Karvy Stock Broking Limited", "Shri C Parthasarathy", "Karvy Realty Pvt Ltd"],
-        "regulations": ["Stock Brokers Regulations", "PFUTP Regulations, 2003", "Section 15HB"],
-    },
-    {
-        "external_id": "ORDER/AO/VN/2024-25/1215",
-        "title": "Adjudication order in respect of ProfitPulse Advisory and Shri Rahul Sharma for Unregistered Investment Advisory",
-        "published_date": _days_ago(25),
-        "source_url": "https://www.sebi.gov.in/enforcement/orders/may-2024/profitpulse-advisory-1215.pdf",
-        "amount": 6500000.0,
-        "summary": "Operating unauthorized Telegram channels promising 99% accuracy intraday equity and options tips and collecting subscription fees of Rs. 65 Lakhs without SEBI Investment Adviser registration. Order to refund all fees plus Rs. 65 Lakh penalty under Section 15EB.",
-        "jurisdiction": "Ahmedabad Bench, Gujarat",
-        "state": "Gujarat",
-        "city": "Ahmedabad",
-        "entities": ["ProfitPulse Advisory Services LLP", "Shri Rahul Sharma", "Target Capital Advisors"],
-        "regulations": ["Investment Advisers Regulations, 2013", "Section 15EB"],
-    },
-    {
-        "external_id": "ORDER/AO/MS/2024-25/1260",
-        "title": "Adjudication order in the matter of Infosys Limited regarding Insider Trading during Q4 financial announcements",
-        "published_date": _days_ago(32),
-        "source_url": "https://www.sebi.gov.in/enforcement/orders/jun-2024/infosys-insider-trading-1260.pdf",
-        "amount": 18000000.0,
-        "summary": "Order against corporate employees and connected persons for communicating unpublished price-sensitive information (UPSI) relating to strategic partnership with Vanguard. Penalty of Rs. 1.8 Crore imposed under Section 15G of the SEBI Act.",
-        "jurisdiction": "Bengaluru Bench, Karnataka",
-        "state": "Karnataka",
-        "city": "Bengaluru",
-        "entities": ["Infosys Limited", "Shri Ramit Khurana", "Shri Amit Goel", "Vanguard Global Fin"],
-        "regulations": ["PIT Regulations, 2015", "Section 15G"],
-    },
-    {
-        "external_id": "ORDER/AO/RK/2024-25/1295",
-        "title": "Adjudication order in respect of Care Ratings Limited in the matter of IL&FS Financial Services rating failures",
-        "published_date": _days_ago(40),
-        "source_url": "https://www.sebi.gov.in/enforcement/orders/jul-2024/care-ratings-ilfs-1295.pdf",
-        "amount": 10000000.0,
-        "summary": "Failure by credit rating agency to exercise due diligence, probe debt stress indicators, and downgrade Non-Convertible Debentures of IL&FS in a timely manner. Penalty of Rs. 1.00 Crore levied under Section 15HB.",
-        "jurisdiction": "Mumbai Bench, Maharashtra",
+        "external_id": "SEBI-JETHA-AUG-2026",
+        "title": "Settlement Order in the matter of Jetha Global Master Fund",
+        "published_date": _days_ago(18),
+        "source_url": "https://www.sebi.gov.in/enforcement/orders/aug-2026/settlement-order-in-the-matter-of-jetha-global-master-fund_103588.html",
+        "amount": 2500000.0,
+        "summary": "Settlement Order in terms of SEBI (Settlement Proceedings) Regulations, 2018 in the matter of Jetha Global Master Fund.",
+        "jurisdiction": "Head Office, Mumbai",
         "state": "Maharashtra",
         "city": "Mumbai",
-        "entities": ["Care Ratings Limited", "IL&FS Financial Services Ltd", "Shri Rajesh Mokashi"],
-        "regulations": ["Credit Rating Agencies Regulations, 1999", "Section 15HB"],
+        "entities": ["Jetha Global Master Fund"],
+        "regulations": ["SEBI (Settlement Proceedings) Regulations, 2018"],
     },
     {
-        "external_id": "ORDER/AO/ST/2024-25/1330",
-        "title": "Adjudication order in the matter of Fortis Healthcare Limited and Religare Finvest fund routing",
-        "published_date": _days_ago(50),
-        "source_url": "https://www.sebi.gov.in/enforcement/orders/jul-2024/fortis-healthcare-1330.pdf",
-        "amount": 42000000.0,
-        "summary": "Order concerning diversion of Rs. 473 Crore from Fortis Healthcare to promoter controlled entities RHC Holding Pvt Ltd via structured short-term loans. Penalty of Rs. 4.2 Crore imposed on Malvinder Singh, Shivinder Singh, and associated entities under Section 15HA.",
-        "jurisdiction": "New Delhi Bench",
-        "state": "Delhi",
-        "city": "New Delhi",
-        "entities": ["Fortis Healthcare Limited", "Religare Finvest Ltd", "Shri Malvinder Mohan Singh", "Shri Shivinder Mohan Singh", "RHC Holding Pvt Ltd"],
-        "regulations": ["PFUTP Regulations, 2003", "LODR Regulations, 2015", "Section 15HA"],
+        "external_id": "SEBI-MAX-AUG-2026",
+        "title": "Order in the matter of Max Financial Services Limited",
+        "published_date": _days_ago(6),
+        "source_url": "https://www.sebi.gov.in/enforcement/orders/aug-2026/order-in-the-matter-of-max-financial-services-limited_103935.html",
+        "amount": None,
+        "summary": "Order under Sections 11(1) and 11B(1) read with Section 19 of the Securities and Exchange Board of India Act, 1992 in the matter of Max Financial Services Limited.",
+        "jurisdiction": "Head Office, Mumbai",
+        "state": "Maharashtra",
+        "city": "Mumbai",
+        "entities": ["Max Financial Services Limited"],
+        "regulations": ["Section 11B"],
     },
     {
-        "external_id": "ORDER/AO/GS/2024-25/1388",
-        "title": "Adjudication order in respect of Brightcom Group Limited and Promoters for accounting irregularities",
-        "published_date": _days_ago(58),
-        "source_url": "https://www.sebi.gov.in/enforcement/orders/aug-2024/brightcom-group-1388.pdf",
-        "amount": 28000000.0,
-        "summary": "Adjudication order against Brightcom Group Limited, Shri Suresh Kumar Reddy, and CFO for falsification of financial statements, impairment omissions in foreign subsidiaries, and misstating share warrants allocation. Penalty of Rs. 2.80 Crore under Section 15HA and 15HB.",
-        "jurisdiction": "Hyderabad Bench, Telangana",
-        "state": "Telangana",
-        "city": "Hyderabad",
-        "entities": ["Brightcom Group Limited", "Shri Suresh Kumar Reddy", "Fortune Media Investments"],
-        "regulations": ["PFUTP Regulations, 2003", "LODR Regulations, 2015", "Section 15HA"],
+        "external_id": "SEBI-WAAREE-AUG-2026",
+        "title": "Exemption Order in the matter of Waaree Energies Limited",
+        "published_date": _days_ago(8),
+        "source_url": "https://www.sebi.gov.in/enforcement/orders/aug-2026/exemption-order-in-the-matter-of-waaree-energies-limited_103780.html",
+        "amount": None,
+        "summary": "Order under Section 11(1) and Section 11(2)(h) of the SEBI Act, 1992 read with Regulation 11(5) of the SEBI (Substantial Acquisition of Shares and Takeovers) Regulations, 2011.",
+        "jurisdiction": "Head Office, Mumbai",
+        "state": "Maharashtra",
+        "city": "Mumbai",
+        "entities": ["Waaree Energies Limited"],
+        "regulations": ["SEBI (SAST) Regulations, 2011", "Regulation 11(5)"],
     },
 ]
 
@@ -384,17 +358,35 @@ class SEBIOrdersAdapter(SourceAdapter):
                         )
                     )
 
-        # 2. Penalties
-        amount = meta.get("amount") or extract_penalties(text_corpus)
+        # 2. Record Type Inference
+        title_lower = ref.title.lower()
+        if "exemption" in title_lower:
+            record_type = "exemption_order"
+        elif "revocation" in title_lower:
+            record_type = "revocation_order"
+        elif "interim" in title_lower:
+            record_type = "interim_order"
+        elif "enquiry" in title_lower:
+            record_type = "enquiry_order"
+        elif "settlement" in title_lower:
+            record_type = "settlement_order"
+        else:
+            record_type = meta.get("record_type") or "adjudication_order"
 
-        # 3. Location / Bench
+        # 3. Penalties (Exemptions & Revocations carry no punitive monetary fines)
+        if record_type in ("exemption_order", "revocation_order"):
+            amount = None
+        else:
+            amount = meta.get("amount") or extract_penalties(text_corpus, ref.title)
+
+        # 4. Location / Bench
         jurisdiction = meta.get("jurisdiction")
         state = meta.get("state")
         city = meta.get("city")
         if not state:
             jurisdiction, state, city = extract_location(text_corpus)
 
-        # 4. Regulations & Metadata
+        # 5. Regulations & Metadata
         regulations = meta.get("regulations") or extract_regulations(text_corpus)
         summary = meta.get("summary") or text_corpus[:600].strip()
 
@@ -411,7 +403,7 @@ class SEBIOrdersAdapter(SourceAdapter):
 
         return NormalizedRecord(
             external_id=ref.external_id,
-            record_type="adjudication_order",
+            record_type=record_type,
             title=ref.title,
             summary=summary,
             entity_names=entity_names_list,

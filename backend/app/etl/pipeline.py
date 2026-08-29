@@ -3,7 +3,7 @@ import uuid
 import traceback
 from datetime import datetime, timezone
 from typing import Optional, Dict, Any
-from sqlalchemy import select, update
+from sqlalchemy import select, update, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.adapters.base import SourceAdapter
@@ -184,13 +184,8 @@ class ETLPipeline:
                         res_ent = await db.execute(stmt_ent)
                         existing_ent = res_ent.scalar_one_or_none()
 
-                        penalty_val = float(normalized.amount or 0.0)
-
                         if existing_ent:
                             existing_ent.last_seen = datetime.now(timezone.utc)
-                            existing_ent.record_count += 1
-                            if penalty_val > 0:
-                                existing_ent.total_penalty_amount = float(existing_ent.total_penalty_amount or 0.0) + penalty_val
                             entity_obj = existing_ent
                         else:
                             entity_obj = Entity(
@@ -201,7 +196,7 @@ class ETLPipeline:
                                 first_seen=datetime.now(timezone.utc),
                                 last_seen=datetime.now(timezone.utc),
                                 record_count=1,
-                                total_penalty_amount=penalty_val,
+                                total_penalty_amount=0.0,
                             )
                             db.add(entity_obj)
                             await db.flush()
@@ -210,7 +205,6 @@ class ETLPipeline:
                         stmt_link = select(RecordEntity).where(
                             RecordEntity.record_id == record_obj.id,
                             RecordEntity.entity_id == entity_obj.id,
-                            RecordEntity.role == ent_item.role,
                         )
                         res_link = await db.execute(stmt_link)
                         if not res_link.scalar_one_or_none():
@@ -221,6 +215,22 @@ class ETLPipeline:
                                 role=ent_item.role,
                             )
                             db.add(link)
+                            await db.flush()
+
+                        # Deterministically recalculate stats for this entity from linked records
+                        stmt_stats = (
+                            select(
+                                func.count(func.distinct(RecordEntity.record_id)),
+                                func.coalesce(func.sum(Record.amount), 0.0),
+                            )
+                            .select_from(RecordEntity)
+                            .join(Record, RecordEntity.record_id == Record.id)
+                            .where(RecordEntity.entity_id == entity_obj.id)
+                        )
+                        stats_res = await db.execute(stmt_stats)
+                        cnt, total_pen = stats_res.one()
+                        entity_obj.record_count = cnt
+                        entity_obj.total_penalty_amount = float(total_pen or 0.0)
 
                     await db.commit()
 

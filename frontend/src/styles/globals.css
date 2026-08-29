@@ -40,6 +40,15 @@ body {
   overflow-x: hidden;
 }
 
+/* GPU Hardware Acceleration Utilities */
+.will-change-transform {
+  will-change: transform;
+}
+.transform-gpu {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+}
+
 /* Lenis Smooth Scroll Rules */
 html.lenis, html.lenis body {
   height: auto;

@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Shield, FileText, Database, Scale, ArrowUpRight } from "lucide-react";
 import { MascotSentinel } from "@/components/motion/MascotSentinel";
 
@@ -11,22 +12,28 @@ export function Footer() {
           {/* Col 1 */}
           <div className="md:col-span-2 space-y-4">
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded border border-white/20 bg-brivo-navy flex items-center justify-center text-brivo-paper">
-                <span className="font-serif italic font-bold text-xs">K</span>
+              <div className="w-6 h-6 flex items-center justify-center">
+                <Image
+                  src="/k_glyph.png"
+                  alt="KRIO Icon"
+                  width={24}
+                  height={24}
+                  className="w-full h-full object-contain filter brightness-200"
+                />
               </div>
               <span className="font-semibold text-brivo-paper tracking-tight text-sm">
                 KRIO<span className="text-brivo-slate font-light">.LEXGOV</span>
               </span>
             </div>
             <p className="text-xs text-brivo-slate max-w-md leading-relaxed font-sans">
-              Audit-grade regulatory enforcement and adjudication intelligence engine normalizing and indexing public orders from the Securities and Exchange Board of India (SEBI). Built with immutable SHA-256 provenance, tsvector search, and relational entity graph resolution.
+              Regulatory enforcement and adjudication intelligence engine indexing publicly available orders published by the Securities and Exchange Board of India (SEBI). Built with SHA-256 provenance tracking, full-text vector search, and relational entity linking.
             </p>
             <div className="flex items-center gap-3 text-[0.65rem] font-mono text-brivo-slate/70 pt-2">
               <span>N°00 // COMPLIANCE</span>
               <span>•</span>
-              <span>100% PUBLIC REGISTRY</span>
+              <span>PUBLIC REGULATORY DISCLOSURES</span>
               <span>•</span>
-              <span>ROBOTS.TXT RESPECTED</span>
+              <span>ROBOTS.TXT COMPLIANT</span>
             </div>
           </div>
 
@@ -96,10 +103,10 @@ export function Footer() {
 
         {/* Bottom bar */}
         <div className="pt-6 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4 text-[0.7rem] text-brivo-slate font-mono">
-          <p>© {new Date().getFullYear()} Krio Intelligence Ltd. Public Domain Registry Project.</p>
+          <p>© {new Date().getFullYear()} Krio Intelligence Ltd. Public Domain Regulatory Intelligence.</p>
           <div className="flex items-center gap-6">
             <span>Rate Limited: 1.0 req/sec</span>
-            <span>Cryptographic SHA-256</span>
+            <span>SHA-256 Digest Provenance</span>
             <span>PostgreSQL 16 FTS</span>
           </div>
         </div>

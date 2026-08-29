@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
   Filter,
@@ -18,10 +19,12 @@ import {
   MapPin,
   Scale,
   Sparkles,
+  Eye,
 } from "lucide-react";
 import { MicroLabel } from "@/components/common/MicroLabel";
 import { HighlightedText } from "@/components/common/HighlightedText";
 import { IntelligenceModal } from "@/components/ai/IntelligenceModal";
+import { QuickLookModal } from "@/components/motion/QuickLookModal";
 import { getRecords } from "@/lib/api";
 import { RecordListItem, PaginationMeta } from "@/lib/types";
 import { formatINR, formatDate, truncateText } from "@/lib/utils";
@@ -71,6 +74,8 @@ function ExplorerContent() {
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+  const [quickLookRecord, setQuickLookRecord] = useState<RecordListItem | null>(null);
+  const [isQuickLookOpen, setIsQuickLookOpen] = useState(false);
 
   // Sync state with URL params
   const updateUrl = useCallback(
@@ -157,7 +162,7 @@ function ExplorerContent() {
             <button
               onClick={() => setViewMode("cards")}
               className={`p-1.5 rounded text-xs transition-colors ${
-                viewMode === "cards" ? "bg-brivo-navy text-brivo-paper" : "text-brivo-slate hover:text-brivo-navy"
+                viewMode === "cards" ? "bg-brivo-navy text-brivo-paper shadow-2xs" : "text-brivo-slate hover:text-brivo-navy"
               }`}
               title="Card View"
             >
@@ -166,7 +171,7 @@ function ExplorerContent() {
             <button
               onClick={() => setViewMode("table")}
               className={`p-1.5 rounded text-xs transition-colors ${
-                viewMode === "table" ? "bg-brivo-navy text-brivo-paper" : "text-brivo-slate hover:text-brivo-navy"
+                viewMode === "table" ? "bg-brivo-navy text-brivo-paper shadow-2xs" : "text-brivo-slate hover:text-brivo-navy"
               }`}
               title="Table View"
             >
@@ -186,13 +191,13 @@ function ExplorerContent() {
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               placeholder="Search by respondent, company name, regulation (e.g. PFUTP, Insider Trading), or order number..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white border border-brivo-navy/15 focus:border-brivo-navy focus:ring-1 focus:ring-brivo-navy text-sm text-brivo-navy placeholder:text-brivo-slate/60 transition-all font-sans outline-none shadow-sm"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white border border-brivo-navy/15 focus:border-brivo-navy focus:ring-2 focus:ring-brivo-cyan/20 text-sm text-brivo-navy placeholder:text-brivo-slate/60 transition-all font-sans outline-none shadow-sm"
             />
           </div>
 
           <button
             type="submit"
-            className="px-5 py-2.5 rounded-xl bg-brivo-navy hover:bg-brivo-navy/90 text-brivo-paper font-medium text-sm transition-all flex items-center gap-1.5 shrink-0 shadow-sm"
+            className="px-5 py-2.5 rounded-xl bg-brivo-navy hover:bg-brivo-navy/90 text-brivo-paper font-medium text-sm transition-all flex items-center gap-1.5 shrink-0 shadow-sm active:scale-95"
           >
             <span>Search</span>
           </button>
@@ -201,7 +206,7 @@ function ExplorerContent() {
           <button
             type="button"
             onClick={() => setIsAiModalOpen(true)}
-            className="px-4 py-2.5 rounded-xl bg-white hover:bg-brivo-paper border border-brivo-navy/15 text-brivo-navy font-mono text-xs transition-all flex items-center gap-1.5 shrink-0 shadow-sm hover:border-brivo-cyan/50"
+            className="px-4 py-2.5 rounded-xl bg-white hover:bg-brivo-paper border border-brivo-navy/15 text-brivo-navy font-mono text-xs transition-all flex items-center gap-1.5 shrink-0 shadow-sm hover:border-brivo-cyan active:scale-95"
             title="Synthesize risk for current query"
           >
             <Sparkles className="w-3.5 h-3.5 text-brivo-cyan" />
@@ -224,7 +229,7 @@ function ExplorerContent() {
 
         {/* Collapsible Filter Panel */}
         {showFilters && (
-          <div className="p-5 rounded-lg bg-white border border-brivo-navy/10 space-y-4 animate-fade-in shadow-sm">
+          <div className="p-5 rounded-xl bg-white border border-brivo-navy/10 space-y-4 animate-fade-in shadow-sm">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* State */}
               <div className="space-y-1.5">
@@ -237,7 +242,7 @@ function ExplorerContent() {
                     setSelectedState(e.target.value);
                     updateUrl({ state: e.target.value, page: 1 });
                   }}
-                  className="w-full px-3 py-1.5 rounded bg-brivo-paper border border-brivo-navy/15 text-xs text-brivo-navy outline-none focus:border-brivo-navy"
+                  className="w-full px-3 py-1.5 rounded-lg bg-brivo-paper border border-brivo-navy/15 text-xs text-brivo-navy outline-none focus:border-brivo-navy"
                 >
                   <option value="">All States</option>
                   {STATES.map((st) => (
@@ -260,7 +265,7 @@ function ExplorerContent() {
                     setDateFrom(e.target.value);
                     updateUrl({ date_from: e.target.value, page: 1 });
                   }}
-                  className="w-full px-3 py-1.5 rounded bg-brivo-paper border border-brivo-navy/15 text-xs text-brivo-navy outline-none focus:border-brivo-navy"
+                  className="w-full px-3 py-1.5 rounded-lg bg-brivo-paper border border-brivo-navy/15 text-xs text-brivo-navy outline-none focus:border-brivo-navy font-mono"
                 />
               </div>
 
@@ -276,7 +281,7 @@ function ExplorerContent() {
                     setDateTo(e.target.value);
                     updateUrl({ date_to: e.target.value, page: 1 });
                   }}
-                  className="w-full px-3 py-1.5 rounded bg-brivo-paper border border-brivo-navy/15 text-xs text-brivo-navy outline-none focus:border-brivo-navy"
+                  className="w-full px-3 py-1.5 rounded-lg bg-brivo-paper border border-brivo-navy/15 text-xs text-brivo-navy outline-none focus:border-brivo-navy font-mono"
                 />
               </div>
 
@@ -285,73 +290,120 @@ function ExplorerContent() {
                 <label className="text-[0.7rem] font-mono text-brivo-slate uppercase tracking-wider">
                   Sort Order
                 </label>
-                <select
-                  value={`${sortBy}-${sortOrder}`}
-                  onChange={(e) => {
-                    const [sb, so] = e.target.value.split("-");
-                    setSortBy(sb);
-                    setSortOrder(so);
-                    updateUrl({ sort_by: sb, sort_order: so, page: 1 });
-                  }}
-                  className="w-full px-3 py-1.5 rounded bg-brivo-paper border border-brivo-navy/15 text-xs text-brivo-navy outline-none focus:border-brivo-navy"
-                >
-                  <option value="published_date-desc">Newest Orders First</option>
-                  <option value="published_date-asc">Oldest Orders First</option>
-                  <option value="amount-desc">Highest Penalty (INR)</option>
-                  <option value="amount-asc">Lowest Penalty (INR)</option>
-                  <option value="title-asc">Title (A-Z)</option>
-                </select>
+                <div className="flex gap-2">
+                  <select
+                    value={sortBy}
+                    onChange={(e) => {
+                      setSortBy(e.target.value);
+                      updateUrl({ sort_by: e.target.value, page: 1 });
+                    }}
+                    className="flex-1 px-3 py-1.5 rounded-lg bg-brivo-paper border border-brivo-navy/15 text-xs text-brivo-navy outline-none focus:border-brivo-navy"
+                  >
+                    <option value="published_date">Date</option>
+                    <option value="amount">Penalty Amount</option>
+                    <option value="title">Title</option>
+                  </select>
+
+                  <select
+                    value={sortOrder}
+                    onChange={(e) => {
+                      setSortOrder(e.target.value);
+                      updateUrl({ sort_order: e.target.value, page: 1 });
+                    }}
+                    className="w-20 px-2 py-1.5 rounded-lg bg-brivo-paper border border-brivo-navy/15 text-xs text-brivo-navy outline-none focus:border-brivo-navy font-mono"
+                  >
+                    <option value="desc">DESC</option>
+                    <option value="asc">ASC</option>
+                  </select>
+                </div>
               </div>
             </div>
 
-            <div className="flex items-center justify-between pt-2 border-t border-brivo-navy/10">
-              <span className="text-[0.65rem] font-mono text-brivo-slate">
-                Active filters update instantly
-              </span>
-              <button
-                onClick={handleResetFilters}
-                className="text-xs font-mono text-brivo-slate hover:text-brivo-navy flex items-center gap-1 transition-colors"
-              >
-                <RotateCcw className="w-3 h-3" />
-                <span>Reset all filters</span>
-              </button>
-            </div>
+            {/* Active Filters Pill Bar */}
+            {(selectedState || selectedEntity || dateFrom || dateTo || qParam) && (
+              <div className="pt-3 border-t border-brivo-navy/10 flex flex-wrap items-center justify-between gap-2">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="text-[0.65rem] font-mono text-brivo-slate uppercase">
+                    Active Filters:
+                  </span>
+                  {qParam && (
+                    <span className="px-2 py-0.5 rounded bg-brivo-paper border border-brivo-navy/10 text-xs font-mono text-brivo-navy flex items-center gap-1">
+                      Query: &ldquo;{qParam}&rdquo;
+                      <button
+                        onClick={() => updateUrl({ q: undefined, page: 1 })}
+                        className="hover:text-rose-500"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                  {selectedState && (
+                    <span className="px-2 py-0.5 rounded bg-brivo-paper border border-brivo-navy/10 text-xs font-mono text-brivo-navy flex items-center gap-1">
+                      State: {selectedState}
+                      <button
+                        onClick={() => updateUrl({ state: undefined, page: 1 })}
+                        className="hover:text-rose-500"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                  {selectedEntity && (
+                    <span className="px-2 py-0.5 rounded bg-brivo-paper border border-brivo-navy/10 text-xs font-mono text-brivo-navy flex items-center gap-1">
+                      Entity: {selectedEntity}
+                      <button
+                        onClick={() => updateUrl({ entity: undefined, page: 1 })}
+                        className="hover:text-rose-500"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                </div>
+
+                <button
+                  onClick={handleResetFilters}
+                  className="text-xs font-mono text-brivo-slate hover:text-brivo-navy flex items-center gap-1 transition-colors"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  <span>Reset All</span>
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
 
-      {/* Results Container */}
+      {/* Results Section with layout transitions */}
       {loading ? (
-        <div className="space-y-3">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="h-28 rounded-lg bg-white border border-brivo-navy/10 animate-pulse shadow-sm" />
-          ))}
+        <div className="py-20 flex flex-col items-center justify-center space-y-3 font-mono text-xs text-brivo-slate">
+          <div className="w-8 h-8 rounded-full border-2 border-brivo-navy/10 border-t-brivo-navy animate-spin" />
+          <span>Searching normalized regulatory index...</span>
         </div>
       ) : records.length === 0 ? (
-        <div className="text-center py-20 border border-brivo-navy/10 rounded-lg bg-white space-y-4 shadow-sm">
-          <div className="w-12 h-12 rounded-full bg-brivo-paper border border-brivo-navy/15 flex items-center justify-center text-brivo-slate mx-auto">
-            <Search className="w-6 h-6" />
-          </div>
-          <div className="space-y-1">
-            <h3 className="text-base font-medium text-brivo-navy">No matching regulatory orders found</h3>
-            <p className="text-xs text-brivo-slate max-w-sm mx-auto">
-              Try adjusting your search terms, clearing entity filters, or expanding the publication date window.
-            </p>
+        <div className="p-12 rounded-2xl bg-white border border-brivo-navy/10 text-center space-y-3 shadow-sm">
+          <div className="text-brivo-slate font-mono text-sm">
+            No enforcement orders match your current filters.
           </div>
           <button
             onClick={handleResetFilters}
-            className="px-4 py-2 rounded bg-brivo-navy hover:bg-brivo-navy/90 text-xs font-mono text-brivo-paper transition-colors"
+            className="px-4 py-2 rounded-full bg-brivo-navy hover:bg-brivo-navy/90 text-xs font-mono text-brivo-paper transition-colors shadow-sm"
           >
             Clear filters & view all
           </button>
         </div>
       ) : viewMode === "cards" ? (
-        /* Card Grid View */
-        <div className="space-y-4">
+        /* Card Grid View with layout physics */
+        <motion.div layout className="space-y-4">
           {records.map((record) => (
-            <div
+            <motion.div
+              layout
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
               key={record.id}
-              className="p-5 sm:p-6 rounded-lg bg-white border border-brivo-navy/10 hover:border-brivo-navy/30 transition-all space-y-3 shadow-sm"
+              className="p-6 rounded-2xl bg-white border border-brivo-navy/10 hover:border-brivo-navy/30 transition-all space-y-3 shadow-sm hover:shadow-md hover:-translate-y-0.5 group"
             >
               {/* Header Badges */}
               <div className="flex flex-wrap items-center justify-between gap-2">
@@ -415,63 +467,93 @@ function ExplorerContent() {
                   )}
                 </div>
 
-                <div className="flex items-center gap-3 shrink-0">
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setQuickLookRecord(record);
+                      setIsQuickLookOpen(true);
+                    }}
+                    className="px-3 py-1 rounded-full bg-brivo-paper hover:bg-brivo-mist text-brivo-slate hover:text-brivo-navy text-xs font-mono border border-brivo-navy/10 transition-all flex items-center gap-1"
+                    title="Quick Look preview (Space)"
+                  >
+                    <span>⎵ Peek</span>
+                  </button>
+
                   <Link
                     href={`/explorer/${record.id}`}
-                    className="text-xs font-medium text-brivo-navy hover:text-brivo-cyan flex items-center gap-1 transition-colors"
+                    className="px-3.5 py-1 rounded-full bg-brivo-navy hover:bg-brivo-navy/90 text-brivo-paper text-xs font-mono font-medium flex items-center gap-1 transition-all shadow-sm"
                   >
-                    <span>View Full Case & Audit</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
+                    <span>Audit Dossier</span>
+                    <ChevronRight className="w-3.5 h-3.5 text-brivo-cyan" />
                   </Link>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       ) : (
         /* Table View */
-        <div className="border border-brivo-navy/10 rounded-lg overflow-x-auto bg-white shadow-sm">
+        <div className="border border-brivo-navy/10 rounded-2xl overflow-hidden bg-white shadow-sm">
           <table className="w-full text-left text-xs">
             <thead className="bg-brivo-paper text-brivo-slate font-mono uppercase text-[0.65rem] tracking-wider border-b border-brivo-navy/10">
               <tr>
-                <th className="px-4 py-3">Order ID</th>
-                <th className="px-4 py-3">Published Date</th>
-                <th className="px-4 py-3">Subject / Title</th>
-                <th className="px-4 py-3">Jurisdiction</th>
-                <th className="px-4 py-3 text-right">Penalty</th>
-                <th className="px-4 py-3 text-right">Action</th>
+                <th className="px-5 py-3.5">Order ID</th>
+                <th className="px-5 py-3.5">Published Date</th>
+                <th className="px-5 py-3.5">Subject / Title</th>
+                <th className="px-5 py-3.5">Jurisdiction</th>
+                <th className="px-5 py-3.5 text-right">Penalty</th>
+                <th className="px-5 py-3.5 text-right">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-brivo-navy/5">
               {records.map((r) => (
-                <tr key={r.id} className="hover:bg-brivo-paper/60 transition-colors">
-                  <td className="px-4 py-3 font-mono text-brivo-navy font-medium">
+                <tr
+                  key={r.id}
+                  onClick={() => {
+                    setQuickLookRecord(r);
+                    setIsQuickLookOpen(true);
+                  }}
+                  className="hover:bg-brivo-paper/60 transition-all cursor-pointer group"
+                >
+                  <td className="px-5 py-3.5 font-mono text-brivo-navy font-medium whitespace-nowrap">
                     {r.external_id}
                   </td>
-                  <td className="px-4 py-3 font-mono text-brivo-slate whitespace-nowrap">
+                  <td className="px-5 py-3.5 font-mono text-brivo-slate whitespace-nowrap">
                     {formatDate(r.published_date)}
                   </td>
-                  <td className="px-4 py-3 text-brivo-navy max-w-md">
-                    <Link
-                      href={`/explorer/${r.id}`}
-                      className="hover:text-brivo-cyan transition-colors font-medium line-clamp-1"
-                    >
-                      <HighlightedText text={r.title} highlight={qParam} />
-                    </Link>
+                  <td className="px-5 py-3.5 text-brivo-navy max-w-md">
+                    <span className="group-hover:text-brivo-cyan transition-colors font-medium line-clamp-1">
+                      {r.title}
+                    </span>
                   </td>
-                  <td className="px-4 py-3 font-mono text-brivo-slate whitespace-nowrap">
-                    {r.state || "Head Office"}
+                  <td className="px-5 py-3.5 font-mono text-brivo-slate whitespace-nowrap">
+                    {r.state || "Maharashtra"}
                   </td>
-                  <td className="px-4 py-3 font-mono text-right text-brivo-navy font-semibold whitespace-nowrap">
-                    {formatINR(r.amount)}
+                  <td className="px-5 py-3.5 font-mono text-right text-brivo-navy font-semibold whitespace-nowrap">
+                    {r.amount ? formatINR(r.amount) : "Non-Monetary"}
                   </td>
-                  <td className="px-4 py-3 text-right">
-                    <Link
-                      href={`/explorer/${r.id}`}
-                      className="text-brivo-slate hover:text-brivo-navy font-mono text-[0.7rem] hover:underline"
-                    >
-                      Details →
-                    </Link>
+                  <td className="px-5 py-3.5 text-right whitespace-nowrap">
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setQuickLookRecord(r);
+                          setIsQuickLookOpen(true);
+                        }}
+                        className="px-2 py-0.5 rounded bg-brivo-paper hover:bg-brivo-mist text-[0.65rem] font-mono text-brivo-slate hover:text-brivo-navy border border-brivo-navy/10 transition-colors"
+                      >
+                        ⎵ Peek
+                      </button>
+                      <Link
+                        href={`/explorer/${r.id}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-brivo-slate hover:text-brivo-navy font-mono text-[0.7rem] hover:underline"
+                      >
+                        Audit →
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -480,18 +562,18 @@ function ExplorerContent() {
         </div>
       )}
 
-      {/* Pagination Controls */}
+      {/* Pagination Bar */}
       {meta.total_pages > 1 && (
-        <div className="flex items-center justify-between border-t border-brivo-navy/10 pt-6">
+        <div className="flex items-center justify-between pt-4 border-t border-brivo-navy/10">
           <span className="text-xs font-mono text-brivo-slate">
-            Page {meta.page} of {meta.total_pages}
+            Page {meta.page} of {meta.total_pages} ({meta.total} records)
           </span>
 
           <div className="flex items-center gap-2">
             <button
               disabled={meta.page <= 1}
               onClick={() => updateUrl({ page: meta.page - 1 })}
-              className="px-3 py-1.5 rounded bg-white hover:bg-brivo-paper disabled:opacity-40 border border-brivo-navy/15 text-xs text-brivo-navy font-mono flex items-center gap-1 transition-colors shadow-sm"
+              className="px-3 py-1.5 rounded-full bg-white hover:bg-brivo-paper disabled:opacity-40 border border-brivo-navy/15 text-xs text-brivo-navy font-mono flex items-center gap-1 transition-colors shadow-sm"
             >
               <ChevronLeft className="w-3.5 h-3.5" />
               <span>Previous</span>
@@ -500,7 +582,7 @@ function ExplorerContent() {
             <button
               disabled={meta.page >= meta.total_pages}
               onClick={() => updateUrl({ page: meta.page + 1 })}
-              className="px-3 py-1.5 rounded bg-white hover:bg-brivo-paper disabled:opacity-40 border border-brivo-navy/15 text-xs text-brivo-navy font-mono flex items-center gap-1 transition-colors shadow-sm"
+              className="px-3 py-1.5 rounded-full bg-white hover:bg-brivo-paper disabled:opacity-40 border border-brivo-navy/15 text-xs text-brivo-navy font-mono flex items-center gap-1 transition-colors shadow-sm"
             >
               <span>Next</span>
               <ChevronRight className="w-3.5 h-3.5" />
@@ -514,6 +596,13 @@ function ExplorerContent() {
         isOpen={isAiModalOpen}
         onClose={() => setIsAiModalOpen(false)}
         initialQuery={searchInput || qParam}
+      />
+
+      {/* Quick Look Modal */}
+      <QuickLookModal
+        record={quickLookRecord}
+        isOpen={isQuickLookOpen}
+        onClose={() => setIsQuickLookOpen(false)}
       />
     </div>
   );
