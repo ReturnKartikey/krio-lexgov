@@ -1,0 +1,108 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Brivo Brand Colour Tokens */
+  --brivo-navy: #1a2333;
+  --brivo-void: #0b1020;
+  --brivo-cyan: #00c2d1;
+  --brivo-mist: #d9f5f8;
+  --brivo-slate: #98a2b3;
+  --brivo-paper: #faf8fc;
+
+  /* Semantic Theme Variables (Light Paper Canvas) */
+  --background: #faf8fc;
+  --foreground: #1a2333;
+  --card: #ffffff;
+  --card-foreground: #1a2333;
+  --border: rgba(26, 35, 51, 0.10);
+  --input: rgba(26, 35, 51, 0.12);
+  --ring: #00c2d1;
+  --radius: 0.375rem;
+}
+
+* {
+  box-sizing: border-box;
+  border-color: var(--border);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Subtle editorial graph paper background */
+.bg-editorial-grid {
+  background-size: 48px 48px;
+  background-image: 
+    linear-gradient(to right, rgba(26, 35, 51, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(26, 35, 51, 0.035) 1px, transparent 1px);
+}
+
+/* Hairline border styling with Brivo slate tone */
+.border-hairline {
+  border: 1px solid rgba(26, 35, 51, 0.10);
+}
+
+.border-hairline-t {
+  border-top: 1px solid rgba(26, 35, 51, 0.10);
+}
+
+.border-hairline-b {
+  border-bottom: 1px solid rgba(26, 35, 51, 0.10);
+}
+
+.border-hairline-r {
+  border-right: 1px solid rgba(26, 35, 51, 0.10);
+}
+
+.border-hairline-l {
+  border-left: 1px solid rgba(26, 35, 51, 0.10);
+}
+
+/* Editorial Serif emphasis */
+.font-display {
+  font-family: var(--font-serif), Georgia, serif;
+}
+
+.editorial-italic {
+  font-family: var(--font-serif), Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+/* Monospace micro label */
+.micro-label {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--brivo-slate);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--brivo-paper);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(152, 162, 179, 0.4);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--brivo-cyan);
+}
+
+/* Subtle glow effects */
+.glow-accent {
+  box-shadow: 0 0 40px -8px rgba(0, 194, 209, 0.25);
+}

@@ -1,0 +1,186 @@
+import uuid
+from datetime import datetime, date
+from typing import List, Optional, Dict, Any, Generic, TypeVar
+from pydantic import BaseModel, ConfigDict, Field
+
+T = TypeVar("T")
+
+
+class PaginationMeta(BaseModel):
+    total: int
+    page: int
+    page_size: int
+    total_pages: int
+
+
+class EnvelopeResponse(BaseModel, Generic[T]):
+    data: T
+    meta: Optional[PaginationMeta] = None
+
+
+class RawDocumentSimple(BaseModel):
+    id: uuid.UUID
+    source_ref: str
+    content_hash: str
+    fetched_at: datetime
+    http_status: int
+    mime_type: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class EntitySimple(BaseModel):
+    id: uuid.UUID
+    name: str
+    normalized_name: str
+    entity_type: str
+    record_count: int
+    total_penalty_amount: float
+    role: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class RecordListItem(BaseModel):
+    id: uuid.UUID
+    source_id: uuid.UUID
+    external_id: str
+    record_type: str
+    title: str
+    summary: Optional[str] = None
+    entity_names: List[str] = []
+    jurisdiction: Optional[str] = None
+    state: Optional[str] = None
+    city: Optional[str] = None
+    amount: Optional[float] = None
+    status: str
+    published_date: Optional[date] = None
+    source_url: str
+    ingested_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class RecordDetailItem(RecordListItem):
+    raw_metadata: Dict[str, Any] = {}
+    raw_document: Optional[RawDocumentSimple] = None
+    entities: List[EntitySimple] = []
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class EntityDetailItem(BaseModel):
+    id: uuid.UUID
+    name: str
+    normalized_name: str
+    entity_type: str
+    first_seen: datetime
+    last_seen: datetime
+    record_count: int
+    total_penalty_amount: float
+    recent_records: List[RecordListItem] = []
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+# Analytics Schemas
+class DailyCount(BaseModel):
+    date: str
+    count: int
+    total_penalty: float
+
+
+class TrendMetric(BaseModel):
+    label: str
+    current_value: float
+    previous_value: float
+    percentage_change: float
+    trend_direction: str  # up, down, flat
+
+
+class TrendsResponse(BaseModel):
+    interval: str
+    total_orders_trend: TrendMetric
+    total_penalties_trend: TrendMetric
+    active_entities_trend: TrendMetric
+    time_series: List[Dict[str, Any]]
+
+
+class EntityFrequencyItem(BaseModel):
+    id: uuid.UUID
+    name: str
+    entity_type: str
+    record_count: int
+    total_penalty: float
+
+
+class GeoDistributionItem(BaseModel):
+    state: str
+    record_count: int
+    total_penalty: float
+    top_cities: List[str]
+
+
+class ProcessingStatsResponse(BaseModel):
+    total_runs: int
+    success_rate_percent: float
+    average_duration_seconds: float
+    total_records_ingested: int
+    last_run_at: Optional[datetime] = None
+    recent_runs: List[Dict[str, Any]] = []
+
+
+class DuplicateItemResponse(BaseModel):
+    primary_record_id: str
+    primary_title: str
+    duplicate_record_id: str
+    duplicate_title: str
+    similarity_score: float
+    reason: str
+    entity_overlap: List[str]
+    amount_difference: Optional[float] = None
+
+
+# Job Schemas
+class IngestionRunItem(BaseModel):
+    id: uuid.UUID
+    source_id: uuid.UUID
+    started_at: datetime
+    finished_at: Optional[datetime] = None
+    status: str
+    records_seen: int
+    records_added: int
+    records_updated: int
+    records_failed: int
+    duration_seconds: Optional[float] = None
+    error_log: Optional[str] = None
+    triggered_by: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class SyncJobRequest(BaseModel):
+    adapter_key: str = "sebi_adjudication_orders"
+    limit: int = Field(default=50, ge=1, le=500)
+    incremental: bool = True
+
+
+class SyncJobResponse(BaseModel):
+    message: str
+    run_id: uuid.UUID
+    status: str
+    records_seen: int
+    records_added: int
+    records_updated: int
+    records_failed: int
+    duration_seconds: Optional[float] = None
+
+
+class HealthResponse(BaseModel):
+    status: str
+    version: str
+    database: str
+    redis: str
+    total_records: int
+    total_entities: int
+    uptime_seconds: float

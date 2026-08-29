@@ -1,0 +1,99 @@
+services:
+  # 1. PostgreSQL Database with pg_trgm and Full Text Search
+  db:
+    image: postgres:16-alpine
+    container_name: opengov_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-opengov_db}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d opengov_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 2. Redis Cache & Task Rate Limiter
+  redis:
+    image: redis:7-alpine
+    container_name: opengov_redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 3. FastAPI REST Backend & Ingestion API
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: opengov_api
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-opengov_db}
+      SYNC_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-opengov_db}
+      REDIS_URL: redis://redis:6379/0
+      CRAWLER_DELAY_SECONDS: ${CRAWLER_DELAY_SECONDS:-1.0}
+      CRAWLER_USER_AGENT: ${CRAWLER_USER_AGENT:-OpenGov-Bot/1.0 (+https://github.com/opengov/explorer)}
+      ENABLE_SCHEDULER_ON_STARTUP: "true"
+      SCHEDULE_INTERVAL_HOURS: 6
+      ENVIRONMENT: production
+    ports:
+      - "${API_PORT:-8000}:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # 4. Background Periodic Worker & Scheduler
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: opengov_worker
+    restart: unless-stopped
+    command: ["python", "-m", "app.scheduler.runner"]
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-opengov_db}
+      SYNC_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-opengov_db}
+      REDIS_URL: redis://redis:6379/0
+      CRAWLER_DELAY_SECONDS: ${CRAWLER_DELAY_SECONDS:-1.0}
+      CRAWLER_USER_AGENT: ${CRAWLER_USER_AGENT:-OpenGov-Bot/1.0 (+https://github.com/opengov/explorer)}
+      ENVIRONMENT: production
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # 5. Next.js 14 Web Frontend
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: opengov_web
+    restart: unless-stopped
+    environment:
+      API_URL: http://api:8000
+      INTERNAL_API_URL: http://api:8000
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
+  redis_data:
