@@ -20,6 +20,18 @@ interface PageProps {
   params: { id: string };
 }
 
+export async function generateMetadata({ params }: PageProps) {
+  try {
+    const entity = await getEntityDetail(params.id);
+    if (!entity) return { title: "Entity Not Found" };
+    return {
+      title: `${entity.name} — Entity Profile`,
+    };
+  } catch {
+    return { title: "Entity Profile" };
+  }
+}
+
 export const revalidate = 0;
 
 export default async function EntityDetailPage({ params }: PageProps) {

@@ -24,9 +24,20 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "OpenGov Intelligence Explorer — Krio Regulatory Intelligence",
+  title: {
+    default: "KRIO",
+    template: "%s | KRIO",
+  },
   description:
     "Audit-grade regulatory intelligence platform normalizing, searching, and analyzing enforcement orders from the Securities and Exchange Board of India (SEBI).",
+  icons: {
+    icon: [
+      { url: "/icon_logo.png", type: "image/png" },
+      { url: "/k_glyph.png", type: "image/png" },
+    ],
+    shortcut: "/icon_logo.png",
+    apple: "/icon_logo.png",
+  },
 };
 
 export default function RootLayout({

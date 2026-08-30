@@ -40,6 +40,7 @@ export default function JobsPage() {
   };
 
   useEffect(() => {
+    document.title = "Ingestion Jobs | KRIO.LEXGOV";
     fetchJobsList();
   }, []);
 
@@ -150,7 +151,7 @@ export default function JobsPage() {
 
       {/* Ingestion Runs Table */}
       <div className="border border-brivo-navy/10 rounded-lg overflow-x-auto bg-white shadow-sm">
-        <table className="w-full text-left text-xs">
+        <table className="w-full text-left text-xs min-w-[680px]">
           <thead className="bg-brivo-paper text-brivo-slate font-mono uppercase text-[0.65rem] tracking-wider border-b border-brivo-navy/10">
             <tr>
               <th className="px-4 py-3">Run ID</th>

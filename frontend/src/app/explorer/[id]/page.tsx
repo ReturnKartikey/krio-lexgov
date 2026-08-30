@@ -27,6 +27,18 @@ interface PageProps {
   params: { id: string };
 }
 
+export async function generateMetadata({ params }: PageProps) {
+  try {
+    const record = await getRecordDetail(params.id);
+    if (!record) return { title: "Dossier Not Found" };
+    return {
+      title: `${record.external_id} — ${record.title.slice(0, 48)}`,
+    };
+  } catch {
+    return { title: "Enforcement Dossier" };
+  }
+}
+
 export const revalidate = 0;
 
 export default async function RecordDetailPage({ params }: PageProps) {

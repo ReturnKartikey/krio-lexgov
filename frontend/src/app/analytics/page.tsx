@@ -58,6 +58,10 @@ export default function AnalyticsPage() {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
+    document.title = "Analytics & Trends | KRIO.LEXGOV";
+  }, []);
+
+  useEffect(() => {
     async function fetchAllAnalytics() {
       setLoading(true);
       try {

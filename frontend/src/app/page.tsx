@@ -190,6 +190,10 @@ export default function LandingPage() {
     };
   }, []);
 
+  useEffect(() => {
+    document.title = "KRIO";
+  }, []);
+
   const openAiWithQuery = (q: string) => {
     setAiInitialQuery(q);
     setIsAiModalOpen(true);
@@ -237,9 +241,9 @@ export default function LandingPage() {
             Krio Intelligence Explorer normalizes, indexes, and analyzes public enforcement orders from the Securities and Exchange Board of India (SEBI) with audit-grade provenance and full-text precision.
           </p>
 
-          <div className="flex flex-wrap items-center gap-4 pt-3">
-            <Link href="/explorer">
-              <MagneticButton className="px-6 py-3 rounded-full bg-brivo-navy hover:bg-brivo-navy/90 text-brivo-paper font-medium text-xs tracking-wider uppercase flex items-center gap-2 shadow-sm hover:shadow-md group active:scale-95 transition-all">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 pt-3">
+            <Link href="/explorer" className="w-full sm:w-auto">
+              <MagneticButton className="w-full sm:w-auto px-6 py-3 rounded-full bg-brivo-navy hover:bg-brivo-navy/90 text-brivo-paper font-medium text-xs tracking-wider uppercase flex items-center justify-center gap-2 shadow-sm hover:shadow-md group active:scale-95 transition-all">
                 <span>Launch Explorer</span>
                 <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1 text-brivo-cyan" />
               </MagneticButton>
@@ -248,7 +252,7 @@ export default function LandingPage() {
             {/* AI Synthesizer Trigger Button */}
             <MagneticButton
               onClick={() => openAiWithQuery("")}
-              className="px-6 py-3 rounded-full bg-white hover:bg-brivo-paper border border-brivo-navy/15 text-brivo-navy font-medium text-xs tracking-wider uppercase flex items-center gap-2 shadow-sm hover:shadow-md hover:border-brivo-cyan/50 active:scale-95 group transition-all"
+              className="w-full sm:w-auto px-6 py-3 rounded-full bg-white hover:bg-brivo-paper border border-brivo-navy/15 text-brivo-navy font-medium text-xs tracking-wider uppercase flex items-center justify-center gap-2 shadow-sm hover:shadow-md hover:border-brivo-cyan/50 active:scale-95 group transition-all"
             >
               <span className="w-2 h-2 rounded-full bg-brivo-cyan animate-pulse" />
               <span>Synthesize Precedents</span>
@@ -256,7 +260,7 @@ export default function LandingPage() {
 
             <Link
               href="/analytics"
-              className="px-4 py-2 text-brivo-slate hover:text-brivo-navy font-mono text-xs transition-colors flex items-center gap-1 group"
+              className="px-4 py-2 text-brivo-slate hover:text-brivo-navy font-mono text-xs transition-colors flex items-center justify-center sm:justify-start gap-1 group text-center"
             >
               <span>Market Analytics</span>
               <span className="transition-transform group-hover:translate-x-1">→</span>
@@ -278,7 +282,7 @@ export default function LandingPage() {
             </span>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-2 text-xs font-mono">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 pt-2 text-xs font-mono">
             <div className="scroll-reveal-item p-4 rounded-xl border border-brivo-navy/10 bg-brivo-paper/40 flex flex-col justify-between hover:border-brivo-navy/25 transition-all">
               <span className="text-[0.68rem] text-brivo-slate uppercase">Primary Source</span>
               <span className="text-sm font-semibold text-brivo-navy mt-1">SEBI Enforcement Orders</span>
@@ -565,8 +569,8 @@ export default function LandingPage() {
         </div>
 
         {/* Directory Table Layout */}
-        <div className="dispatch-table-container border border-brivo-navy/10 rounded-2xl overflow-hidden bg-white shadow-xs">
-          <table className="w-full text-left text-xs">
+        <div className="dispatch-table-container border border-brivo-navy/10 rounded-2xl overflow-x-auto bg-white shadow-xs">
+          <table className="w-full text-left text-xs min-w-[680px]">
             <thead className="bg-brivo-paper text-brivo-slate font-mono uppercase text-[0.68rem] tracking-wider border-b border-brivo-navy/10">
               <tr>
                 <th className="px-5 py-4">Citation</th>

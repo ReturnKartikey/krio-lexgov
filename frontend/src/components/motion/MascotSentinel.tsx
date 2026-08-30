@@ -17,28 +17,6 @@ export function MascotSentinel() {
   const [isScanning, setIsScanning] = useState(false);
   const [isCelebrated, setIsCelebrated] = useState(false);
 
-  // Sentinel Sentry Mode on Unfocused Tab
-  useEffect(() => {
-    const originalTitle = document.title;
-
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        document.title = "(●) Krio Sentinel Scanning...";
-        setIsScanning(true);
-      } else {
-        document.title = originalTitle;
-        setIsScanning(false);
-        triggerWingWave();
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      document.title = originalTitle;
-    };
-  }, []);
-
   const triggerWingWave = useCallback(() => {
     if (rightWingRef.current) {
       gsap.fromTo(
@@ -54,6 +32,23 @@ export function MascotSentinel() {
       );
     }
   }, []);
+
+  // Sentinel Sentry Animation State on Visibility
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        setIsScanning(true);
+      } else {
+        setIsScanning(false);
+        triggerWingWave();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [triggerWingWave]);
 
   const handleMascotClick = () => {
     triggerWingWave();

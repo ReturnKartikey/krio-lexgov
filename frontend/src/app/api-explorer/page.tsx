@@ -136,6 +136,10 @@ export default function ApiExplorerPage() {
   const [loading, setLoading] = useState(false);
   const [copiedCurl, setCopiedCurl] = useState(false);
 
+  React.useEffect(() => {
+    document.title = "API Console | KRIO.LEXGOV";
+  }, []);
+
   const handleSelectEndpoint = (ep: ApiEndpoint) => {
     setSelectedEndpoint(ep);
     const newVals: Record<string, string> = {};
