@@ -4,16 +4,6 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { prefersReducedMotion } from "@/lib/motion";
-import { Sparkles, Radio, Shield, MessageSquare, Volume2 } from "lucide-react";
-
-const REGULATORY_INSIGHTS = [
-  "Tip: Press ⌘K anywhere to synthesize live market precedent briefs.",
-  "All 35 indexed SEBI orders verified against immutable SHA-256 digests.",
-  "Section 15HA carries a ₹25 Crore statutory ceiling for PFUTP violations.",
-  "Near-duplicate clustering connects synchronized trading accounts automatically.",
-  "SEBI Adjudication Rules strictly mandate evidentiary electronic audit trails.",
-];
-
 export function MascotSentinel() {
   const containerRef = useRef<HTMLDivElement>(null);
   const pupilLeftRef = useRef<SVGCircleElement>(null);
@@ -25,11 +15,9 @@ export function MascotSentinel() {
   const scanBeamRef = useRef<SVGPathElement>(null);
 
   const [isScanning, setIsScanning] = useState(false);
-  const [currentInsightIndex, setCurrentInsightIndex] = useState(0);
-  const [showSpeechBubble, setShowSpeechBubble] = useState(false);
   const [isCelebrated, setIsCelebrated] = useState(false);
 
-  // 13. "Sentinel Sentry Mode" on Unfocused Tab
+  // Sentinel Sentry Mode on Unfocused Tab
   useEffect(() => {
     const originalTitle = document.title;
 
@@ -68,9 +56,6 @@ export function MascotSentinel() {
   }, []);
 
   const handleMascotClick = () => {
-    // Cycle insight
-    setCurrentInsightIndex((prev) => (prev + 1) % REGULATORY_INSIGHTS.length);
-    setShowSpeechBubble(true);
     triggerWingWave();
 
     // Trigger laser radar scan
@@ -159,7 +144,6 @@ export function MascotSentinel() {
         onEnter: () => {
           triggerWingWave();
           setIsCelebrated(true);
-          setTimeout(() => setShowSpeechBubble(true), 600);
         },
       });
     }
@@ -174,24 +158,12 @@ export function MascotSentinel() {
 
   return (
     <div className="relative flex flex-col items-center justify-center p-4 select-none group">
-      {/* Speech Bubble / Tactical Insight Whisper */}
-      {showSpeechBubble && (
-        <div
-          onClick={() => setShowSpeechBubble(false)}
-          className="absolute -top-16 bg-white/95 backdrop-blur-md border border-brivo-navy/15 rounded-xl px-3.5 py-2 shadow-xl text-brivo-navy text-[0.7rem] font-mono max-w-xs text-center animate-fade-in cursor-pointer z-30 flex items-center gap-2 group-hover:border-brivo-cyan"
-        >
-          <span className="w-1.5 h-1.5 rounded-full bg-brivo-cyan shrink-0 animate-pulse" />
-          <span className="leading-tight">{REGULATORY_INSIGHTS[currentInsightIndex]}</span>
-          <span className="text-[0.6rem] text-brivo-slate shrink-0 font-sans">✕</span>
-        </div>
-      )}
-
       {/* Interactive Mascot Container */}
       <div
         ref={containerRef}
         onClick={handleMascotClick}
         className="relative cursor-pointer p-2 transition-transform duration-300 group-hover:scale-105"
-        title="Click Krio Sentinel to trigger radar scan and tactical insights"
+        title="Click Krio Sentinel to trigger radar scan"
       >
         {/* Glowing Radar Halo */}
         <div
@@ -200,10 +172,10 @@ export function MascotSentinel() {
           }`}
         />
 
-        {/* Larger, Articulated 88x88 Vector Sentinel Character */}
+        {/* Articulated Vector Sentinel Character (Enlarged 112x112) */}
         <svg
-          width="88"
-          height="88"
+          width="112"
+          height="112"
           viewBox="0 0 88 88"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
@@ -284,30 +256,6 @@ export function MascotSentinel() {
 
             {/* Beak / Prism */}
             <polygon points="44,42 40,48 48,48" fill="#00c2d1" />
-
-            {/* Chest Monogram Plaque 'K' */}
-            <rect
-              x="36"
-              y="54"
-              width="16"
-              height="16"
-              rx="4"
-              fill="#0b1020"
-              stroke="rgba(0,194,209,0.4)"
-              strokeWidth="1"
-            />
-            <text
-              x="44"
-              y="66"
-              textAnchor="middle"
-              fontFamily="var(--font-serif), Georgia, serif"
-              fontStyle="italic"
-              fontSize="12"
-              fontWeight="bold"
-              fill="#d9f5f8"
-            >
-              k
-            </text>
           </g>
 
           <defs>

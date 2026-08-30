@@ -20,12 +20,11 @@ export function Navbar() {
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
-  const navRef = useRef<HTMLElement>(null);
-  const linkRefs = useRef<(HTMLAnchorElement | null)[]>([]);
-  const [indicator, setIndicator] = useState<{ x: number; width: number; ready: boolean }>({
-    x: 0,
-    width: 0,
-    ready: false,
+  const tabRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+  const [indicator, setIndicator] = useState<{ x: number; width: number; visible: boolean }>({
+    x: 4,
+    width: 100,
+    visible: false,
   });
 
   const navLinks = [
@@ -35,11 +34,35 @@ export function Navbar() {
     { href: "/api-explorer", label: "API Console", icon: Terminal },
   ];
 
-  const activeIndex = navLinks.findIndex(
-    (link) => pathname.startsWith(link.href) || (link.href === "/explorer" && pathname === "/")
-  );
+  const activeIndex = navLinks.findIndex((link) => pathname.startsWith(link.href));
 
-  // Scroll listener with RAF throttling and balanced threshold for seamless forward and reverse morphing
+  // Measure strictly local relative offset within the nav container
+  const updatePillPosition = useCallback(() => {
+    if (activeIndex !== -1 && tabRefs.current[activeIndex]) {
+      const el = tabRefs.current[activeIndex]!;
+      setIndicator({
+        x: el.offsetLeft,
+        width: el.offsetWidth,
+        visible: true,
+      });
+    } else {
+      setIndicator((prev) => ({ ...prev, visible: false }));
+    }
+  }, [activeIndex]);
+
+  // Update on route change and resize
+  useEffect(() => {
+    updatePillPosition();
+    const raf = requestAnimationFrame(updatePillPosition);
+    return () => cancelAnimationFrame(raf);
+  }, [updatePillPosition, pathname]);
+
+  useEffect(() => {
+    window.addEventListener("resize", updatePillPosition);
+    return () => window.removeEventListener("resize", updatePillPosition);
+  }, [updatePillPosition]);
+
+  // Scroll listener with RAF throttling
   useEffect(() => {
     let ticking = false;
     const handleScroll = () => {
@@ -60,33 +83,6 @@ export function Navbar() {
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  // Synchronized indicator measurement
-  const updateIndicator = useCallback(() => {
-    if (activeIndex !== -1 && linkRefs.current[activeIndex] && navRef.current) {
-      const el = linkRefs.current[activeIndex]!;
-      setIndicator({
-        x: el.offsetLeft,
-        width: el.offsetWidth,
-        ready: true,
-      });
-    }
-  }, [activeIndex]);
-
-  useEffect(() => {
-    updateIndicator();
-    const raf = requestAnimationFrame(updateIndicator);
-    const timer = setTimeout(updateIndicator, 50);
-    return () => {
-      cancelAnimationFrame(raf);
-      clearTimeout(timer);
-    };
-  }, [updateIndicator, isScrolled, pathname]);
-
-  useEffect(() => {
-    window.addEventListener("resize", updateIndicator);
-    return () => window.removeEventListener("resize", updateIndicator);
-  }, [updateIndicator]);
 
   // Global Cmd+K shortcut
   useEffect(() => {
@@ -115,91 +111,91 @@ export function Navbar() {
               : "max-w-7xl h-20 px-4 sm:px-6 rounded-2xl bg-white/0 backdrop-blur-none border border-transparent shadow-none"
           }`}
         >
-          {/* Brand Monogram & Name - Invariant Coordinate System */}
-          <Link href="/" className="flex items-center gap-3 group shrink-0">
-            <div
-              className="w-9.5 h-9.5 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform duration-300 overflow-hidden shrink-0"
-            >
-              <Image
-                src="/icon_logo.png"
-                alt="KRIO Icon"
-                width={38}
-                height={38}
-                className="w-full h-full object-contain rounded-xl"
-                priority
-              />
-            </div>
-            <div className="flex items-baseline gap-1.5 shrink-0">
-              <span className="font-bold tracking-tight text-brivo-navy font-sans text-lg">
-                KRIO
-              </span>
-              <span className="text-brivo-slate/70 font-mono font-medium tracking-wide text-xs">
-                .LEXGOV
-              </span>
-            </div>
-          </Link>
+          {/* Left Wing - Brand Monogram & Name */}
+          <div className="flex-1 flex items-center justify-start shrink-0">
+            <Link href="/" className="flex items-center gap-3 group shrink-0">
+              <div
+                className="w-9 h-9 max-w-[36px] max-h-[36px] rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform duration-300 overflow-hidden shrink-0"
+              >
+                <Image
+                  src="/icon_logo.png"
+                  alt="KRIO Icon"
+                  width={36}
+                  height={36}
+                  style={{ width: "36px", height: "36px", maxWidth: "36px", maxHeight: "36px" }}
+                  className="w-9 h-9 max-w-[36px] max-h-[36px] object-contain rounded-xl shrink-0"
+                  priority
+                />
+              </div>
+              <div className="flex items-baseline gap-1.5 shrink-0">
+                <span className="font-bold tracking-tight text-brivo-navy font-sans text-base sm:text-lg">
+                  KRIO
+                </span>
+                <span className="text-brivo-slate/70 font-mono font-medium tracking-wide text-xs">
+                  .LEXGOV
+                </span>
+              </div>
+            </Link>
+          </div>
 
-          {/* Center Navigation Links with Invariant Geometry & Horizontal Sliding Pill */}
-          <nav
-            ref={navRef}
-            className="relative hidden md:flex items-center gap-1.5 p-1.5 rounded-full bg-brivo-paper/80 border border-brivo-navy/10 shadow-2xs transition-colors duration-300 shrink-0"
-          >
-            {/* Absolute Horizontal-Only Animated Pill */}
-            {indicator.ready && activeIndex !== -1 && (
+          {/* Center Navigation - Seamless Gliding Segmented Control */}
+          <div className="shrink-0 flex items-center justify-center">
+            <nav
+              className="relative hidden md:flex items-center gap-1 shrink-0 h-10 select-none"
+            >
+              {/* Strictly Local Spring-Gliding Active Pill */}
               <motion.div
-                className="absolute inset-y-1.5 rounded-full bg-brivo-navy shadow-xs z-0 pointer-events-none"
+                className="absolute inset-y-1 rounded-full bg-brivo-navy shadow-xs z-0 pointer-events-none"
                 initial={false}
                 animate={{
-                  left: indicator.x,
+                  x: indicator.x,
                   width: indicator.width,
+                  opacity: indicator.visible ? 1 : 0,
                 }}
                 transition={{
-                  type: "spring",
-                  stiffness: 450,
-                  damping: 35,
+                  x: { type: "spring", stiffness: 480, damping: 38 },
+                  width: { type: "spring", stiffness: 480, damping: 38 },
+                  opacity: { duration: 0.15, ease: "easeOut" },
                 }}
               />
-            )}
 
-            {navLinks.map((link, index) => {
-              const Icon = link.icon;
-              const isActive =
-                pathname.startsWith(link.href) || (link.href === "/explorer" && pathname === "/");
-              return (
-                <Link
-                  key={link.href}
-                  ref={(el) => {
-                    linkRefs.current[index] = el;
-                  }}
-                  href={link.href}
-                  onMouseEnter={() => prefetchTab(link.href)}
-                  onFocus={() => prefetchTab(link.href)}
-                  className="relative px-4 py-2 rounded-full text-xs sm:text-sm font-semibold font-sans flex items-center justify-center gap-2 select-none cursor-pointer whitespace-nowrap shrink-0 transition-colors"
-                >
-                  <Icon
-                    className={`w-4 h-4 shrink-0 transition-colors duration-200 ${
-                      isActive ? "text-brivo-cyan" : "text-brivo-slate"
-                    }`}
-                  />
-                  <span
-                    className={`whitespace-nowrap transition-colors duration-200 ${
+              {navLinks.map((link, index) => {
+                const Icon = link.icon;
+                const isActive = activeIndex === index;
+                return (
+                  <Link
+                    key={link.href}
+                    ref={(el) => {
+                      tabRefs.current[index] = el;
+                    }}
+                    href={link.href}
+                    onMouseEnter={() => prefetchTab(link.href)}
+                    onFocus={() => prefetchTab(link.href)}
+                    className={`relative h-8 px-4 rounded-full text-xs sm:text-sm font-medium font-sans flex items-center justify-center gap-2 select-none cursor-pointer whitespace-nowrap shrink-0 transition-colors duration-200 z-10 outline-none focus:outline-none focus-visible:outline-none ${
                       isActive
                         ? "text-brivo-paper font-semibold"
                         : "text-brivo-navy/80 hover:text-brivo-navy"
                     }`}
                   >
-                    {link.label}
-                  </span>
-                </Link>
-              );
-            })}
-          </nav>
+                    <Icon
+                      className={`w-4 h-4 shrink-0 transition-colors duration-200 ${
+                        isActive ? "text-brivo-cyan" : "text-brivo-slate"
+                      }`}
+                    />
+                    <span className="whitespace-nowrap">
+                      {link.label}
+                    </span>
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
 
-          {/* Right Action Group - Synthesizer Action Pill */}
-          <div className="flex items-center shrink-0">
+          {/* Right Wing - Synthesizer Action Pill */}
+          <div className="flex-1 flex items-center justify-end shrink-0">
             <button
               onClick={() => setIsAiModalOpen(true)}
-              className="h-10 px-4 rounded-full bg-brivo-paper/90 hover:bg-white border border-brivo-navy/10 hover:border-brivo-cyan/50 text-brivo-navy font-sans text-xs sm:text-sm font-semibold transition-all flex items-center gap-2.5 shadow-2xs group active:scale-95 cursor-pointer select-none"
+              className="h-10 px-4 rounded-full bg-brivo-paper/90 hover:bg-white border border-brivo-navy/10 hover:border-brivo-cyan/50 text-brivo-navy font-sans text-xs sm:text-sm font-semibold transition-all flex items-center gap-2.5 shadow-2xs group active:scale-95 cursor-pointer select-none shrink-0"
               title="Open AI Precedent & Risk Synthesizer (Cmd+K)"
             >
               <Sparkles className="w-4 h-4 text-brivo-cyan group-hover:rotate-12 transition-transform shrink-0" />
@@ -212,7 +208,7 @@ export function Navbar() {
         </div>
       </header>
 
-      {/* Global Intelligence Modal */}
+      {/* Global Command Menu & Intelligence Modal */}
       <IntelligenceModal
         isOpen={isAiModalOpen}
         onClose={() => setIsAiModalOpen(false)}

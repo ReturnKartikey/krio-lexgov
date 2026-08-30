@@ -260,37 +260,27 @@ ${data.compliance_takeaways.join("\n")}
                 </div>
 
                 {/* Example query chips */}
-                <div className="hidden sm:flex items-center gap-1 text-[0.65rem] font-mono text-brivo-slate">
-                  <span>Try:</span>
-                  <button
-                    onClick={() => {
-                      setQuery("Illiquid Options");
-                      handleRunSynthesis("Illiquid Options", mode, true);
-                    }}
-                    className="underline hover:text-brivo-navy"
-                  >
-                    Illiquid Options
-                  </button>
-                  <span>•</span>
-                  <button
-                    onClick={() => {
-                      setQuery("Front-Running");
-                      handleRunSynthesis("Front-Running", mode, true);
-                    }}
-                    className="underline hover:text-brivo-navy"
-                  >
-                    Front-Running
-                  </button>
-                  <span>•</span>
-                  <button
-                    onClick={() => {
-                      setQuery("Reliance");
-                      handleRunSynthesis("Reliance", mode, true);
-                    }}
-                    className="underline hover:text-brivo-navy"
-                  >
-                    Reliance
-                  </button>
+                <div className="flex flex-wrap items-center gap-1.5 text-[0.68rem] font-mono text-brivo-slate pt-1">
+                  <span className="text-brivo-slate/80 font-medium">Try:</span>
+                  {[
+                    { label: "Front Running", q: "Front Running" },
+                    { label: "Angel One", q: "Angel One" },
+                    { label: "Unregistered Advisory", q: "Unregistered Advisory" },
+                    { label: "Insider Trading", q: "Insider Trading" },
+                    { label: "Settlement Orders", q: "Settlement Order" },
+                  ].map((chip) => (
+                    <button
+                      key={chip.label}
+                      type="button"
+                      onClick={() => {
+                        setQuery(chip.q);
+                        handleRunSynthesis(chip.q, mode, true);
+                      }}
+                      className="px-2 py-0.5 rounded-md bg-brivo-paper hover:bg-white border border-brivo-navy/12 text-brivo-navy hover:text-brivo-navy font-mono text-[0.65rem] transition-all hover:border-brivo-navy/30 shadow-2xs active:scale-95"
+                    >
+                      {chip.label}
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>

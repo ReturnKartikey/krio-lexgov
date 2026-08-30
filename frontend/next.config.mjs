@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  output: "standalone",
   async rewrites() {
     const backendUrl =
       process.env.INTERNAL_API_URL ||

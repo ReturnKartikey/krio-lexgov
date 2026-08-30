@@ -12,13 +12,14 @@ export function Footer() {
           {/* Col 1 */}
           <div className="md:col-span-2 space-y-4">
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 flex items-center justify-center">
+              <div className="w-6 h-6 max-w-[24px] max-h-[24px] flex items-center justify-center shrink-0">
                 <Image
-                  src="/k_glyph.png"
-                  alt="KRIO Icon"
+                  src="/k_glyph_white.png"
+                  alt="KRIO Logo"
                   width={24}
                   height={24}
-                  className="w-full h-full object-contain filter brightness-200"
+                  style={{ width: "24px", height: "24px" }}
+                  className="w-6 h-6 object-contain"
                 />
               </div>
               <span className="font-semibold text-brivo-paper tracking-tight text-sm">
