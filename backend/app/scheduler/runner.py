@@ -1,11 +1,10 @@
-import asyncio
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 
 from app.core.config import get_settings
+from app.core.database import AsyncSessionLocal, Base, engine
 from app.core.logging import logger
-from app.core.database import AsyncSessionLocal, engine, Base
 from app.db.models import Record
 from app.etl.pipeline import ETLPipeline
 

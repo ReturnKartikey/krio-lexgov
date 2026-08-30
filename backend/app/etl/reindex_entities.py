@@ -1,10 +1,17 @@
 import asyncio
-from datetime import datetime, timezone
-from app.core.database import AsyncSessionLocal
-from app.db.models import Record, Entity, RecordEntity
-from app.etl.entity_extractor import extract_entities_from_text, normalize_entity_name, is_valid_entity_candidate
+from datetime import UTC, datetime
+
+from sqlalchemy import delete, select
+
 from app.adapters.base import ExtractedEntityItem
-from sqlalchemy import select, delete
+from app.core.database import AsyncSessionLocal
+from app.db.models import Entity, Record, RecordEntity
+from app.etl.entity_extractor import (
+    extract_entities_from_text,
+    is_valid_entity_candidate,
+    normalize_entity_name,
+)
+
 
 async def renormalize():
     async with AsyncSessionLocal() as session:
@@ -54,9 +61,9 @@ async def renormalize():
                 # Ensure published_date has a valid timezone-aware datetime for first_seen/last_seen
                 p_date = rec.published_date
                 if p_date:
-                    ts = datetime.combine(p_date, datetime.min.time(), tzinfo=timezone.utc)
+                    ts = datetime.combine(p_date, datetime.min.time(), tzinfo=UTC)
                 else:
-                    ts = datetime.now(timezone.utc)
+                    ts = datetime.now(UTC)
                 
                 penalty_amt = float(rec.amount) if rec.amount else 0.0
                 

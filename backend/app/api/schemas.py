@@ -1,6 +1,7 @@
 import uuid
-from datetime import datetime, date
-from typing import List, Optional, Dict, Any, Generic, TypeVar
+from datetime import date, datetime
+from typing import Any, Generic, TypeVar
+
 from pydantic import BaseModel, ConfigDict, Field
 
 T = TypeVar("T")
@@ -15,7 +16,7 @@ class PaginationMeta(BaseModel):
 
 class EnvelopeResponse(BaseModel, Generic[T]):
     data: T
-    meta: Optional[PaginationMeta] = None
+    meta: PaginationMeta | None = None
 
 
 class RawDocumentSimple(BaseModel):
@@ -36,7 +37,7 @@ class EntitySimple(BaseModel):
     entity_type: str
     record_count: int
     total_penalty_amount: float
-    role: Optional[str] = None
+    role: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -47,14 +48,14 @@ class RecordListItem(BaseModel):
     external_id: str
     record_type: str
     title: str
-    summary: Optional[str] = None
-    entity_names: List[str] = []
-    jurisdiction: Optional[str] = None
-    state: Optional[str] = None
-    city: Optional[str] = None
-    amount: Optional[float] = None
+    summary: str | None = None
+    entity_names: list[str] = []
+    jurisdiction: str | None = None
+    state: str | None = None
+    city: str | None = None
+    amount: float | None = None
     status: str
-    published_date: Optional[date] = None
+    published_date: date | None = None
     source_url: str
     ingested_at: datetime
 
@@ -62,9 +63,9 @@ class RecordListItem(BaseModel):
 
 
 class RecordDetailItem(RecordListItem):
-    raw_metadata: Dict[str, Any] = {}
-    raw_document: Optional[RawDocumentSimple] = None
-    entities: List[EntitySimple] = []
+    raw_metadata: dict[str, Any] = {}
+    raw_document: RawDocumentSimple | None = None
+    entities: list[EntitySimple] = []
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -78,7 +79,7 @@ class EntityDetailItem(BaseModel):
     last_seen: datetime
     record_count: int
     total_penalty_amount: float
-    recent_records: List[RecordListItem] = []
+    recent_records: list[RecordListItem] = []
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -103,7 +104,7 @@ class TrendsResponse(BaseModel):
     total_orders_trend: TrendMetric
     total_penalties_trend: TrendMetric
     active_entities_trend: TrendMetric
-    time_series: List[Dict[str, Any]]
+    time_series: list[dict[str, Any]]
 
 
 class EntityFrequencyItem(BaseModel):
@@ -118,7 +119,7 @@ class GeoDistributionItem(BaseModel):
     state: str
     record_count: int
     total_penalty: float
-    top_cities: List[str]
+    top_cities: list[str]
 
 
 class ProcessingStatsResponse(BaseModel):
@@ -126,8 +127,8 @@ class ProcessingStatsResponse(BaseModel):
     success_rate_percent: float
     average_duration_seconds: float
     total_records_ingested: int
-    last_run_at: Optional[datetime] = None
-    recent_runs: List[Dict[str, Any]] = []
+    last_run_at: datetime | None = None
+    recent_runs: list[dict[str, Any]] = []
 
 
 class DuplicateItemResponse(BaseModel):
@@ -137,8 +138,8 @@ class DuplicateItemResponse(BaseModel):
     duplicate_title: str
     similarity_score: float
     reason: str
-    entity_overlap: List[str]
-    amount_difference: Optional[float] = None
+    entity_overlap: list[str]
+    amount_difference: float | None = None
 
 
 # Job Schemas
@@ -146,14 +147,14 @@ class IngestionRunItem(BaseModel):
     id: uuid.UUID
     source_id: uuid.UUID
     started_at: datetime
-    finished_at: Optional[datetime] = None
+    finished_at: datetime | None = None
     status: str
     records_seen: int
     records_added: int
     records_updated: int
     records_failed: int
-    duration_seconds: Optional[float] = None
-    error_log: Optional[str] = None
+    duration_seconds: float | None = None
+    error_log: str | None = None
     triggered_by: str
 
     model_config = ConfigDict(from_attributes=True)
@@ -173,7 +174,7 @@ class SyncJobResponse(BaseModel):
     records_added: int
     records_updated: int
     records_failed: int
-    duration_seconds: Optional[float] = None
+    duration_seconds: float | None = None
 
 
 class HealthResponse(BaseModel):

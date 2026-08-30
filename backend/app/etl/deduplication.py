@@ -1,7 +1,7 @@
-from dataclasses import dataclass
-from typing import List, Dict, Any, Optional
-from difflib import SequenceMatcher
 import re
+from dataclasses import dataclass
+from difflib import SequenceMatcher
+from typing import Any
 
 
 @dataclass
@@ -12,8 +12,8 @@ class DuplicateCluster:
     duplicate_title: str
     similarity_score: float
     reason: str
-    entity_overlap: List[str]
-    amount_difference: Optional[float]
+    entity_overlap: list[str]
+    amount_difference: float | None
 
 
 def clean_title_for_sim(t: str) -> str:
@@ -54,12 +54,12 @@ def calculate_text_similarity(a: str, b: str) -> float:
     return SequenceMatcher(None, clean_a, clean_b).ratio()
 
 
-def detect_near_duplicates(records: List[Dict[str, Any]], similarity_threshold: float = 0.75) -> List[DuplicateCluster]:
+def detect_near_duplicates(records: list[dict[str, Any]], similarity_threshold: float = 0.75) -> list[DuplicateCluster]:
     """
     Detect authentic near-duplicate records and cross-matter clusters using distinctive subject matter similarity,
     entity set overlap, and penalty amount parity.
     """
-    duplicates: List[DuplicateCluster] = []
+    duplicates: list[DuplicateCluster] = []
     n = len(records)
 
     for i in range(n):
@@ -77,11 +77,6 @@ def detect_near_duplicates(records: List[Dict[str, Any]], similarity_threshold: 
 
             # 2. Entity overlap
             shared_entities = list(entities_a.intersection(entities_b))
-            entity_overlap_score = (
-                len(shared_entities) / max(len(entities_a.union(entities_b)), 1)
-                if entities_a and entities_b
-                else 0.0
-            )
 
             # 3. Amount parity check
             amount_diff = None

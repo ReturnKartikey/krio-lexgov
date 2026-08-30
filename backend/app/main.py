@@ -1,16 +1,18 @@
 import asyncio
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.responses import HTMLResponse, JSONResponse
 
+from app.api.router import api_router
 from app.core.config import get_settings
 from app.core.logging import logger
-from app.api.router import api_router
 from app.scheduler.runner import (
-    start_scheduler,
-    shutdown_scheduler,
     bootstrap_initial_data_if_empty,
+    shutdown_scheduler,
+    start_scheduler,
 )
 
 settings = get_settings()
@@ -53,8 +55,6 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-from fastapi.middleware.gzip import GZipMiddleware
-
 # GZip Compression Middleware for ultra-fast API payloads
 app.add_middleware(GZipMiddleware, minimum_size=500)
 
@@ -76,8 +76,6 @@ async def global_exception_handler(request: Request, exc: Exception):
         content={"detail": "Internal server error occurred. Please refer to server logs."},
     )
 
-
-from fastapi.responses import HTMLResponse
 
 @app.get("/docs", include_in_schema=False)
 async def custom_swagger_ui_html():

@@ -1,26 +1,25 @@
 import hashlib
 import io
-import re
-from datetime import datetime, date, timezone, timedelta
-from typing import List, Optional, Tuple, Dict, Any
+from datetime import UTC, date, datetime, timedelta
+
 import httpx
 from bs4 import BeautifulSoup
 from pypdf import PdfReader
 
 from app.adapters.base import (
-    SourceAdapter,
-    RawRecordRef,
-    RawDocumentPayload,
-    NormalizedRecord,
     ExtractedEntityItem,
+    NormalizedRecord,
+    RawDocumentPayload,
+    RawRecordRef,
+    SourceAdapter,
 )
 from app.core.config import get_settings
 from app.core.logging import logger
 from app.core.rate_limiter import rate_limiter, robots_validator
 from app.etl.entity_extractor import (
     extract_entities_from_text,
-    extract_penalties,
     extract_location,
+    extract_penalties,
     extract_regulations,
     normalize_entity_name,
 )
@@ -166,7 +165,7 @@ class SEBIOrdersAdapter(SourceAdapter):
             "issued by the Securities and Exchange Board of India."
         )
 
-    def _get_headers(self) -> Dict[str, str]:
+    def _get_headers(self) -> dict[str, str]:
         return {
             "User-Agent": settings.CRAWLER_USER_AGENT,
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,application/pdf,*/*;q=0.8",
@@ -175,10 +174,10 @@ class SEBIOrdersAdapter(SourceAdapter):
 
     async def discover(
         self,
-        since: Optional[datetime] = None,
-        cursor: Optional[str] = None,
+        since: datetime | None = None,
+        cursor: str | None = None,
         limit: int = 50,
-    ) -> Tuple[List[RawRecordRef], Optional[str]]:
+    ) -> tuple[list[RawRecordRef], str | None]:
         """
         Scrapes SEBI's public order listings page.
         Falls back seamlessly to authentic seed fixtures if registry is offline, blocked, or in test environment.
@@ -187,7 +186,7 @@ class SEBIOrdersAdapter(SourceAdapter):
         if settings.ENVIRONMENT == "test":
             return self._get_seed_refs(since, page_num, limit)
 
-        refs: List[RawRecordRef] = []
+        refs: list[RawRecordRef] = []
         listing_url = (
             f"{self.base_url}/sebiweb/home/HomeAction.do?doListing=yes&sid=2&ssid=9&smid=2&pageNo={page_num}"
         )
@@ -247,13 +246,13 @@ class SEBIOrdersAdapter(SourceAdapter):
         return refs, next_cursor
 
     def _get_seed_refs(
-        self, since: Optional[datetime], page_num: int, limit: int
-    ) -> Tuple[List[RawRecordRef], Optional[str]]:
+        self, since: datetime | None, page_num: int, limit: int
+    ) -> tuple[list[RawRecordRef], str | None]:
         """Return references from the built-in authentic public dataset."""
-        refs: List[RawRecordRef] = []
+        refs: list[RawRecordRef] = []
         for item in SAMPLE_SEBI_DATA:
             p_date = date.fromisoformat(item["published_date"])
-            if since and datetime.combine(p_date, datetime.min.time(), tzinfo=timezone.utc) < since:
+            if since and datetime.combine(p_date, datetime.min.time(), tzinfo=UTC) < since:
                 continue
 
             refs.append(
@@ -397,7 +396,7 @@ class SEBIOrdersAdapter(SourceAdapter):
             "regulations_cited": regulations,
             "external_reference": ref.external_id,
             "content_hash": raw.content_hash,
-            "scraped_at": datetime.now(timezone.utc).isoformat(),
+            "scraped_at": datetime.now(UTC).isoformat(),
             **meta,
         }
 

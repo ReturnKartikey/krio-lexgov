@@ -1,23 +1,22 @@
 import re
 from datetime import datetime
-from typing import Optional, List, Dict, Any
+
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
-from fastapi import APIRouter, Depends, Query
-from sqlalchemy import select, func, or_, and_, desc, cast, String
+from sqlalchemy import String, and_, cast, desc, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
 from app.core.database import get_db
-from app.db.models import Record, Entity, RecordEntity
+from app.db.models import Record
 
 router = APIRouter(prefix="/ai", tags=["AI Intelligence"])
 
 
 class SynthesisRequest(BaseModel):
-    query: Optional[str] = Field(None, description="Custom query or entity name")
+    query: str | None = Field(None, description="Custom query or entity name")
     mode: str = Field("risk_brief", description="Mode: 'risk_brief', 'precedent_analysis', 'entity_exposure', 'statutory_memo'")
-    entity_id: Optional[str] = None
-    state: Optional[str] = None
+    entity_id: str | None = None
+    state: str | None = None
 
 
 class PrecedentCase(BaseModel):
@@ -25,10 +24,10 @@ class PrecedentCase(BaseModel):
     external_id: str
     title: str
     published_date: str
-    amount: Optional[float]
-    jurisdiction: Optional[str]
+    amount: float | None
+    jurisdiction: str | None
     key_finding: str
-    respondents: List[str]
+    respondents: list[str]
 
 
 class SynthesisResponse(BaseModel):
@@ -38,15 +37,15 @@ class SynthesisResponse(BaseModel):
     total_penalty_exposure: float
     order_count: int
     entity_count: int
-    applicable_statutes: List[str]
-    precedents: List[PrecedentCase]
-    compliance_takeaways: List[str]
+    applicable_statutes: list[str]
+    precedents: list[PrecedentCase]
+    compliance_takeaways: list[str]
     risk_level: str  # 'HIGH', 'MEDIUM', 'MODERATE', 'LOW'
     confidence_score: float
     generated_at: str
 
 
-def clean_summary_text(raw_text: Optional[str], title: str) -> str:
+def clean_summary_text(raw_text: str | None, title: str) -> str:
     """Strip website scraping artifacts, breadcrumbs, and redundant prefixes."""
     if not raw_text:
         return f"SEBI Adjudication Order concerning {title}."
@@ -198,7 +197,7 @@ async def synthesize_regulatory_intelligence(
         statutes_found.add("SEBI (PFUTP) Regulations, 2003 — Regulations 3 & 4")
 
     # 5. Format Precedents with Clean Legal Finding Text
-    precedents: List[PrecedentCase] = []
+    precedents: list[PrecedentCase] = []
     for r in records[:6]:
         cleaned_finding = clean_summary_text(r.summary, r.title)
         precedents.append(
@@ -245,19 +244,19 @@ async def synthesize_regulatory_intelligence(
             )
     else:
         if req.mode == "precedent_analysis":
-            headline = f"Statutory Precedent Synthesis: Capital Markets Enforcement"
+            headline = "Statutory Precedent Synthesis: Capital Markets Enforcement"
             summary = (
                 f"Cross-matter analysis of {len(records)} indexed SEBI adjudication proceedings demonstrates consistent application of "
                 f"PFUTP Regulations, Section 15HA penalties, and Settlement Regulations. Total sanction exposure: ₹{total_penalty:,.2f}."
             )
         elif req.mode == "entity_exposure":
-            headline = f"Noticee & Promoter Cross-Matter Liability Matrix"
+            headline = "Noticee & Promoter Cross-Matter Liability Matrix"
             summary = (
                 f"Cross-matter correlation across {len(all_entities)} distinct noticees spanning {len(records)} orders with "
                 f"₹{total_penalty:,.2f} in cumulative liability."
             )
         else:
-            headline = f"Executive Regulatory Intelligence Brief"
+            headline = "Executive Regulatory Intelligence Brief"
             summary = (
                 f"Automated intelligence synthesis of {len(records)} recent SEBI adjudication orders reveals surveillance focus across "
                 f"front-running operations, settlement proceedings, and unregistered advisory networks. Total exposure: ₹{total_penalty:,.2f}."

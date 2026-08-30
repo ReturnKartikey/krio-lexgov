@@ -1,27 +1,27 @@
 import math
 import uuid
-from typing import Optional, List
-from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks
-from sqlalchemy import select, func, desc
+
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
+from sqlalchemy import desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import get_db, AsyncSessionLocal
-from app.db.models import IngestionRun, Source
-from app.etl.pipeline import ETLPipeline
 from app.api.schemas import (
     EnvelopeResponse,
-    PaginationMeta,
     IngestionRunItem,
+    PaginationMeta,
     SyncJobRequest,
     SyncJobResponse,
 )
+from app.core.database import AsyncSessionLocal, get_db
+from app.db.models import IngestionRun
+from app.etl.pipeline import ETLPipeline
 
 router = APIRouter(prefix="/jobs", tags=["Ingestion Jobs"])
 
 
-@router.get("", response_model=EnvelopeResponse[List[IngestionRunItem]])
+@router.get("", response_model=EnvelopeResponse[list[IngestionRunItem]])
 async def list_jobs(
-    status: Optional[str] = Query(None, description="Filter by status (queued, running, success, partial, failed)"),
+    status: str | None = Query(None, description="Filter by status (queued, running, success, partial, failed)"),
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
@@ -84,7 +84,7 @@ async def execute_background_sync(adapter_key: str, limit: int, incremental: boo
                 limit=limit,
                 incremental=incremental,
             )
-        except Exception as e:
+        except Exception:
             pass
 
 

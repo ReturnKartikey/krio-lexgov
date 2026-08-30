@@ -1,22 +1,22 @@
 import time
-import uuid
 import traceback
-from datetime import datetime, timezone
-from typing import Optional, Dict, Any
-from sqlalchemy import select, update, func
+import uuid
+from datetime import UTC, datetime
+
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.adapters.base import SourceAdapter
 from app.adapters.registry import registry
 from app.core.logging import logger
 from app.db.models import (
-    Source,
+    CrawlState,
+    Entity,
+    IngestionRun,
     RawDocument,
     Record,
-    Entity,
     RecordEntity,
-    IngestionRun,
-    CrawlState,
+    Source,
 )
 
 
@@ -25,7 +25,7 @@ class ETLPipeline:
 
     def __init__(self, adapter_key: str = "sebi_adjudication_orders"):
         self.adapter_key = adapter_key
-        self.adapter: Optional[SourceAdapter] = registry.get(adapter_key)
+        self.adapter: SourceAdapter | None = registry.get(adapter_key)
         if not self.adapter:
             raise ValueError(f"No source adapter registered for key: {adapter_key}")
 
@@ -74,7 +74,7 @@ class ETLPipeline:
         ingestion_run = IngestionRun(
             id=uuid.uuid4(),
             source_id=source.id,
-            started_at=datetime.now(timezone.utc),
+            started_at=datetime.now(UTC),
             status="running",
             triggered_by=triggered_by,
             records_seen=0,
@@ -116,7 +116,7 @@ class ETLPipeline:
                             source_id=source.id,
                             source_ref=raw_doc_payload.source_ref,
                             content_hash=raw_doc_payload.content_hash,
-                            fetched_at=datetime.now(timezone.utc),
+                            fetched_at=datetime.now(UTC),
                             http_status=raw_doc_payload.http_status,
                             mime_type=raw_doc_payload.mime_type,
                             raw_content=raw_doc_payload.text_content,
@@ -147,7 +147,7 @@ class ETLPipeline:
                         existing_record.source_url = normalized.source_url
                         existing_record.raw_metadata = normalized.raw_metadata
                         existing_record.raw_document_id = raw_doc.id
-                        existing_record.updated_at = datetime.now(timezone.utc)
+                        existing_record.updated_at = datetime.now(UTC)
                         record_obj = existing_record
                         ingestion_run.records_updated += 1
                     else:
@@ -185,7 +185,7 @@ class ETLPipeline:
                         existing_ent = res_ent.scalar_one_or_none()
 
                         if existing_ent:
-                            existing_ent.last_seen = datetime.now(timezone.utc)
+                            existing_ent.last_seen = datetime.now(UTC)
                             entity_obj = existing_ent
                         else:
                             entity_obj = Entity(
@@ -193,8 +193,8 @@ class ETLPipeline:
                                 name=ent_item.name,
                                 normalized_name=ent_item.normalized_name,
                                 entity_type=ent_item.entity_type,
-                                first_seen=datetime.now(timezone.utc),
-                                last_seen=datetime.now(timezone.utc),
+                                first_seen=datetime.now(UTC),
+                                last_seen=datetime.now(UTC),
                                 record_count=1,
                                 total_penalty_amount=0.0,
                             )
@@ -243,7 +243,7 @@ class ETLPipeline:
 
             # Update crawl state
             crawl_state.last_cursor = next_cursor
-            crawl_state.last_run_at = datetime.now(timezone.utc)
+            crawl_state.last_run_at = datetime.now(UTC)
             crawl_state.total_runs += 1
 
             # Finalize run status
@@ -253,7 +253,7 @@ class ETLPipeline:
 
             duration = round(time.monotonic() - start_time, 2)
             ingestion_run.status = status
-            ingestion_run.finished_at = datetime.now(timezone.utc)
+            ingestion_run.finished_at = datetime.now(UTC)
             ingestion_run.duration_seconds = duration
             ingestion_run.error_log = "\n".join(errors) if errors else None
             await db.commit()
@@ -269,7 +269,7 @@ class ETLPipeline:
             await db.rollback()
             duration = round(time.monotonic() - start_time, 2)
             ingestion_run.status = "failed"
-            ingestion_run.finished_at = datetime.now(timezone.utc)
+            ingestion_run.finished_at = datetime.now(UTC)
             ingestion_run.duration_seconds = duration
             ingestion_run.error_log = f"Pipeline execution failed: {e}\n{traceback.format_exc()}"
             await db.commit()

@@ -1,6 +1,6 @@
 import re
 import unicodedata
-from typing import List, Optional, Tuple, Dict, Any
+
 from app.adapters.base import ExtractedEntityItem
 
 # Strict Blacklist: Regulator, Courts, Stock Exchanges, and Boilerplate Legal Roles
@@ -221,7 +221,7 @@ def clean_entity_name(name: str) -> str:
     return s
 
 
-def parse_inr_amount(amount_str: str, multiplier_unit: Optional[str] = None) -> Optional[float]:
+def parse_inr_amount(amount_str: str, multiplier_unit: str | None = None) -> float | None:
     """Convert parsed INR string and unit into standard float value."""
     try:
         clean_str = amount_str.replace(",", "").strip()
@@ -245,9 +245,9 @@ def parse_inr_amount(amount_str: str, multiplier_unit: Optional[str] = None) -> 
         return None
 
 
-def extract_entities_from_text(title: str, body: str = "") -> List[ExtractedEntityItem]:
+def extract_entities_from_text(title: str, body: str = "") -> list[ExtractedEntityItem]:
     """Extract clean, structured entities strictly from title and matter declarations."""
-    entities_map: Dict[str, ExtractedEntityItem] = {}
+    entities_map: dict[str, ExtractedEntityItem] = {}
 
     # 1. Primary target: Check title matter patterns
     matter_matches = MATTER_REGEX.findall(title)
@@ -295,7 +295,7 @@ def extract_entities_from_text(title: str, body: str = "") -> List[ExtractedEnti
 
     # 4. Longest-match filter
     all_extracted = list(entities_map.values())
-    filtered: List[ExtractedEntityItem] = []
+    filtered: list[ExtractedEntityItem] = []
     for item in all_extracted:
         is_sub = any(
             item.name != other.name and item.name in other.name
@@ -327,14 +327,14 @@ def extract_entities_from_text(title: str, body: str = "") -> List[ExtractedEnti
     return filtered
 
 
-def extract_penalties(text: str, title: str = "") -> Optional[float]:
+def extract_penalties(text: str, title: str = "") -> float | None:
     """Find maximum penalty amount declared in order text, ensuring non-punitive exemption orders return None."""
     if title:
         title_lower = title.lower()
         if "exemption order" in title_lower or "revocation order" in title_lower:
             return None
 
-    amounts: List[float] = []
+    amounts: list[float] = []
     for match in PENALTY_REGEX.finditer(text):
         amt_str = match.group(1)
         unit_str = match.group(2)
@@ -344,7 +344,7 @@ def extract_penalties(text: str, title: str = "") -> Optional[float]:
     return max(amounts) if amounts else None
 
 
-def extract_location(text: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:
+def extract_location(text: str) -> tuple[str | None, str | None, str | None]:
     """Extract (Jurisdiction, State, City) from text."""
     lower_text = text.lower()
     for city_key, state_val in CITIES_STATE_MAP.items():
@@ -356,9 +356,9 @@ def extract_location(text: str) -> Tuple[Optional[str], Optional[str], Optional[
     return "Head Office, Mumbai", "Maharashtra", "Mumbai"
 
 
-def extract_regulations(text: str) -> List[str]:
+def extract_regulations(text: str) -> list[str]:
     """Extract relevant SEBI regulations and sections cited."""
-    regulations: List[str] = []
+    regulations: list[str] = []
     for m in REGULATIONS_REGEX.finditer(text):
         reg = m.group(1).strip()
         if reg not in regulations:

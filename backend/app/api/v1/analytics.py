@@ -1,26 +1,26 @@
-from datetime import datetime, timedelta, date, timezone
-from typing import List, Optional, Dict, Any, Tuple
+from datetime import date, timedelta
+
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy import select, func, desc, and_
+from sqlalchemy import and_, desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import get_db
-from app.db.models import Record, Entity, RecordEntity, IngestionRun
-from app.etl.deduplication import detect_near_duplicates
 from app.api.schemas import (
     DailyCount,
-    TrendsResponse,
-    TrendMetric,
+    DuplicateItemResponse,
     EntityFrequencyItem,
     GeoDistributionItem,
     ProcessingStatsResponse,
-    DuplicateItemResponse,
+    TrendMetric,
+    TrendsResponse,
 )
+from app.core.database import get_db
+from app.db.models import Entity, IngestionRun, Record, RecordEntity
+from app.etl.deduplication import detect_near_duplicates
 
 router = APIRouter(prefix="/analytics", tags=["Analytics"])
 
 
-@router.get("/records-per-day", response_model=List[DailyCount])
+@router.get("/records-per-day", response_model=list[DailyCount])
 async def get_records_per_day(
     days: int = Query(90, ge=7, le=365),
     db: AsyncSession = Depends(get_db),
@@ -83,7 +83,7 @@ async def get_trends(
     ent_res = await db.execute(ent_stmt)
     total_entities = ent_res.scalar_one() or 0
 
-    def calc_pct(cur: float, prev: float) -> Tuple[float, str]:
+    def calc_pct(cur: float, prev: float) -> tuple[float, str]:
         if prev == 0:
             return (100.0 if cur > 0 else 0.0, "up" if cur > 0 else "flat")
         pct = round(((cur - prev) / prev) * 100.0, 1)
@@ -137,7 +137,7 @@ async def get_trends(
     )
 
 
-@router.get("/entity-frequency", response_model=List[EntityFrequencyItem])
+@router.get("/entity-frequency", response_model=list[EntityFrequencyItem])
 async def get_entity_frequency(
     top: int = Query(20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
@@ -172,7 +172,7 @@ async def get_entity_frequency(
     ]
 
 
-@router.get("/geo-distribution", response_model=List[GeoDistributionItem])
+@router.get("/geo-distribution", response_model=list[GeoDistributionItem])
 async def get_geo_distribution(db: AsyncSession = Depends(get_db)):
     """Aggregate regulatory enforcement distribution across Indian states and jurisdictions."""
     stmt = (
@@ -268,7 +268,7 @@ async def get_processing_stats(db: AsyncSession = Depends(get_db)):
     )
 
 
-@router.get("/duplicates", response_model=List[DuplicateItemResponse])
+@router.get("/duplicates", response_model=list[DuplicateItemResponse])
 async def get_duplicates(
     threshold: float = Query(0.70, ge=0.5, le=1.0),
     db: AsyncSession = Depends(get_db),

@@ -1,28 +1,28 @@
 import math
 import uuid
-from typing import Optional, List
+
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import select, func, desc, asc
+from sqlalchemy import asc, desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.core.database import get_db
-from app.db.models import Entity, RecordEntity, Record
 from app.api.schemas import (
+    EntityDetailItem,
+    EntitySimple,
     EnvelopeResponse,
     PaginationMeta,
-    EntitySimple,
-    EntityDetailItem,
     RecordListItem,
 )
+from app.core.database import get_db
+from app.db.models import Entity, RecordEntity
 
 router = APIRouter(prefix="/entities", tags=["Entities"])
 
 
-@router.get("", response_model=EnvelopeResponse[List[EntitySimple]])
+@router.get("", response_model=EnvelopeResponse[list[EntitySimple]])
 async def list_entities(
-    q: Optional[str] = Query(None, description="Search entity by name or normalized name"),
-    entity_type: Optional[str] = Query(None, description="Filter by type (company, individual, intermediary)"),
+    q: str | None = Query(None, description="Search entity by name or normalized name"),
+    entity_type: str | None = Query(None, description="Filter by type (company, individual, intermediary)"),
     sort_by: str = Query("record_count", description="Sort by (record_count, total_penalty_amount, name)"),
     sort_order: str = Query("desc", description="Sort order (asc, desc)"),
     page: int = Query(1, ge=1),

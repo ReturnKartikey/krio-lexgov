@@ -1,20 +1,21 @@
 import uuid
-from datetime import datetime, date, timezone
-from typing import List, Optional, Any, Dict
+from datetime import UTC, date, datetime
+from typing import Any, Optional
+
 from sqlalchemy import (
-    String,
-    Text,
-    DateTime,
     Date,
-    Numeric,
-    Integer,
+    DateTime,
     ForeignKey,
     Index,
-    func,
+    Integer,
+    Numeric,
+    String,
+    Text,
 )
-from sqlalchemy.dialects.postgresql import UUID, JSONB, ARRAY, TSVECTOR
-from sqlalchemy.types import TypeDecorator
+from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.types import TypeDecorator
+
 from app.core.database import Base
 
 
@@ -144,15 +145,15 @@ class Source(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     base_url: Mapped[str] = mapped_column(String(1024), nullable=False)
     adapter_key: Mapped[str] = mapped_column(String(100), nullable=False, unique=True)
-    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False
+        DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False
     )
 
     # Relationships
-    raw_documents: Mapped[List["RawDocument"]] = relationship("RawDocument", back_populates="source", cascade="all, delete-orphan")
-    records: Mapped[List["Record"]] = relationship("Record", back_populates="source", cascade="all, delete-orphan")
-    ingestion_runs: Mapped[List["IngestionRun"]] = relationship("IngestionRun", back_populates="source", cascade="all, delete-orphan")
+    raw_documents: Mapped[list["RawDocument"]] = relationship("RawDocument", back_populates="source", cascade="all, delete-orphan")
+    records: Mapped[list["Record"]] = relationship("Record", back_populates="source", cascade="all, delete-orphan")
+    ingestion_runs: Mapped[list["IngestionRun"]] = relationship("IngestionRun", back_populates="source", cascade="all, delete-orphan")
     crawl_state: Mapped[Optional["CrawlState"]] = relationship("CrawlState", back_populates="source", uselist=False, cascade="all, delete-orphan")
 
 
@@ -168,12 +169,12 @@ class RawDocument(Base):
     source_ref: Mapped[str] = mapped_column(String(1024), nullable=False)
     content_hash: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     fetched_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False
+        DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False
     )
-    storage_path: Mapped[Optional[str]] = mapped_column(String(1024), nullable=True)
+    storage_path: Mapped[str | None] = mapped_column(String(1024), nullable=True)
     http_status: Mapped[int] = mapped_column(Integer, default=200, nullable=False)
     mime_type: Mapped[str] = mapped_column(String(100), default="text/html", nullable=False)
-    raw_content: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    raw_content: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Relationships
     source: Mapped["Source"] = relationship("Source", back_populates="raw_documents")
@@ -193,33 +194,33 @@ class Record(Base):
     source_id: Mapped[uuid.UUID] = mapped_column(
         SafeUUID, ForeignKey("sources.id", ondelete="CASCADE"), nullable=False, index=True
     )
-    raw_document_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+    raw_document_id: Mapped[uuid.UUID | None] = mapped_column(
         SafeUUID, ForeignKey("raw_documents.id", ondelete="SET NULL"), nullable=True, index=True
     )
     external_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     record_type: Mapped[str] = mapped_column(String(100), default="order", nullable=False, index=True)
     title: Mapped[str] = mapped_column(Text, nullable=False)
-    summary: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    entity_names: Mapped[List[str]] = mapped_column(SafeArray, default=list, nullable=False)
-    jurisdiction: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-    state: Mapped[Optional[str]] = mapped_column(String(100), nullable=True, index=True)
-    city: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
-    amount: Mapped[Optional[float]] = mapped_column(Numeric(18, 2), nullable=True)
+    summary: Mapped[str | None] = mapped_column(Text, nullable=True)
+    entity_names: Mapped[list[str]] = mapped_column(SafeArray, default=list, nullable=False)
+    jurisdiction: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    state: Mapped[str | None] = mapped_column(String(100), nullable=True, index=True)
+    city: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    amount: Mapped[float | None] = mapped_column(Numeric(18, 2), nullable=True)
     status: Mapped[str] = mapped_column(String(100), default="active", nullable=False, index=True)
-    published_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True, index=True)
+    published_date: Mapped[date | None] = mapped_column(Date, nullable=True, index=True)
     source_url: Mapped[str] = mapped_column(String(2048), nullable=False)
     ingested_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False
+        DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False
+        DateTime(timezone=True), default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC), nullable=False
     )
-    raw_metadata: Mapped[Dict[str, Any]] = mapped_column(SafeJSON, default=dict, nullable=False)
+    raw_metadata: Mapped[dict[str, Any]] = mapped_column(SafeJSON, default=dict, nullable=False)
 
     # Relationships
     source: Mapped["Source"] = relationship("Source", back_populates="records")
     raw_document: Mapped[Optional["RawDocument"]] = relationship("RawDocument", back_populates="record")
-    record_entities: Mapped[List["RecordEntity"]] = relationship(
+    record_entities: Mapped[list["RecordEntity"]] = relationship(
         "RecordEntity", back_populates="record", cascade="all, delete-orphan"
     )
 
@@ -238,13 +239,13 @@ class Entity(Base):
     name: Mapped[str] = mapped_column(String(512), nullable=False)
     normalized_name: Mapped[str] = mapped_column(String(512), nullable=False, index=True)
     entity_type: Mapped[str] = mapped_column(String(100), default="company", nullable=False, index=True)  # company, individual, intermediary
-    first_seen: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
-    last_seen: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
+    first_seen: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False)
+    last_seen: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False)
     record_count: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
     total_penalty_amount: Mapped[float] = mapped_column(Numeric(18, 2), default=0.0, nullable=False)
 
     # Relationships
-    record_links: Mapped[List["RecordEntity"]] = relationship(
+    record_links: Mapped[list["RecordEntity"]] = relationship(
         "RecordEntity", back_populates="entity", cascade="all, delete-orphan"
     )
 
@@ -282,16 +283,16 @@ class IngestionRun(Base):
         SafeUUID, ForeignKey("sources.id", ondelete="CASCADE"), nullable=False, index=True
     )
     started_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False
+        DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False
     )
-    finished_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     status: Mapped[str] = mapped_column(String(50), default="running", nullable=False, index=True)  # queued, running, success, partial, failed
     records_seen: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     records_added: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     records_updated: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     records_failed: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
-    duration_seconds: Mapped[Optional[float]] = mapped_column(Numeric(10, 2), nullable=True)
-    error_log: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    duration_seconds: Mapped[float | None] = mapped_column(Numeric(10, 2), nullable=True)
+    error_log: Mapped[str | None] = mapped_column(Text, nullable=True)
     triggered_by: Mapped[str] = mapped_column(String(100), default="scheduler", nullable=False)
 
     # Relationships
@@ -307,8 +308,8 @@ class CrawlState(Base):
     source_id: Mapped[uuid.UUID] = mapped_column(
         SafeUUID, ForeignKey("sources.id", ondelete="CASCADE"), nullable=False, unique=True
     )
-    last_cursor: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-    last_run_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_cursor: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    last_run_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     total_runs: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 
     # Relationships

@@ -1,13 +1,14 @@
 import time
-from fastapi import APIRouter, Depends
-from sqlalchemy import text, select, func
-from sqlalchemy.ext.asyncio import AsyncSession
-import redis.asyncio as aioredis
 
-from app.core.database import get_db
-from app.core.config import get_settings
-from app.db.models import Record, Entity
+import redis.asyncio as aioredis
+from fastapi import APIRouter, Depends
+from sqlalchemy import func, select, text
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.api.schemas import HealthResponse
+from app.core.config import get_settings
+from app.core.database import get_db
+from app.db.models import Entity, Record
 
 router = APIRouter(tags=["Health"])
 settings = get_settings()

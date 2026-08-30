@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from datetime import datetime, date
-from typing import List, Optional, Dict, Any, Tuple
+from datetime import date, datetime
+from typing import Any
 
 
 @dataclass
@@ -10,8 +10,8 @@ class RawRecordRef:
     external_id: str
     source_url: str
     title: str
-    published_date: Optional[date] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    published_date: date | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -22,8 +22,8 @@ class RawDocumentPayload:
     content_hash: str
     mime_type: str = "text/html"
     http_status: int = 200
-    storage_path: Optional[str] = None
-    text_content: Optional[str] = None
+    storage_path: str | None = None
+    text_content: str | None = None
 
 
 @dataclass
@@ -41,17 +41,17 @@ class NormalizedRecord:
     external_id: str
     record_type: str  # order, notice, case, adjudication
     title: str
-    summary: Optional[str]
-    entity_names: List[str]
-    jurisdiction: Optional[str]
-    state: Optional[str]
-    city: Optional[str]
-    amount: Optional[float]
+    summary: str | None
+    entity_names: list[str]
+    jurisdiction: str | None
+    state: str | None
+    city: str | None
+    amount: float | None
     status: str
-    published_date: Optional[date]
+    published_date: date | None
     source_url: str
-    raw_metadata: Dict[str, Any]
-    entities: List[ExtractedEntityItem] = field(default_factory=list)
+    raw_metadata: dict[str, Any]
+    entities: list[ExtractedEntityItem] = field(default_factory=list)
 
 
 class SourceAdapter(ABC):
@@ -84,10 +84,10 @@ class SourceAdapter(ABC):
     @abstractmethod
     async def discover(
         self,
-        since: Optional[datetime] = None,
-        cursor: Optional[str] = None,
+        since: datetime | None = None,
+        cursor: str | None = None,
         limit: int = 50,
-    ) -> Tuple[List[RawRecordRef], Optional[str]]:
+    ) -> tuple[list[RawRecordRef], str | None]:
         """
         Discover new or changed record references since the last sync cursor.
         Returns a tuple of (references, next_cursor).

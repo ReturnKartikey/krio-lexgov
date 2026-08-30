@@ -1,18 +1,21 @@
 import asyncio
+
 import httpx
-from sqlalchemy import select, func
-from app.core.database import AsyncSessionLocal
-from app.db.models import Record, Entity, RecordEntity, RawDocument, Source
+from sqlalchemy import select
+
+from app.api.v1.ai import SynthesisRequest, synthesize_regulatory_intelligence
 from app.api.v1.analytics import (
-    get_records_per_day,
-    get_trends,
+    get_duplicates,
     get_entity_frequency,
     get_geo_distribution,
     get_processing_stats,
-    get_duplicates,
+    get_records_per_day,
+    get_trends,
 )
-from app.api.v1.records import list_records, get_record_detail
-from app.api.v1.ai import synthesize_regulatory_intelligence, SynthesisRequest
+from app.api.v1.records import get_record_detail, list_records
+from app.core.database import AsyncSessionLocal
+from app.db.models import Entity, RawDocument, Record, RecordEntity
+
 
 async def run_full_system_audit():
     print("=" * 80)
@@ -26,7 +29,7 @@ async def run_full_system_audit():
         links = (await session.execute(select(RecordEntity))).scalars().all()
         raw_docs = (await session.execute(select(RawDocument))).scalars().all()
         
-        print(f"\n[1. DATABASE CORE COUNTS]")
+        print("\n[1. DATABASE CORE COUNTS]")
         print(f"  * Total Stored Records: {len(records)}")
         print(f"  * Total Distinct Entities: {len(entities)}")
         print(f"  * Total Graph Relational Links: {len(links)}")
@@ -49,7 +52,7 @@ async def run_full_system_audit():
             if not r.raw_document_id:
                 record_anomalies.append(f"Missing raw_document_id (SHA-256 provenance link) on record {r.id}")
                 
-        print(f"\n[2. RECORD INTEGRITY AUDIT]")
+        print("\n[2. RECORD INTEGRITY AUDIT]")
         if record_anomalies:
             print(f"  Found {len(record_anomalies)} anomalies:")
             for a in record_anomalies:
@@ -60,7 +63,7 @@ async def run_full_system_audit():
         # 2. ENTITY GRAPH AUDIT
         entity_anomalies = []
         for e in entities:
-            e_links = [l for l in links if l.entity_id == e.id]
+            e_links = [link for link in links if link.entity_id == e.id]
             if len(e_links) == 0:
                 entity_anomalies.append(f"Orphan entity with 0 links: {e.name}")
             if e.entity_type not in ('company', 'individual'):
@@ -68,7 +71,7 @@ async def run_full_system_audit():
             if e.name.isupper() and len(e.name.split()) > 2 and ("SECURITIES" in e.name or "EXCHANGE" in e.name):
                 entity_anomalies.append(f"Suspicious boilerplate entity name: '{e.name}'")
 
-        print(f"\n[3. ENTITY GRAPH AUDIT]")
+        print("\n[3. ENTITY GRAPH AUDIT]")
         if entity_anomalies:
             print(f"  Found {len(entity_anomalies)} entity anomalies:")
             for a in entity_anomalies:
@@ -77,7 +80,7 @@ async def run_full_system_audit():
             print(f"  ALL {len(entities)} Entities PASS validation: Zero orphan nodes, clean company/individual types, zero boilerplate leakages.")
 
         # 3. HTTP PROVENANCE AUDIT (HEAD check on URLs)
-        print(f"\n[4. LIVE HTTP 200 PROVENANCE CHECK (Sampling 5 records)]")
+        print("\n[4. LIVE HTTP 200 PROVENANCE CHECK (Sampling 5 records)]")
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
         async with httpx.AsyncClient(timeout=10.0, follow_redirects=True) as client:
             for r in records[:5]:
@@ -88,7 +91,7 @@ async def run_full_system_audit():
                     print(f"  * [HTTP ERR] {r.title[:45]}... -> {ex}")
 
         # 4. API ENDPOINTS INTEGRATION AUDIT
-        print(f"\n[5. CORE API ENDPOINTS EXECUTION AUDIT]")
+        print("\n[5. CORE API ENDPOINTS EXECUTION AUDIT]")
         
         # Test 1: get_records_per_day
         daily_res = await get_records_per_day(days=90, db=session)

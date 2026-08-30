@@ -1,37 +1,37 @@
 import math
 import uuid
 from datetime import date, datetime
-from typing import Optional, List
+
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import select, func, or_, desc, asc, cast, String
+from sqlalchemy import String, asc, cast, desc, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.core.database import get_db
-from app.db.models import Record, Entity, RecordEntity, RawDocument
 from app.api.schemas import (
+    EntitySimple,
     EnvelopeResponse,
     PaginationMeta,
-    RecordListItem,
-    RecordDetailItem,
     RawDocumentSimple,
-    EntitySimple,
+    RecordDetailItem,
+    RecordListItem,
 )
+from app.core.database import get_db
+from app.db.models import Record, RecordEntity
 
 router = APIRouter(prefix="/records", tags=["Records"])
 
 
-@router.get("", response_model=EnvelopeResponse[List[RecordListItem]])
+@router.get("", response_model=EnvelopeResponse[list[RecordListItem]])
 async def list_records(
-    q: Optional[str] = Query(None, description="Full-text search query across title, summary, and jurisdiction"),
-    state: Optional[str] = Query(None, description="Filter by state (e.g. Maharashtra, Delhi)"),
-    record_type: Optional[str] = Query(None, description="Filter by record type"),
-    status: Optional[str] = Query(None, description="Filter by status"),
-    entity: Optional[str] = Query(None, description="Filter by extracted entity name"),
-    date_from: Optional[date] = Query(None, description="Filter orders published on or after date"),
-    date_to: Optional[date] = Query(None, description="Filter orders published on or before date"),
-    min_amount: Optional[float] = Query(None, description="Filter minimum penalty amount (INR)"),
-    max_amount: Optional[float] = Query(None, description="Filter maximum penalty amount (INR)"),
+    q: str | None = Query(None, description="Full-text search query across title, summary, and jurisdiction"),
+    state: str | None = Query(None, description="Filter by state (e.g. Maharashtra, Delhi)"),
+    record_type: str | None = Query(None, description="Filter by record type"),
+    status: str | None = Query(None, description="Filter by status"),
+    entity: str | None = Query(None, description="Filter by extracted entity name"),
+    date_from: date | None = Query(None, description="Filter orders published on or after date"),
+    date_to: date | None = Query(None, description="Filter orders published on or before date"),
+    min_amount: float | None = Query(None, description="Filter minimum penalty amount (INR)"),
+    max_amount: float | None = Query(None, description="Filter maximum penalty amount (INR)"),
     sort_by: str = Query("published_date", description="Field to sort by (published_date, amount, ingested_at, title)"),
     sort_order: str = Query("desc", description="Sort order (asc, desc)"),
     page: int = Query(1, ge=1, description="Page number"),

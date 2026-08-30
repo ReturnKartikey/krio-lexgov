@@ -1,9 +1,10 @@
 import asyncio
 import time
 import urllib.robotparser
-from typing import Optional, Dict
 from urllib.parse import urlparse
+
 import httpx
+
 from app.core.logging import logger
 
 
@@ -44,10 +45,10 @@ class RobotsTxtValidator:
 
     def __init__(self, user_agent: str = "OpenGov-Bot/1.0"):
         self.user_agent = user_agent
-        self._parsers: Dict[str, urllib.robotparser.RobotFileParser] = {}
+        self._parsers: dict[str, urllib.robotparser.RobotFileParser] = {}
         self._lock = asyncio.Lock()
 
-    async def can_fetch(self, url: str, client: Optional[httpx.AsyncClient] = None) -> bool:
+    async def can_fetch(self, url: str, client: httpx.AsyncClient | None = None) -> bool:
         parsed = urlparse(url)
         host = f"{parsed.scheme}://{parsed.netloc}"
 

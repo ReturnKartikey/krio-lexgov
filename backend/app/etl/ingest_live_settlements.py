@@ -1,21 +1,21 @@
 import asyncio
-from datetime import datetime, date
 import hashlib
+import io
+import re
 import uuid
+from datetime import date, datetime
+
 import httpx
 from bs4 import BeautifulSoup
-import io
 from pypdf import PdfReader
-import re
-
 from sqlalchemy import select
+
 from app.core.database import AsyncSessionLocal
-from app.db.models import Source, Record, RawDocument, Entity, RecordEntity
+from app.db.models import RawDocument, Record, Source
 from app.etl.entity_extractor import (
     extract_entities_from_text,
     extract_location,
     extract_regulations,
-    normalize_entity_name,
 )
 
 headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}

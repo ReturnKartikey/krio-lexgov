@@ -1,10 +1,11 @@
 from fastapi import APIRouter
-from app.api.v1.records import router as records_router
-from app.api.v1.entities import router as entities_router
-from app.api.v1.analytics import router as analytics_router
-from app.api.v1.jobs import router as jobs_router
-from app.api.v1.health import router as health_router
+
 from app.api.v1.ai import router as ai_router
+from app.api.v1.analytics import router as analytics_router
+from app.api.v1.entities import router as entities_router
+from app.api.v1.health import router as health_router
+from app.api.v1.jobs import router as jobs_router
+from app.api.v1.records import router as records_router
 
 api_router = APIRouter()
 

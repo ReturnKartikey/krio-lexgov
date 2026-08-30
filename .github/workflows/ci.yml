@@ -53,7 +53,7 @@ jobs:
 
       - name: Backend Lint (Ruff)
         run: |
-          ruff check backend/app
+          ruff check backend/app --config backend/pyproject.toml
 
       - name: Run Alembic Migrations
         env:
