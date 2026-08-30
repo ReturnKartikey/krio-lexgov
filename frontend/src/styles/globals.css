@@ -28,7 +28,14 @@
 }
 
 html {
+  font-size: 16.5px;
   scroll-behavior: initial;
+}
+
+@media (min-width: 1024px) {
+  html {
+    font-size: 17px;
+  }
 }
 
 body {
