@@ -6,14 +6,14 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB:-opengov_db}
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d opengov_db"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -41,9 +41,9 @@ services:
     container_name: opengov_api
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-opengov_db}
-      SYNC_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-opengov_db}
-      REDIS_URL: redis://redis:6379/0
+      DATABASE_URL: ${DATABASE_URL}
+      SYNC_DATABASE_URL: ${SYNC_DATABASE_URL}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
       CRAWLER_DELAY_SECONDS: ${CRAWLER_DELAY_SECONDS:-1.0}
       CRAWLER_USER_AGENT: ${CRAWLER_USER_AGENT:-OpenGov-Bot/1.0 (+https://github.com/opengov/explorer)}
       ENABLE_SCHEDULER_ON_STARTUP: "true"
@@ -66,9 +66,9 @@ services:
     restart: unless-stopped
     command: ["python", "-m", "app.scheduler.runner"]
     environment:
-      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-opengov_db}
-      SYNC_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-opengov_db}
-      REDIS_URL: redis://redis:6379/0
+      DATABASE_URL: ${DATABASE_URL}
+      SYNC_DATABASE_URL: ${SYNC_DATABASE_URL}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
       CRAWLER_DELAY_SECONDS: ${CRAWLER_DELAY_SECONDS:-1.0}
       CRAWLER_USER_AGENT: ${CRAWLER_USER_AGENT:-OpenGov-Bot/1.0 (+https://github.com/opengov/explorer)}
       ENVIRONMENT: production

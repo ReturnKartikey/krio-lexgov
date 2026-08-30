@@ -11,8 +11,8 @@ class Settings(BaseSettings):
     DEBUG: bool = True
 
     # Database
-    DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/opengov_db"
-    SYNC_DATABASE_URL: str = "postgresql+psycopg://postgres:postgres@localhost:5432/opengov_db"
+    DATABASE_URL: str = "postgresql+asyncpg://postgres:change_me_in_env@localhost:5432/opengov_db"
+    SYNC_DATABASE_URL: str = "postgresql+psycopg://postgres:change_me_in_env@localhost:5432/opengov_db"
     DB_ECHO: bool = False
     DB_POOL_SIZE: int = 10
     DB_MAX_OVERFLOW: int = 20
