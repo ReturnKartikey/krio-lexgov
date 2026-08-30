@@ -83,7 +83,7 @@ export function Navbar() {
       .catch(() => setHealthStatus("degraded"));
   }, []);
 
-  // Scroll listener with RAF throttling and hysteresis to eliminate jitter
+  // Scroll listener with RAF throttling and balanced threshold for seamless forward and reverse morphing
   useEffect(() => {
     let ticking = false;
     const handleScroll = () => {
@@ -91,8 +91,8 @@ export function Navbar() {
         window.requestAnimationFrame(() => {
           const currentY = window.scrollY;
           setIsScrolled((prev) => {
-            if (!prev && currentY > 60) return true;
-            if (prev && currentY < 30) return false;
+            if (!prev && currentY > 40) return true;
+            if (prev && currentY <= 30) return false;
             return prev;
           });
           ticking = false;
@@ -162,48 +162,36 @@ export function Navbar() {
     <>
       {/* Dynamic Morphing Navigation Container */}
       <header
-        className={`sticky z-40 w-full transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] transform-gpu ${
-          isScrolled
-            ? "top-3 sm:top-4 px-4 sm:px-6 max-w-6xl xl:max-w-7xl"
-            : "top-0 px-6 sm:px-10 lg:px-12 max-w-[1400px]"
-        } mx-auto`}
+        className={`sticky top-0 z-40 w-full pointer-events-none transition-all duration-300 ease-out ${
+          isScrolled ? "pt-3.5 px-4 sm:px-6" : "pt-0 px-4 sm:px-6 lg:px-8"
+        }`}
       >
         <div
-          className={`w-full transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] transform-gpu flex items-center justify-between gap-4 select-none ${
+          className={`w-full max-w-7xl mx-auto pointer-events-auto transition-all duration-300 ease-out transform-gpu flex items-center justify-between gap-4 select-none ${
             isScrolled
-              ? "h-16 px-6 sm:px-8 rounded-full bg-white/90 backdrop-blur-xl border border-brivo-navy/12 shadow-[0_16px_36px_-8px_rgba(11,16,32,0.12)]"
-              : "h-20 sm:h-22 px-2 sm:px-4 rounded-none bg-transparent border-b border-transparent shadow-none"
+              ? "h-16 px-6 sm:px-8 rounded-full bg-white/95 backdrop-blur-xl border border-brivo-navy/12 shadow-[0_16px_36px_-8px_rgba(11,16,32,0.12)]"
+              : "h-20 px-4 sm:px-6 rounded-2xl bg-white/0 backdrop-blur-none border border-transparent shadow-none"
           }`}
         >
-          {/* Brand Monogram & Name */}
+          {/* Brand Monogram & Name - Invariant Coordinate System */}
           <Link href="/" className="flex items-center gap-3 group shrink-0">
             <div
-              className={`rounded-2xl border border-brivo-navy/15 bg-brivo-paper flex items-center justify-center text-brivo-navy group-hover:border-brivo-cyan group-hover:scale-105 transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] shadow-xs overflow-hidden p-1 ${
-                isScrolled ? "w-8.5 h-8.5" : "w-10.5 h-10.5"
-              }`}
+              className="w-9.5 h-9.5 rounded-xl border border-brivo-navy/15 bg-brivo-paper flex items-center justify-center text-brivo-navy group-hover:border-brivo-cyan group-hover:scale-105 transition-transform duration-300 shadow-xs overflow-hidden p-1 shrink-0"
             >
               <Image
                 src="/icon_logo.png"
                 alt="KRIO Icon"
-                width={38}
-                height={38}
+                width={36}
+                height={36}
                 className="w-full h-full object-contain"
                 priority
               />
             </div>
-            <div className="flex items-baseline gap-1.5">
-              <span
-                className={`font-bold tracking-tight text-brivo-navy font-sans transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                  isScrolled ? "text-base sm:text-lg" : "text-lg sm:text-xl"
-                }`}
-              >
+            <div className="flex items-baseline gap-1.5 shrink-0">
+              <span className="font-bold tracking-tight text-brivo-navy font-sans text-lg">
                 KRIO
               </span>
-              <span
-                className={`text-brivo-slate/70 font-mono font-medium tracking-wide transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                  isScrolled ? "text-xs" : "text-xs sm:text-sm font-semibold"
-                }`}
-              >
+              <span className="text-brivo-slate/70 font-mono font-medium tracking-wide text-xs">
                 .LEXGOV
               </span>
             </div>
@@ -212,7 +200,7 @@ export function Navbar() {
           {/* Center Navigation Links with Invariant Geometry & Horizontal Sliding Pill */}
           <nav
             ref={navRef}
-            className="relative hidden md:flex items-center gap-1.5 p-1.5 rounded-full bg-brivo-paper/70 border border-brivo-navy/10 shadow-2xs transition-colors duration-300 shrink-0"
+            className="relative hidden md:flex items-center gap-1.5 p-1.5 rounded-full bg-brivo-paper/80 border border-brivo-navy/10 shadow-2xs transition-colors duration-300 shrink-0"
           >
             {/* Absolute Horizontal-Only Animated Pill */}
             {indicator.ready && activeIndex !== -1 && (
@@ -264,16 +252,12 @@ export function Navbar() {
             })}
           </nav>
 
-          {/* Right Action Group */}
+          {/* Right Action Group - Invariant Heights & Alignment */}
           <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
             {/* AI Synthesizer Trigger Button */}
             <button
               onClick={() => setIsAiModalOpen(true)}
-              className={`rounded-full bg-brivo-paper hover:bg-brivo-mist/80 border border-brivo-navy/15 text-brivo-navy font-sans transition-all flex items-center shadow-2xs group hover:border-brivo-cyan active:scale-95 cursor-pointer ${
-                isScrolled
-                  ? "h-10 px-4 text-xs sm:text-sm gap-2"
-                  : "h-11 sm:h-12 px-4.5 sm:px-5 text-xs sm:text-sm gap-2.5 font-semibold"
-              }`}
+              className="h-10 px-4 rounded-full bg-brivo-paper hover:bg-brivo-mist/80 border border-brivo-navy/15 text-brivo-navy font-sans transition-all flex items-center shadow-2xs group hover:border-brivo-cyan active:scale-95 cursor-pointer text-xs sm:text-sm gap-2 font-semibold"
               title="Open AI Precedent & Risk Synthesizer (Cmd+K)"
             >
               <Sparkles className="w-4 h-4 text-brivo-cyan group-hover:rotate-12 transition-transform shrink-0" />
@@ -292,17 +276,11 @@ export function Navbar() {
             >
               <button
                 onClick={() => setShowTelemetryPopover(!showTelemetryPopover)}
-                className={`rounded-full bg-brivo-navy text-brivo-paper font-sans flex items-center transition-all shadow-sm hover:bg-brivo-navy/90 cursor-pointer ${
-                  isScrolled
-                    ? "h-10 px-4 text-xs sm:text-sm gap-2"
-                    : "h-11 sm:h-12 px-4.5 sm:px-5 text-xs sm:text-sm gap-2.5 font-semibold"
-                }`}
+                className="h-10 px-4 rounded-full bg-brivo-navy text-brivo-paper font-sans flex items-center transition-all shadow-sm hover:bg-brivo-navy/90 cursor-pointer text-xs sm:text-sm gap-2 font-semibold"
                 title="Live Registry Ingestion Telemetry"
               >
                 <span
-                  className={`rounded-full ${
-                    isScrolled ? "w-2 h-2" : "w-2.5 h-2.5"
-                  } ${
+                  className={`w-2 h-2 rounded-full ${
                     healthStatus === "healthy"
                       ? "bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.9)] animate-pulse"
                       : "bg-amber-400 animate-ping"
