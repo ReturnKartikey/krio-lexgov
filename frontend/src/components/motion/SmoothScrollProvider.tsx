@@ -17,11 +17,13 @@ export function SmoothScrollProvider({ children }: { children: React.ReactNode }
     gsap.registerPlugin(ScrollTrigger);
 
     const lenis = new Lenis({
-      lerp: 0.09, // Silky Linear-style fluid response
-      wheelMultiplier: 0.9,
-      touchMultiplier: 1.5,
+      duration: 1.15,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Silky Apple/Linear exponential ease-out
+      wheelMultiplier: 1.05,
+      touchMultiplier: 1.2,
       smoothWheel: true,
       syncTouch: false,
+      infinite: false,
     });
 
     lenisRef.current = lenis;

@@ -20,6 +20,10 @@
   --input: rgba(26, 35, 51, 0.12);
   --ring: #00c2d1;
   --radius: 0.375rem;
+
+  /* Fluid Motion Easings */
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-smooth: cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 * {
@@ -30,6 +34,7 @@
 html {
   font-size: 16.5px;
   scroll-behavior: initial;
+  scrollbar-gutter: stable;
 }
 
 @media (min-width: 1024px) {
@@ -47,13 +52,43 @@ body {
   overflow-x: hidden;
 }
 
-/* GPU Hardware Acceleration Utilities */
+/* Fluid Tactile Micro-Interactions */
+button, [role="button"], a {
+  transition-timing-function: var(--ease-expo);
+}
+
+button:active:not(:disabled), [role="button"]:active:not([aria-disabled="true"]) {
+  transform: scale(0.982);
+  transition-duration: 120ms;
+}
+
+input, select, textarea {
+  transition: border-color 0.25s var(--ease-expo), box-shadow 0.25s var(--ease-expo), background-color 0.2s ease;
+}
+
+/* GPU Hardware Acceleration & 120 FPS Compositing Utilities */
 .will-change-transform {
   will-change: transform;
 }
 .transform-gpu {
   transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
+}
+.gpu-accelerated {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+  will-change: transform;
+}
+
+/* Lightweight Off-Screen Virtualized Rendering */
+.render-optimized {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 120px;
+}
+.table-row-optimized {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 54px;
 }
 
 /* Lenis Smooth Scroll Rules */

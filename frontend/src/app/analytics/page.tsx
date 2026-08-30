@@ -35,24 +35,25 @@ import {
 } from "@/lib/api";
 import {
   TrendsResponse,
-  DayRecordCount,
-  EntityFrequency,
+  DailyCount,
+  EntityFrequencyItem,
   GeoDistributionItem,
-  DuplicateMatch,
-  ProcessingStats,
+  DuplicateItemResponse,
+  ProcessingStatsResponse,
 } from "@/lib/types";
 import { formatINR, formatDate } from "@/lib/utils";
+import { RollingNumber } from "@/components/ui/RollingNumber";
 
 export default function AnalyticsPage() {
   const [interval, setInterval] = useState<"week" | "month">("month");
   const [daysWindow, setDaysWindow] = useState<number>(90);
 
   const [trends, setTrends] = useState<TrendsResponse | null>(null);
-  const [dailyData, setDailyData] = useState<DayRecordCount[]>([]);
-  const [topEntities, setTopEntities] = useState<EntityFrequency[]>([]);
+  const [dailyData, setDailyData] = useState<DailyCount[]>([]);
+  const [topEntities, setTopEntities] = useState<EntityFrequencyItem[]>([]);
   const [geoData, setGeoData] = useState<GeoDistributionItem[]>([]);
-  const [duplicates, setDuplicates] = useState<DuplicateMatch[]>([]);
-  const [processingStats, setProcessingStats] = useState<ProcessingStats | null>(null);
+  const [duplicates, setDuplicates] = useState<DuplicateItemResponse[]>([]);
+  const [processingStats, setProcessingStats] = useState<ProcessingStatsResponse | null>(null);
   const [geoScope, setGeoScope] = useState<"head_office" | "regional">("head_office");
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -72,7 +73,7 @@ export default function AnalyticsPage() {
           getRecordsPerDay(daysWindow),
           getEntityFrequency(10),
           getGeoDistribution(),
-          getDuplicates(0.6),
+          getDuplicates(0.75),
           getProcessingStats(),
         ]);
 
@@ -185,9 +186,10 @@ export default function AnalyticsPage() {
               <Scale className="w-4 h-4 text-brivo-slate" />
             </div>
             <div className="flex items-baseline gap-3">
-              <span className="text-3xl font-bold font-mono text-brivo-navy">
-                {trends.total_orders_trend.current_value}
-              </span>
+              <RollingNumber
+                value={trends.total_orders_trend.current_value}
+                className="text-3xl font-bold font-mono text-brivo-navy"
+              />
               <span
                 className={`text-xs font-mono flex items-center gap-0.5 ${
                   trends.total_orders_trend.percentage_change >= 0 ? "text-emerald-600" : "text-rose-600"
@@ -215,9 +217,11 @@ export default function AnalyticsPage() {
             <div className="flex items-baseline gap-3">
               {trends.total_penalties_trend.current_value > 0 ? (
                 <>
-                  <span className="text-2xl font-bold font-mono text-brivo-navy">
-                    {formatINR(trends.total_penalties_trend.current_value)}
-                  </span>
+                  <RollingNumber
+                    value={trends.total_penalties_trend.current_value}
+                    formatAsINR
+                    className="text-2xl font-bold font-mono text-brivo-navy"
+                  />
                   <span
                     className={`text-xs font-mono flex items-center gap-0.5 ${
                       trends.total_penalties_trend.percentage_change >= 0 ? "text-emerald-600" : "text-rose-600"
@@ -256,9 +260,10 @@ export default function AnalyticsPage() {
               <Building2 className="w-4 h-4 text-brivo-slate" />
             </div>
             <div className="flex items-baseline gap-3">
-              <span className="text-3xl font-bold font-mono text-brivo-navy">
-                {trends.active_entities_trend.current_value}
-              </span>
+              <RollingNumber
+                value={trends.active_entities_trend.current_value}
+                className="text-3xl font-bold font-mono text-brivo-navy"
+              />
               <span className="text-xs font-mono text-emerald-600 flex items-center gap-0.5">
                 <TrendingUp className="w-3.5 h-3.5" />
                 <span>+12.5% expansion</span>
@@ -505,53 +510,53 @@ export default function AnalyticsPage() {
             <div className="space-y-3 text-xs font-mono pt-2">
               <div className="flex justify-between p-2 rounded bg-brivo-paper border border-brivo-navy/10">
                 <span className="text-brivo-slate">Total Crawl Runs</span>
-                <span className="text-brivo-navy font-medium">{processingStats.total_runs}</span>
+                <RollingNumber value={processingStats.total_runs} className="text-brivo-navy font-medium" />
               </div>
               <div className="flex justify-between p-2 rounded bg-brivo-paper border border-brivo-navy/10">
                 <span className="text-brivo-slate">Success Rate</span>
-                <span className="text-emerald-600 font-medium">{processingStats.success_rate_percent}%</span>
+                <RollingNumber value={processingStats.success_rate_percent} suffix="%" decimals={1} className="text-emerald-600 font-medium" />
               </div>
               <div className="flex justify-between p-2 rounded bg-brivo-paper border border-brivo-navy/10">
                 <span className="text-brivo-slate">Avg Execution Latency</span>
-                <span className="text-brivo-navy font-medium">{processingStats.average_duration_seconds}s</span>
+                <RollingNumber value={processingStats.average_duration_seconds} suffix="s" decimals={2} className="text-brivo-navy font-medium" />
               </div>
               <div className="flex justify-between p-2 rounded bg-brivo-paper border border-brivo-navy/10">
                 <span className="text-brivo-slate">Records Synchronized</span>
-                <span className="text-brivo-navy font-medium">{processingStats.total_records_ingested}</span>
+                <RollingNumber value={processingStats.total_records_ingested} className="text-brivo-navy font-medium" />
               </div>
             </div>
           )}
         </div>
 
-        {/* Near Duplicate Detection */}
+        {/* Semantically Similar Orders Detection */}
         <div className="lg:col-span-2 p-6 rounded-lg bg-white border border-brivo-navy/10 space-y-4 shadow-sm">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <h2 className="text-sm font-semibold text-brivo-navy flex items-center gap-2">
                 <Layers className="w-4 h-4 text-brivo-navy" />
-                <span>Near-Duplicate & Cross-Reference Detector</span>
+                <span>Semantically Similar Orders</span>
               </h2>
               <p className="text-xs text-brivo-slate">
-                Fuzzy similarity matches and multi-respondent linked proceedings.
+                Distinct regulatory proceedings exhibiting high semantic similarity in legal language, noticee clusters, and document structure.
               </p>
             </div>
             <span className="text-[0.65rem] font-mono px-2 py-0.5 rounded bg-brivo-paper border border-brivo-navy/15 text-brivo-slate">
-              {duplicates.length} Clusters Found
+              {duplicates.length} Related Pairs
             </span>
           </div>
 
           <div className="space-y-3 pt-2">
             {duplicates.length === 0 ? (
               <div className="text-center py-8 text-xs font-mono text-brivo-slate">
-                No duplicate or clustered proceedings detected above similarity threshold.
+                No cross-matter semantic clusters detected above similarity threshold.
               </div>
             ) : (
               duplicates.slice(0, 3).map((dup, idx) => (
                 <div
                   key={idx}
-                  className="p-3.5 rounded bg-brivo-paper border border-brivo-navy/10 space-y-2 text-xs"
+                  className="p-3.5 rounded bg-brivo-paper border border-brivo-navy/10 space-y-2.5 text-xs"
                 >
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-wrap items-center justify-between gap-1">
                     <span className="font-mono text-[0.65rem] px-2 py-0.5 rounded bg-brivo-mist border border-brivo-cyan/30 text-brivo-navy font-medium">
                       Similarity Score: {(dup.similarity_score * 100).toFixed(0)}%
                     </span>
@@ -570,6 +575,10 @@ export default function AnalyticsPage() {
                       <span className="truncate">{dup.duplicate_title}</span>
                     </div>
                   </div>
+
+                  <p className="text-[0.65rem] text-brivo-slate/75 font-mono leading-relaxed pt-1 border-t border-brivo-navy/5">
+                    High semantic similarity based on subject matter and document structure. This does not indicate that the proceedings are duplicates.
+                  </p>
                 </div>
               ))
             )}

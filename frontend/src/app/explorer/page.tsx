@@ -28,6 +28,7 @@ import { QuickLookModal } from "@/components/motion/QuickLookModal";
 import { getRecords } from "@/lib/api";
 import { RecordListItem, PaginationMeta } from "@/lib/types";
 import { formatINR, formatDate, truncateText } from "@/lib/utils";
+import { RollingNumber } from "@/components/ui/RollingNumber";
 
 const STATES = [
   "Maharashtra",
@@ -155,7 +156,7 @@ function ExplorerContent() {
         {/* View Switcher & Result Count */}
         <div className="flex items-center gap-3">
           <span className="text-xs font-mono text-brivo-slate">
-            Showing <strong className="text-brivo-navy">{meta.total}</strong> results
+            Showing <strong className="text-brivo-navy"><RollingNumber value={meta.total} /></strong> results
           </span>
 
           <div className="flex items-center border border-brivo-navy/15 rounded-md bg-white p-0.5 shadow-sm">

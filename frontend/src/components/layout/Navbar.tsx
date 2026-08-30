@@ -14,7 +14,7 @@ import {
   Sparkles,
   Activity,
 } from "lucide-react";
-import { getHealth, triggerSyncJob } from "@/lib/api";
+import { getHealth, triggerSyncJob, prefetchTab } from "@/lib/api";
 import Image from "next/image";
 import { IntelligenceModal } from "@/components/ai/IntelligenceModal";
 
@@ -28,6 +28,33 @@ export function Navbar() {
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const [showTelemetryPopover, setShowTelemetryPopover] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+
+  const telemetryRef = useRef<HTMLDivElement>(null);
+  const telemetryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleTelemetryEnter = () => {
+    if (telemetryTimeoutRef.current) clearTimeout(telemetryTimeoutRef.current);
+    setShowTelemetryPopover(true);
+  };
+
+  const handleTelemetryLeave = () => {
+    telemetryTimeoutRef.current = setTimeout(() => {
+      setShowTelemetryPopover(false);
+    }, 150);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (telemetryRef.current && !telemetryRef.current.contains(e.target as Node)) {
+        setShowTelemetryPopover(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      if (telemetryTimeoutRef.current) clearTimeout(telemetryTimeoutRef.current);
+    };
+  }, []);
 
   const navRef = useRef<HTMLElement>(null);
   const linkRefs = useRef<(HTMLAnchorElement | null)[]>([]);
@@ -56,16 +83,27 @@ export function Navbar() {
       .catch(() => setHealthStatus("degraded"));
   }, []);
 
-  // Scroll listener for dynamic morphing navigation (> 60px)
+  // Scroll listener with RAF throttling and hysteresis to eliminate jitter
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      const scrolled = window.scrollY > 60;
-      setIsScrolled(scrolled);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentY = window.scrollY;
+          setIsScrolled((prev) => {
+            if (!prev && currentY > 60) return true;
+            if (prev && currentY < 30) return false;
+            return prev;
+          });
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [pathname]);
+  }, []);
 
   // Synchronized indicator measurement
   const updateIndicator = useCallback(() => {
@@ -124,14 +162,14 @@ export function Navbar() {
     <>
       {/* Dynamic Morphing Navigation Container */}
       <header
-        className={`sticky z-40 w-full transition-[max-width,padding,top] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+        className={`sticky z-40 w-full transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] transform-gpu ${
           isScrolled
             ? "top-3 sm:top-4 px-4 sm:px-6 max-w-6xl xl:max-w-7xl"
             : "top-0 px-6 sm:px-10 lg:px-12 max-w-[1400px]"
         } mx-auto`}
       >
         <div
-          className={`w-full transition-[height,padding,background-color,border-radius,box-shadow,border-color] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center justify-between gap-4 select-none ${
+          className={`w-full transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] transform-gpu flex items-center justify-between gap-4 select-none ${
             isScrolled
               ? "h-16 px-6 sm:px-8 rounded-full bg-white/90 backdrop-blur-xl border border-brivo-navy/12 shadow-[0_16px_36px_-8px_rgba(11,16,32,0.12)]"
               : "h-20 sm:h-22 px-2 sm:px-4 rounded-none bg-transparent border-b border-transparent shadow-none"
@@ -140,7 +178,7 @@ export function Navbar() {
           {/* Brand Monogram & Name */}
           <Link href="/" className="flex items-center gap-3 group shrink-0">
             <div
-              className={`rounded-2xl border border-brivo-navy/15 bg-brivo-paper flex items-center justify-center text-brivo-navy group-hover:border-brivo-cyan group-hover:scale-105 transition-[width,height] duration-300 shadow-xs overflow-hidden p-1 ${
+              className={`rounded-2xl border border-brivo-navy/15 bg-brivo-paper flex items-center justify-center text-brivo-navy group-hover:border-brivo-cyan group-hover:scale-105 transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] shadow-xs overflow-hidden p-1 ${
                 isScrolled ? "w-8.5 h-8.5" : "w-10.5 h-10.5"
               }`}
             >
@@ -155,14 +193,14 @@ export function Navbar() {
             </div>
             <div className="flex items-baseline gap-1.5">
               <span
-                className={`font-bold tracking-tight text-brivo-navy font-sans transition-all duration-300 ${
+                className={`font-bold tracking-tight text-brivo-navy font-sans transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${
                   isScrolled ? "text-base sm:text-lg" : "text-lg sm:text-xl"
                 }`}
               >
                 KRIO
               </span>
               <span
-                className={`text-brivo-slate/70 font-mono font-medium tracking-wide transition-all ${
+                className={`text-brivo-slate/70 font-mono font-medium tracking-wide transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${
                   isScrolled ? "text-xs" : "text-xs sm:text-sm font-semibold"
                 }`}
               >
@@ -203,6 +241,8 @@ export function Navbar() {
                     linkRefs.current[index] = el;
                   }}
                   href={link.href}
+                  onMouseEnter={() => prefetchTab(link.href)}
+                  onFocus={() => prefetchTab(link.href)}
                   className="relative px-4 py-2 rounded-full text-xs sm:text-sm font-semibold font-sans flex items-center justify-center gap-2 select-none cursor-pointer whitespace-nowrap shrink-0 transition-colors"
                 >
                   <Icon
@@ -244,10 +284,14 @@ export function Navbar() {
             </button>
 
             {/* Live Registry Telemetry Beacon */}
-            <div className="relative">
+            <div
+              ref={telemetryRef}
+              className="relative"
+              onMouseEnter={handleTelemetryEnter}
+              onMouseLeave={handleTelemetryLeave}
+            >
               <button
                 onClick={() => setShowTelemetryPopover(!showTelemetryPopover)}
-                onMouseEnter={() => setShowTelemetryPopover(true)}
                 className={`rounded-full bg-brivo-navy text-brivo-paper font-sans flex items-center transition-all shadow-sm hover:bg-brivo-navy/90 cursor-pointer ${
                   isScrolled
                     ? "h-10 px-4 text-xs sm:text-sm gap-2"
@@ -273,7 +317,6 @@ export function Navbar() {
               {/* Telemetry Popover Menu */}
               {showTelemetryPopover && (
                 <div
-                  onMouseLeave={() => setShowTelemetryPopover(false)}
                   className="absolute right-0 top-full mt-2.5 w-64 p-4 rounded-2xl bg-white border border-brivo-navy/15 shadow-2xl z-50 space-y-3 font-mono text-xs animate-fade-in"
                 >
                   <div className="flex items-center justify-between border-b border-brivo-navy/10 pb-2">

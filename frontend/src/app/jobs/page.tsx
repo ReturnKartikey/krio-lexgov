@@ -61,6 +61,16 @@ export default function JobsPage() {
     }
   };
 
+  const formatTrigger = (trigger: string) => {
+    const t = trigger.toLowerCase().replace(/_/g, " ");
+    if (t.includes("bootstrap")) return "Initial Bootstrap";
+    if (t.includes("idempotency")) return "Idempotency Check";
+    if (t.includes("scheduler") || t.includes("periodic") || t.includes("cron")) return "Scheduled Cron";
+    if (t.includes("repeat_noticees") || t.includes("noticees")) return "Noticee Re-Index";
+    if (t.includes("manual") || t.includes("api")) return "Manual API";
+    return trigger.replace(/_/g, " ");
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "success":
@@ -113,7 +123,7 @@ export default function JobsPage() {
           <button
             onClick={() => handleTriggerSync(true)}
             disabled={isSyncing}
-            className="px-4 py-2 rounded-full bg-brivo-navy hover:bg-brivo-navy/90 text-brivo-paper text-xs font-medium tracking-wide transition-all shadow-sm disabled:opacity-50 flex items-center gap-2"
+            className="px-4 py-2 rounded-full bg-brivo-navy hover:bg-brivo-navy/90 text-brivo-paper text-xs font-medium tracking-wide transition-all shadow-sm disabled:opacity-50 flex items-center gap-2 cursor-pointer active:scale-95"
           >
             <Play className={`w-3.5 h-3.5 ${isSyncing ? "animate-spin text-brivo-cyan" : "text-brivo-cyan"}`} />
             <span>{isSyncing ? "Running Ingestion..." : "Run Incremental Sync"}</span>
@@ -122,7 +132,7 @@ export default function JobsPage() {
           <button
             onClick={() => handleTriggerSync(false)}
             disabled={isSyncing}
-            className="px-3.5 py-2 rounded-full bg-white hover:bg-brivo-paper border border-brivo-navy/15 text-xs font-mono text-brivo-navy transition-colors disabled:opacity-50 shadow-sm"
+            className="px-3.5 py-2 rounded-full bg-white hover:bg-brivo-paper border border-brivo-navy/15 text-xs font-mono text-brivo-navy transition-colors disabled:opacity-50 shadow-sm cursor-pointer active:scale-95"
           >
             Full Re-Sync
           </button>
@@ -132,7 +142,7 @@ export default function JobsPage() {
       {syncStatus && (
         <div className="p-3 rounded-lg bg-white border border-brivo-navy/15 text-xs font-mono text-brivo-navy flex items-center justify-between animate-fade-in shadow-sm">
           <span>{syncStatus}</span>
-          <button onClick={() => setSyncStatus(null)} className="text-brivo-slate hover:text-brivo-navy">
+          <button onClick={() => setSyncStatus(null)} className="text-brivo-slate hover:text-brivo-navy cursor-pointer">
             Dismiss
           </button>
         </div>
@@ -145,7 +155,7 @@ export default function JobsPage() {
             <tr>
               <th className="px-4 py-3">Run ID</th>
               <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3">Trigger</th>
+              <th className="px-4 py-3">Trigger Source</th>
               <th className="px-4 py-3">Started At</th>
               <th className="px-4 py-3 text-center">Seen</th>
               <th className="px-4 py-3 text-center">Added</th>
@@ -178,8 +188,10 @@ export default function JobsPage() {
                         {job.id.slice(0, 8)}...
                       </td>
                       <td className="px-4 py-3">{getStatusBadge(job.status)}</td>
-                      <td className="px-4 py-3 font-mono text-brivo-slate capitalize">
-                        {job.triggered_by.replace("_", " ")}
+                      <td className="px-4 py-3">
+                        <span className="inline-block px-2.5 py-0.5 rounded-full bg-brivo-paper border border-brivo-navy/10 font-mono text-[0.68rem] text-brivo-navy font-medium">
+                          {formatTrigger(job.triggered_by)}
+                        </span>
                       </td>
                       <td className="px-4 py-3 font-mono text-brivo-slate whitespace-nowrap">
                         {formatRelativeTime(job.started_at)}
@@ -187,14 +199,30 @@ export default function JobsPage() {
                       <td className="px-4 py-3 font-mono text-center text-brivo-navy">
                         {job.records_seen}
                       </td>
-                      <td className="px-4 py-3 font-mono text-center text-emerald-600 font-medium">
-                        +{job.records_added}
+                      <td className="px-4 py-3 font-mono text-center">
+                        {job.records_added > 0 ? (
+                          <span className="inline-block px-2 py-0.5 rounded bg-emerald-50 border border-emerald-200/80 text-emerald-700 font-semibold text-[0.7rem]">
+                            +{job.records_added}
+                          </span>
+                        ) : (
+                          <span className="text-brivo-slate/50 font-normal">+0</span>
+                        )}
                       </td>
-                      <td className="px-4 py-3 font-mono text-center text-brivo-navy font-medium">
-                        {job.records_updated}
+                      <td className="px-4 py-3 font-mono text-center">
+                        {job.records_updated > 0 ? (
+                          <span className="text-brivo-navy font-semibold">{job.records_updated}</span>
+                        ) : (
+                          <span className="text-brivo-slate/50 font-normal">0</span>
+                        )}
                       </td>
-                      <td className="px-4 py-3 font-mono text-center text-rose-600 font-medium">
-                        {job.records_failed}
+                      <td className="px-4 py-3 font-mono text-center">
+                        {job.records_failed > 0 ? (
+                          <span className="inline-block px-2 py-0.5 rounded bg-rose-50 border border-rose-200/80 text-rose-700 font-semibold text-[0.7rem]">
+                            {job.records_failed}
+                          </span>
+                        ) : (
+                          <span className="text-brivo-slate/50 font-normal">0</span>
+                        )}
                       </td>
                       <td className="px-4 py-3 font-mono text-right text-brivo-slate">
                         {job.duration_seconds !== null && job.duration_seconds !== undefined
@@ -204,7 +232,7 @@ export default function JobsPage() {
                       <td className="px-4 py-3 text-right">
                         <button
                           onClick={() => setExpandedJobId(isExpanded ? null : job.id)}
-                          className="p-1 rounded hover:bg-brivo-paper text-brivo-slate hover:text-brivo-navy transition-colors"
+                          className="p-1 rounded hover:bg-brivo-paper text-brivo-slate hover:text-brivo-navy transition-colors cursor-pointer"
                           title="View Execution Log"
                         >
                           {isExpanded ? (
