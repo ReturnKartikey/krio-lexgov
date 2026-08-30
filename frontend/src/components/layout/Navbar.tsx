@@ -3,58 +3,22 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion, LayoutGroup } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Search,
   BarChart3,
   Clock,
   Terminal,
-  RefreshCw,
-  ChevronDown,
   Sparkles,
-  Activity,
 } from "lucide-react";
-import { getHealth, triggerSyncJob, prefetchTab } from "@/lib/api";
+import { prefetchTab } from "@/lib/api";
 import Image from "next/image";
 import { IntelligenceModal } from "@/components/ai/IntelligenceModal";
 
 export function Navbar() {
   const pathname = usePathname();
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [healthStatus, setHealthStatus] = useState<string>("checking");
-  const [totalRecords, setTotalRecords] = useState<number>(35);
-  const [totalEntities, setTotalEntities] = useState<number>(612);
-  const [syncMessage, setSyncMessage] = useState<string | null>(null);
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
-  const [showTelemetryPopover, setShowTelemetryPopover] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-
-  const telemetryRef = useRef<HTMLDivElement>(null);
-  const telemetryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  const handleTelemetryEnter = () => {
-    if (telemetryTimeoutRef.current) clearTimeout(telemetryTimeoutRef.current);
-    setShowTelemetryPopover(true);
-  };
-
-  const handleTelemetryLeave = () => {
-    telemetryTimeoutRef.current = setTimeout(() => {
-      setShowTelemetryPopover(false);
-    }, 150);
-  };
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (telemetryRef.current && !telemetryRef.current.contains(e.target as Node)) {
-        setShowTelemetryPopover(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      if (telemetryTimeoutRef.current) clearTimeout(telemetryTimeoutRef.current);
-    };
-  }, []);
 
   const navRef = useRef<HTMLElement>(null);
   const linkRefs = useRef<(HTMLAnchorElement | null)[]>([]);
@@ -71,17 +35,9 @@ export function Navbar() {
     { href: "/api-explorer", label: "API Console", icon: Terminal },
   ];
 
-  const activeIndex = navLinks.findIndex((link) => pathname.startsWith(link.href));
-
-  useEffect(() => {
-    getHealth()
-      .then((data) => {
-        setHealthStatus(data.status);
-        if (data.total_records) setTotalRecords(data.total_records);
-        if (data.total_entities) setTotalEntities(data.total_entities);
-      })
-      .catch(() => setHealthStatus("degraded"));
-  }, []);
+  const activeIndex = navLinks.findIndex(
+    (link) => pathname.startsWith(link.href) || (link.href === "/explorer" && pathname === "/")
+  );
 
   // Scroll listener with RAF throttling and balanced threshold for seamless forward and reverse morphing
   useEffect(() => {
@@ -144,20 +100,6 @@ export function Navbar() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  const handleManualSync = async () => {
-    setIsSyncing(true);
-    setSyncMessage("Syncing...");
-    try {
-      const res = await triggerSyncJob({ incremental: true, limit: 20 });
-      setSyncMessage(`Synced (${res.status})`);
-    } catch (err: any) {
-      setSyncMessage("Failed");
-    } finally {
-      setIsSyncing(false);
-      setTimeout(() => setSyncMessage(null), 3000);
-    }
-  };
-
   return (
     <>
       {/* Dynamic Morphing Navigation Container */}
@@ -167,23 +109,23 @@ export function Navbar() {
         }`}
       >
         <div
-          className={`w-full max-w-7xl mx-auto pointer-events-auto transition-all duration-300 ease-out transform-gpu flex items-center justify-between gap-4 select-none ${
+          className={`w-full mx-auto pointer-events-auto transition-all duration-300 ease-out transform-gpu flex items-center justify-between gap-4 sm:gap-6 select-none ${
             isScrolled
-              ? "h-16 px-6 sm:px-8 rounded-full bg-white/95 backdrop-blur-xl border border-brivo-navy/12 shadow-[0_16px_36px_-8px_rgba(11,16,32,0.12)]"
-              : "h-20 px-4 sm:px-6 rounded-2xl bg-white/0 backdrop-blur-none border border-transparent shadow-none"
+              ? "max-w-[1040px] xl:max-w-5xl h-16 px-6 sm:px-7 rounded-full bg-white/95 backdrop-blur-xl border border-brivo-navy/12 shadow-[0_16px_36px_-8px_rgba(11,16,32,0.12)]"
+              : "max-w-7xl h-20 px-4 sm:px-6 rounded-2xl bg-white/0 backdrop-blur-none border border-transparent shadow-none"
           }`}
         >
           {/* Brand Monogram & Name - Invariant Coordinate System */}
           <Link href="/" className="flex items-center gap-3 group shrink-0">
             <div
-              className="w-9.5 h-9.5 rounded-xl border border-brivo-navy/15 bg-brivo-paper flex items-center justify-center text-brivo-navy group-hover:border-brivo-cyan group-hover:scale-105 transition-transform duration-300 shadow-xs overflow-hidden p-1 shrink-0"
+              className="w-9.5 h-9.5 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform duration-300 overflow-hidden shrink-0"
             >
               <Image
                 src="/icon_logo.png"
                 alt="KRIO Icon"
-                width={36}
-                height={36}
-                className="w-full h-full object-contain"
+                width={38}
+                height={38}
+                className="w-full h-full object-contain rounded-xl"
                 priority
               />
             </div>
@@ -221,7 +163,8 @@ export function Navbar() {
 
             {navLinks.map((link, index) => {
               const Icon = link.icon;
-              const isActive = pathname.startsWith(link.href);
+              const isActive =
+                pathname.startsWith(link.href) || (link.href === "/explorer" && pathname === "/");
               return (
                 <Link
                   key={link.href}
@@ -252,96 +195,19 @@ export function Navbar() {
             })}
           </nav>
 
-          {/* Right Action Group - Invariant Heights & Alignment */}
-          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
-            {/* AI Synthesizer Trigger Button */}
+          {/* Right Action Group - Synthesizer Action Pill */}
+          <div className="flex items-center shrink-0">
             <button
               onClick={() => setIsAiModalOpen(true)}
-              className="h-10 px-4 rounded-full bg-brivo-paper hover:bg-brivo-mist/80 border border-brivo-navy/15 text-brivo-navy font-sans transition-all flex items-center shadow-2xs group hover:border-brivo-cyan active:scale-95 cursor-pointer text-xs sm:text-sm gap-2 font-semibold"
+              className="h-10 px-4 rounded-full bg-brivo-paper/90 hover:bg-white border border-brivo-navy/10 hover:border-brivo-cyan/50 text-brivo-navy font-sans text-xs sm:text-sm font-semibold transition-all flex items-center gap-2.5 shadow-2xs group active:scale-95 cursor-pointer select-none"
               title="Open AI Precedent & Risk Synthesizer (Cmd+K)"
             >
               <Sparkles className="w-4 h-4 text-brivo-cyan group-hover:rotate-12 transition-transform shrink-0" />
-              <span className="hidden sm:inline font-semibold">Synthesize</span>
-              <kbd className="hidden sm:inline-flex items-center text-[0.7rem] px-2 py-0.5 rounded-md bg-white border border-brivo-navy/15 text-brivo-slate font-mono font-medium shadow-2xs">
+              <span className="font-semibold text-brivo-navy tracking-tight">Synthesize</span>
+              <kbd className="hidden sm:inline-flex items-center justify-center text-[0.65rem] px-2 py-0.5 rounded-md bg-white border border-brivo-navy/12 text-brivo-slate font-mono font-medium shadow-2xs">
                 ⌘K
               </kbd>
             </button>
-
-            {/* Live Registry Telemetry Beacon */}
-            <div
-              ref={telemetryRef}
-              className="relative"
-              onMouseEnter={handleTelemetryEnter}
-              onMouseLeave={handleTelemetryLeave}
-            >
-              <button
-                onClick={() => setShowTelemetryPopover(!showTelemetryPopover)}
-                className="h-10 px-4 rounded-full bg-brivo-navy text-brivo-paper font-sans flex items-center transition-all shadow-sm hover:bg-brivo-navy/90 cursor-pointer text-xs sm:text-sm gap-2 font-semibold"
-                title="Live Registry Ingestion Telemetry"
-              >
-                <span
-                  className={`w-2 h-2 rounded-full ${
-                    healthStatus === "healthy"
-                      ? "bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.9)] animate-pulse"
-                      : "bg-amber-400 animate-ping"
-                  }`}
-                />
-                <span className="font-semibold tracking-wider hidden sm:inline font-mono text-xs sm:text-[0.8rem]">
-                  {syncMessage ? syncMessage : "REGISTRY LIVE"}
-                </span>
-                <ChevronDown className="w-3.5 h-3.5 text-brivo-slate transition-transform shrink-0" />
-              </button>
-
-              {/* Telemetry Popover Menu */}
-              {showTelemetryPopover && (
-                <div
-                  className="absolute right-0 top-full mt-2.5 w-64 p-4 rounded-2xl bg-white border border-brivo-navy/15 shadow-2xl z-50 space-y-3 font-mono text-xs animate-fade-in"
-                >
-                  <div className="flex items-center justify-between border-b border-brivo-navy/10 pb-2">
-                    <span className="text-[0.65rem] text-brivo-slate uppercase font-bold">
-                      Registry Telemetry
-                    </span>
-                    <span className="text-[0.65rem] text-emerald-600 font-semibold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
-                      100% HEALTHY
-                    </span>
-                  </div>
-
-                  <div className="space-y-1.5 text-[0.7rem] text-brivo-navy">
-                    <div className="flex justify-between">
-                      <span className="text-brivo-slate">Indexed Orders:</span>
-                      <span className="font-semibold">{totalRecords} Records</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-brivo-slate">Extracted Entities:</span>
-                      <span className="font-semibold">{totalEntities} Noticees</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-brivo-slate">Crawler Rate Limit:</span>
-                      <span className="font-semibold">1.0 req/sec</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-brivo-slate">Scheduler:</span>
-                      <span className="font-semibold">6-Hour Cadence</span>
-                    </div>
-                  </div>
-
-                  <div className="pt-2 border-t border-brivo-navy/10">
-                    <button
-                      onClick={handleManualSync}
-                      disabled={isSyncing}
-                      className="w-full py-2 rounded-xl bg-brivo-navy hover:bg-brivo-navy/90 text-brivo-paper text-[0.7rem] font-semibold flex items-center justify-center gap-1.5 transition-all shadow-sm disabled:opacity-50 cursor-pointer"
-                    >
-                      <RefreshCw
-                        className={`w-3.5 h-3.5 ${
-                          isSyncing ? "animate-spin text-brivo-cyan" : "text-brivo-cyan"
-                        }`}
-                      />
-                      <span>{isSyncing ? "Syncing Feed..." : "Trigger Incremental Sync"}</span>
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
           </div>
         </div>
       </header>
