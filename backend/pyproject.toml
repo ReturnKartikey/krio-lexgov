@@ -40,3 +40,12 @@ target-version = "py312"
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
 ignore = ["E501", "B008", "B904", "UP046"]
+
+[tool.coverage.run]
+source = ["app"]
+omit = [
+    "app/etl/ingest_live_settlements.py",
+    "app/etl/reindex_entities.py",
+    "app/etl/system_audit.py",
+    "app/db/migrations/*",
+]
