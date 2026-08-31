@@ -20,6 +20,7 @@ import {
   Scale,
   Sparkles,
   Eye,
+  X,
 } from "lucide-react";
 import { MicroLabel } from "@/components/common/MicroLabel";
 import { HighlightedText } from "@/components/common/HighlightedText";
@@ -223,8 +224,21 @@ function ExplorerContent() {
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               placeholder="Search by respondent, company name, regulation (e.g. PFUTP, Insider Trading), or order number..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white border border-brivo-navy/15 focus:border-brivo-navy focus:ring-2 focus:ring-brivo-cyan/20 text-sm text-brivo-navy placeholder:text-brivo-slate/60 transition-all font-sans outline-none shadow-sm"
+              className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-white border border-brivo-navy/15 focus:border-brivo-navy focus:ring-2 focus:ring-brivo-cyan/20 text-sm text-brivo-navy placeholder:text-brivo-slate/60 transition-all font-sans outline-none shadow-sm"
             />
+            {searchInput && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchInput("");
+                  updateUrl({ q: undefined, page: 1 });
+                }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full text-brivo-slate hover:text-brivo-navy hover:bg-brivo-navy/10 transition-colors"
+                title="Clear search"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
 
           <div className="flex items-center gap-2 shrink-0">

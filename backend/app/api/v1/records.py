@@ -3,7 +3,7 @@ import uuid
 from datetime import date, datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import String, asc, cast, desc, func, or_, select
+from sqlalchemy import String, and_, asc, cast, desc, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -50,32 +50,68 @@ async def list_records(
 
     if isinstance(q, str) and q.strip():
         search_term = q.strip()
-        # Dialect agnostic search: uses ILIKE on title/summary or TSVector if on postgres
-        search_filter = or_(
+        tokens = [t for t in search_term.split() if len(t) > 1]
+        
+        # Base full-phrase match
+        full_phrase_filter = or_(
             Record.title.ilike(f"%{search_term}%"),
             Record.summary.ilike(f"%{search_term}%"),
             Record.jurisdiction.ilike(f"%{search_term}%"),
+            Record.external_id.ilike(f"%{search_term}%"),
             cast(Record.entity_names, String).ilike(f"%{search_term}%"),
         )
-        filters.append(search_filter)
+        
+        if len(tokens) > 1:
+            # Multi-token match: every word in query must match a field
+            token_filters = []
+            for tok in tokens:
+                token_filters.append(
+                    or_(
+                        Record.title.ilike(f"%{tok}%"),
+                        Record.summary.ilike(f"%{tok}%"),
+                        Record.jurisdiction.ilike(f"%{tok}%"),
+                        Record.external_id.ilike(f"%{tok}%"),
+                        cast(Record.entity_names, String).ilike(f"%{tok}%"),
+                    )
+                )
+            filters.append(or_(full_phrase_filter, and_(*token_filters)))
+        else:
+            filters.append(full_phrase_filter)
 
     if isinstance(state, str) and state.strip():
-        filters.append(Record.state.ilike(state.strip()))
+        filters.append(Record.state.ilike(f"%{state.strip()}%"))
 
     if isinstance(record_type, str) and record_type.strip():
-        filters.append(Record.record_type == record_type.strip())
+        filters.append(Record.record_type.ilike(record_type.strip()))
 
     if isinstance(status, str) and status.strip():
-        filters.append(Record.status == status.strip())
+        filters.append(Record.status.ilike(status.strip()))
 
     if isinstance(entity, str) and entity.strip():
         ent_term = entity.strip()
-        filters.append(
-            or_(
-                cast(Record.entity_names, String).ilike(f"%{ent_term}%"),
-                Record.title.ilike(f"%{ent_term}%"),
+        ent_tokens = [t for t in ent_term.split() if len(t) > 1]
+        if len(ent_tokens) > 1:
+            ent_token_filters = [
+                or_(
+                    cast(Record.entity_names, String).ilike(f"%{tok}%"),
+                    Record.title.ilike(f"%{tok}%"),
+                )
+                for tok in ent_tokens
+            ]
+            filters.append(
+                or_(
+                    cast(Record.entity_names, String).ilike(f"%{ent_term}%"),
+                    Record.title.ilike(f"%{ent_term}%"),
+                    and_(*ent_token_filters),
+                )
             )
-        )
+        else:
+            filters.append(
+                or_(
+                    cast(Record.entity_names, String).ilike(f"%{ent_term}%"),
+                    Record.title.ilike(f"%{ent_term}%"),
+                )
+            )
 
     if isinstance(date_from, (date, datetime)):
         filters.append(Record.published_date >= date_from)
@@ -137,16 +173,25 @@ async def list_records(
 
 @router.get("/{record_id}", response_model=RecordDetailItem)
 async def get_record_detail(
-    record_id: uuid.UUID,
+    record_id: str,
     db: AsyncSession = Depends(get_db),
 ):
     """
     Retrieve full normalized record details including raw document hash,
     traceable source URL, and linked entity graph.
+    Supports lookup by UUID (internal ID) or External Citation ID (e.g. SEBI-xxx).
     """
+    clean_id = record_id.strip()
+    id_filter = None
+    try:
+        val = uuid.UUID(clean_id)
+        id_filter = or_(Record.id == val, Record.external_id.ilike(clean_id))
+    except (ValueError, AttributeError):
+        id_filter = Record.external_id.ilike(clean_id)
+
     stmt = (
         select(Record)
-        .where(Record.id == record_id)
+        .where(id_filter)
         .options(
             selectinload(Record.raw_document),
             selectinload(Record.record_entities).selectinload(RecordEntity.entity),

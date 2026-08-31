@@ -1,11 +1,10 @@
-import pytest
 from app.etl.entity_extractor import (
+    extract_entities_from_text,
+    extract_location,
+    extract_penalties,
+    extract_regulations,
     normalize_entity_name,
     parse_inr_amount,
-    extract_entities_from_text,
-    extract_penalties,
-    extract_location,
-    extract_regulations,
 )
 
 

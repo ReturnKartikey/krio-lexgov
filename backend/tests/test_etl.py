@@ -1,8 +1,8 @@
 import pytest
-from sqlalchemy import select, func
-from app.etl.pipeline import ETLPipeline
+from app.db.models import Entity, Record
 from app.etl.deduplication import detect_near_duplicates
-from app.db.models import Record, Entity, RawDocument, IngestionRun
+from app.etl.pipeline import ETLPipeline
+from sqlalchemy import func, select
 
 
 @pytest.mark.asyncio

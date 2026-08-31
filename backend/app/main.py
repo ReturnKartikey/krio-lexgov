@@ -85,10 +85,10 @@ async def custom_swagger_ui_html():
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KRIO // OpenAPI Specification 3.1</title>
-  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/ReturnKartikey/krio-lexgov/main/icon_logo.png" />
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/ReturnKartikey/krio-lexgov/main/frontend/public/icon_logo.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.11.0/swagger-ui.css" />
   <style>
     :root {
@@ -126,10 +126,11 @@ async def custom_swagger_ui_html():
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border-bottom: 1px solid rgba(26, 35, 51, 0.10);
-      padding: 14px 28px;
+      padding: 12px 28px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      box-shadow: 0 1px 3px rgba(11, 16, 32, 0.03);
     }
     
     .krio-brand {
@@ -144,26 +145,22 @@ async def custom_swagger_ui_html():
       width: 32px;
       height: 32px;
       border-radius: 8px;
-      background: #1a2333;
-      color: #faf8fc;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-family: 'Playfair Display', serif;
-      font-style: italic;
-      font-weight: 700;
-      font-size: 16px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(11, 16, 32, 0.12);
     }
     
     .krio-brand-text {
       font-weight: 700;
-      font-size: 16px;
+      font-size: 15px;
       letter-spacing: -0.02em;
     }
     
     .krio-brand-sub {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
+      font-size: 11px;
       color: #98a2b3;
       font-weight: 500;
     }
@@ -171,7 +168,7 @@ async def custom_swagger_ui_html():
     .krio-nav-links {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
     
     .krio-nav-btn {
@@ -184,22 +181,26 @@ async def custom_swagger_ui_html():
       display: flex;
       align-items: center;
       gap: 6px;
+      font-weight: 500;
     }
     
     .krio-nav-btn-secondary {
-      background: #faf8fc;
+      background: #ffffff;
       color: #1a2333;
       border: 1px solid rgba(26, 35, 51, 0.12);
+      box-shadow: 0 1px 2px rgba(11, 16, 32, 0.04);
     }
     .krio-nav-btn-secondary:hover {
-      background: #ffffff;
+      background: #faf8fc;
       border-color: #00c2d1;
+      color: #0e7490;
     }
     
     .krio-nav-btn-primary {
       background: #1a2333;
       color: #faf8fc;
       border: 1px solid #1a2333;
+      box-shadow: 0 1px 3px rgba(11, 16, 32, 0.15);
     }
     .krio-nav-btn-primary:hover {
       background: #0b1020;
@@ -209,7 +210,7 @@ async def custom_swagger_ui_html():
     .swagger-ui {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 24px 24px 80px 24px;
+      padding: 28px 24px 80px 24px;
       font-family: 'Inter', sans-serif;
     }
 
@@ -218,15 +219,24 @@ async def custom_swagger_ui_html():
     }
 
     .swagger-ui .info {
-      margin: 20px 0 36px 0;
+      margin: 12px 0 36px 0;
+      background: #ffffff;
+      border: 1px solid rgba(26, 35, 51, 0.08);
+      border-radius: 16px;
+      padding: 28px 32px;
+      box-shadow: 0 2px 8px rgba(11, 16, 32, 0.03);
     }
 
     .swagger-ui .info .title {
       font-family: 'Inter', sans-serif;
-      font-weight: 300;
-      font-size: 34px;
+      font-weight: 400;
+      font-size: 28px;
       letter-spacing: -0.03em;
       color: #1a2333;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
     }
 
     .swagger-ui .info .title small {
@@ -235,55 +245,95 @@ async def custom_swagger_ui_html():
       font-family: 'JetBrains Mono', monospace;
       font-size: 11px;
       font-weight: 600;
-      padding: 3px 8px;
-      border-radius: 6px;
-      border: 1px solid rgba(0, 194, 209, 0.3);
+      padding: 3px 10px;
+      border-radius: 9999px;
+      border: 1px solid rgba(0, 194, 209, 0.35);
       vertical-align: middle;
-      margin-left: 10px;
     }
 
     .swagger-ui .info p {
-      font-size: 14px;
-      line-height: 1.6;
-      color: #98a2b3;
+      font-size: 13.5px;
+      line-height: 1.7;
+      color: #475467;
       font-family: 'Inter', sans-serif;
+      margin-top: 12px;
+    }
+
+    /* Custom Filter / Search Input */
+    .swagger-ui .filter-wrapper {
+      padding: 0 0 24px 0;
+      margin-bottom: 24px;
+      border-bottom: 1px solid rgba(26, 35, 51, 0.08);
+    }
+
+    .swagger-ui .filter-wrapper .operation-filter-input {
+      width: 100%;
+      padding: 12px 20px 12px 42px;
+      background-color: #ffffff;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2398a2b3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'%3E%3C/line%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: 14px center;
+      border: 1px solid rgba(26, 35, 51, 0.15);
+      border-radius: 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      color: #1a2333;
+      box-shadow: 0 1px 3px rgba(11, 16, 32, 0.04);
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .swagger-ui .filter-wrapper .operation-filter-input:focus {
+      border-color: #00c2d1;
+      box-shadow: 0 0 0 3px rgba(0, 194, 209, 0.18), 0 2px 8px rgba(11, 16, 32, 0.06);
+    }
+
+    .swagger-ui .filter-wrapper .operation-filter-input::placeholder {
+      color: #98a2b3;
     }
 
     /* Scheme & Server bar */
     .swagger-ui .scheme-container {
       background: #ffffff;
-      border: 1px solid rgba(26, 35, 51, 0.10);
+      border: 1px solid rgba(26, 35, 51, 0.08);
       border-radius: 12px;
-      box-shadow: 0 1px 3px rgba(11, 16, 32, 0.04);
-      padding: 16px 20px;
-      margin-bottom: 28px;
+      box-shadow: 0 1px 3px rgba(11, 16, 32, 0.03);
+      padding: 14px 20px;
+      margin-bottom: 24px;
     }
 
     /* Operation Tags */
     .swagger-ui .opblock-tag {
       font-family: 'Inter', sans-serif;
       font-weight: 600;
-      font-size: 18px;
+      font-size: 17px;
       color: #1a2333;
-      border-bottom: 1px solid rgba(26, 35, 51, 0.10);
+      border-bottom: 1px solid rgba(26, 35, 51, 0.08);
       padding-bottom: 10px;
       margin-top: 32px;
+    }
+
+    .swagger-ui .opblock-tag small {
+      font-size: 12px;
+      color: #98a2b3;
+      font-weight: 400;
+      margin-left: 8px;
     }
 
     /* Operation Cards */
     .swagger-ui .opblock {
       background: #ffffff;
-      border: 1px solid rgba(26, 35, 51, 0.10);
-      border-radius: 14px;
-      box-shadow: 0 1px 4px rgba(11, 16, 32, 0.03);
-      margin: 0 0 14px 0;
+      border: 1px solid rgba(26, 35, 51, 0.09);
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(11, 16, 32, 0.02);
+      margin: 0 0 12px 0;
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
       overflow: hidden;
     }
 
     .swagger-ui .opblock:hover {
-      border-color: rgba(26, 35, 51, 0.25);
-      box-shadow: 0 6px 20px -4px rgba(11, 16, 32, 0.07);
+      border-color: rgba(26, 35, 51, 0.22);
+      box-shadow: 0 4px 16px -2px rgba(11, 16, 32, 0.06);
       transform: translateY(-1px);
     }
 
@@ -301,7 +351,7 @@ async def custom_swagger_ui_html():
     .swagger-ui .opblock .opblock-summary-description {
       font-family: 'Inter', sans-serif;
       font-size: 12px;
-      color: #98a2b3;
+      color: #667085;
     }
 
     /* Method Badges */
@@ -363,7 +413,7 @@ async def custom_swagger_ui_html():
 
     .swagger-ui .opblock-section-header {
       background: #faf8fc;
-      padding: 8px 12px;
+      padding: 8px 14px;
       border-radius: 8px;
       border: 1px solid rgba(26, 35, 51, 0.06);
     }
@@ -448,15 +498,20 @@ async def custom_swagger_ui_html():
     .swagger-ui .microlight {
       font-family: 'JetBrains Mono', monospace !important;
       font-size: 12px !important;
-      background: #0b1020 !important;
-      color: #d9f5f8 !important;
+      color: #faf8fc !important;
     }
 
-    /* Models Section */
+    .swagger-ui .model-box {
+      background: #faf8fc;
+      border-radius: 8px;
+      padding: 12px;
+      border: 1px solid rgba(26, 35, 51, 0.08);
+    }
+
     .swagger-ui section.models {
-      border: 1px solid rgba(26, 35, 51, 0.10);
-      border-radius: 14px;
       background: #ffffff;
+      border: 1px solid rgba(26, 35, 51, 0.08);
+      border-radius: 16px;
       box-shadow: 0 1px 4px rgba(11, 16, 32, 0.03);
       margin-top: 36px;
     }
@@ -472,15 +527,17 @@ async def custom_swagger_ui_html():
 </head>
 <body>
   <header class="krio-header">
-    <a href="http://localhost:3001" class="krio-brand">
-      <div class="krio-logo-badge">K</div>
+    <a href="https://krio-rust.vercel.app" class="krio-brand" target="_blank" rel="noopener noreferrer">
+      <div class="krio-logo-badge">
+        <img src="https://raw.githubusercontent.com/ReturnKartikey/krio-lexgov/main/frontend/public/icon_logo.png" alt="KRIO Emblem" style="width: 32px; height: 32px; object-fit: contain;" />
+      </div>
       <div>
         <span class="krio-brand-text">KRIO</span>
         <span class="krio-brand-sub">.LEXGOV</span>
       </div>
     </a>
     <div class="krio-nav-links">
-      <a href="http://localhost:3001/api-explorer" class="krio-nav-btn krio-nav-btn-secondary">Interactive Console</a>
+      <a href="https://krio-rust.vercel.app/api-explorer" target="_blank" rel="noopener noreferrer" class="krio-nav-btn krio-nav-btn-secondary">Interactive Console</a>
       <a href="/api/openapi.json" target="_blank" class="krio-nav-btn krio-nav-btn-primary">OpenAPI JSON</a>
     </div>
   </header>

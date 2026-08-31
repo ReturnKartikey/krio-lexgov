@@ -1,6 +1,6 @@
 import pytest
+from app.adapters.base import RawDocumentPayload, RawRecordRef
 from app.adapters.sebi_orders import SEBIOrdersAdapter
-from app.adapters.base import RawRecordRef, RawDocumentPayload
 
 
 @pytest.mark.asyncio

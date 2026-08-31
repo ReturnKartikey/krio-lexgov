@@ -30,16 +30,19 @@ async def list_jobs(
     stmt = select(IngestionRun)
     count_stmt = select(func.count(IngestionRun.id))
 
-    if status and status.strip():
+    if isinstance(status, str) and status.strip():
         stmt = stmt.where(IngestionRun.status == status.strip().lower())
         count_stmt = count_stmt.where(IngestionRun.status == status.strip().lower())
 
     total_res = await db.execute(count_stmt)
     total_count = total_res.scalar_one() or 0
 
+    p_num = page if isinstance(page, int) else 1
+    p_size = page_size if isinstance(page_size, int) else 20
+
     stmt = stmt.order_by(desc(IngestionRun.started_at))
-    offset = (page - 1) * page_size
-    stmt = stmt.offset(offset).limit(page_size)
+    offset = (p_num - 1) * p_size
+    stmt = stmt.offset(offset).limit(p_size)
 
     result = await db.execute(stmt)
     runs = result.scalars().all()

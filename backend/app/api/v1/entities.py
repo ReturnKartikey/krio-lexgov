@@ -2,7 +2,7 @@ import math
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import asc, desc, func, select
+from sqlalchemy import asc, desc, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -33,30 +33,35 @@ async def list_entities(
     stmt = select(Entity)
     count_stmt = select(func.count(Entity.id))
 
-    if q and q.strip():
+    if isinstance(q, str) and q.strip():
         term = q.strip().lower()
-        search_filter = Entity.normalized_name.ilike(f"%{term}%")
+        search_filter = or_(Entity.normalized_name.ilike(f"%{term}%"), Entity.name.ilike(f"%{term}%"))
         stmt = stmt.where(search_filter)
         count_stmt = count_stmt.where(search_filter)
 
-    if entity_type and entity_type.strip():
+    if isinstance(entity_type, str) and entity_type.strip():
         stmt = stmt.where(Entity.entity_type == entity_type.strip().lower())
         count_stmt = count_stmt.where(Entity.entity_type == entity_type.strip().lower())
 
     total_res = await db.execute(count_stmt)
     total_count = total_res.scalar_one() or 0
 
-    order_func = desc if sort_order.lower() == "desc" else asc
+    s_order = sort_order if isinstance(sort_order, str) else "desc"
+    s_by = sort_by if isinstance(sort_by, str) else "record_count"
+    p_num = page if isinstance(page, int) else 1
+    p_size = page_size if isinstance(page_size, int) else 20
+
+    order_func = desc if s_order.lower() == "desc" else asc
     sort_column = Entity.record_count
-    if sort_by == "total_penalty_amount":
+    if s_by == "total_penalty_amount":
         sort_column = Entity.total_penalty_amount
-    elif sort_by == "name":
+    elif s_by == "name":
         sort_column = Entity.name
 
     stmt = stmt.order_by(order_func(sort_column))
 
-    offset = (page - 1) * page_size
-    stmt = stmt.offset(offset).limit(page_size)
+    offset = (p_num - 1) * p_size
+    stmt = stmt.offset(offset).limit(p_size)
 
     result = await db.execute(stmt)
     entities = result.scalars().all()
@@ -86,13 +91,24 @@ async def list_entities(
 
 @router.get("/{entity_id}", response_model=EntityDetailItem)
 async def get_entity_detail(
-    entity_id: uuid.UUID,
+    entity_id: str,
     db: AsyncSession = Depends(get_db),
 ):
-    """Retrieve comprehensive entity dossier with linked historical orders and penalty sums."""
+    """
+    Retrieve comprehensive entity dossier with linked historical orders and penalty sums.
+    Supports lookup by UUID or entity name.
+    """
+    clean_id = entity_id.strip()
+    id_filter = None
+    try:
+        val = uuid.UUID(clean_id)
+        id_filter = or_(Entity.id == val, Entity.name.ilike(clean_id), Entity.normalized_name.ilike(clean_id.lower()))
+    except (ValueError, AttributeError):
+        id_filter = or_(Entity.name.ilike(clean_id), Entity.normalized_name.ilike(clean_id.lower()))
+
     stmt = (
         select(Entity)
-        .where(Entity.id == entity_id)
+        .where(id_filter)
         .options(
             selectinload(Entity.record_links).selectinload(RecordEntity.record)
         )
