@@ -2,7 +2,7 @@ import uuid
 from datetime import date, datetime
 from typing import Any, Generic, TypeVar
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 T = TypeVar("T")
 
@@ -66,6 +66,19 @@ class RecordDetailItem(RecordListItem):
     raw_metadata: dict[str, Any] = {}
     raw_document: RawDocumentSimple | None = None
     entities: list[EntitySimple] = []
+
+    @field_validator("raw_metadata", mode="before")
+    @classmethod
+    def parse_raw_metadata(cls, v):
+        if isinstance(v, str):
+            try:
+                import json
+                return json.loads(v)
+            except Exception:
+                return {}
+        if v is None:
+            return {}
+        return v
 
     model_config = ConfigDict(from_attributes=True)
 

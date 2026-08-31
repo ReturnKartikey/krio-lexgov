@@ -222,6 +222,16 @@ async def get_record_detail(
                 )
                 entities_list.append(ent_dto)
 
+    raw_meta = record.raw_metadata
+    if isinstance(raw_meta, str):
+        try:
+            import json
+            raw_meta = json.loads(raw_meta)
+        except Exception:
+            raw_meta = {}
+    elif not isinstance(raw_meta, dict):
+        raw_meta = {}
+
     return RecordDetailItem(
         id=record.id,
         source_id=record.source_id,
@@ -238,7 +248,7 @@ async def get_record_detail(
         published_date=record.published_date,
         source_url=record.source_url,
         ingested_at=record.ingested_at,
-        raw_metadata=record.raw_metadata or {},
+        raw_metadata=raw_meta,
         raw_document=raw_doc_simple,
         entities=entities_list,
     )

@@ -62,14 +62,14 @@ class SafeJSON(TypeDecorator):
     def process_result_value(self, value, dialect):
         import json
         if value is None:
-            return None
-        if dialect.name == "postgresql":
-            return value
+            return {}
         if isinstance(value, str):
             try:
                 return json.loads(value)
             except Exception:
-                return value
+                return {}
+        if isinstance(value, dict):
+            return value
         return value
 
 
