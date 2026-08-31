@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
@@ -146,8 +147,14 @@ ${data.compliance_takeaways.join("\n")}
             {/* Modal Header */}
             <div className="px-6 py-4 border-b border-brivo-navy/10 bg-brivo-paper flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-7 h-7 rounded bg-brivo-navy text-brivo-paper flex items-center justify-center font-serif italic text-sm font-bold shadow-sm">
-                  K
+                <div className="w-7 h-7 rounded-lg overflow-hidden shrink-0 flex items-center justify-center shadow-sm">
+                  <Image
+                    src="/icon_logo.png"
+                    alt="KRIO Icon"
+                    width={28}
+                    height={28}
+                    className="w-7 h-7 object-contain rounded-lg shrink-0"
+                  />
                 </div>
                 <div className="space-y-0.5">
                   <div className="flex items-center gap-2">
@@ -193,7 +200,7 @@ ${data.compliance_takeaways.join("\n")}
                     type="text"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Focus query (e.g. 'Illiquid Options', 'Arvind Shenoy Front-Running', 'Section 15HA', or leave empty for full cohort)..."
+                    placeholder="Focus query (e.g. 'Front-Running', 'Section 15HA', or leave empty)..."
                     className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-brivo-paper border border-brivo-navy/15 focus:border-brivo-navy focus:ring-1 focus:ring-brivo-navy text-xs sm:text-sm text-brivo-navy placeholder:text-brivo-slate/60 outline-none transition-all font-sans"
                   />
                 </div>
