@@ -59,6 +59,40 @@ class RecordListItem(BaseModel):
     source_url: str
     ingested_at: datetime
 
+    @field_validator("entity_names", mode="before")
+    @classmethod
+    def parse_entity_names(cls, v):
+        if isinstance(v, list):
+            return [str(x) for x in v if x]
+        if isinstance(v, str):
+            import csv
+            import io
+            import json
+            if v.startswith("[") and v.endswith("]"):
+                try:
+                    return json.loads(v)
+                except Exception:
+                    pass
+            if v.startswith("{") and v.endswith("}"):
+                try:
+                    reader = csv.reader(io.StringIO(v[1:-1]))
+                    for row in reader:
+                        return [r.strip('"') for r in row if r.strip('"')]
+                except Exception:
+                    pass
+            return [v]
+        return []
+
+    @field_validator("amount", mode="before")
+    @classmethod
+    def parse_amount(cls, v):
+        if v is None:
+            return None
+        try:
+            return float(v)
+        except (ValueError, TypeError):
+            return None
+
     model_config = ConfigDict(from_attributes=True)
 
 
