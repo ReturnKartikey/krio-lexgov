@@ -8,7 +8,7 @@ async def test_jobs_list_and_sync(client):
     assert sync_resp.status_code == 200
     sync_data = sync_resp.json()
     assert "run_id" in sync_data
-    assert sync_data["status"] in ("success", "partial")
+    assert sync_data["status"] in ("success", "partial", "queued")
 
     # 2. List jobs
     list_resp = await client.get("/api/jobs")

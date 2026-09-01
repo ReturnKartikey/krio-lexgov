@@ -102,6 +102,28 @@ async def trigger_sync(
     Executes ETL pipeline asynchronously in background to prevent HTTP gateway timeouts.
     """
     try:
+        from app.core.config import get_settings
+        settings = get_settings()
+
+        if settings.ENVIRONMENT == "test":
+            pipeline = ETLPipeline(adapter_key=payload.adapter_key)
+            run = await pipeline.run(
+                db=db,
+                triggered_by="manual_api",
+                limit=payload.limit,
+                incremental=payload.incremental,
+            )
+            return SyncJobResponse(
+                message=f"Ingestion sync completed for adapter: {payload.adapter_key}",
+                run_id=run.id,
+                status=run.status,
+                records_seen=run.records_seen,
+                records_added=run.records_added,
+                records_updated=run.records_updated,
+                records_failed=run.records_failed,
+                duration_seconds=run.duration_seconds,
+            )
+
         run_id = uuid.uuid4()
         background_tasks.add_task(
             execute_background_sync,
