@@ -310,43 +310,6 @@ function ExplorerContent() {
           </div>
         </form>
 
-        {/* Quick Penalty Slabs Pill Filter Bar */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs font-mono scrollbar-none">
-          <span className="text-[0.68rem] text-brivo-slate uppercase tracking-wider shrink-0 mr-1 flex items-center gap-1">
-            <Scale className="w-3 h-3 text-brivo-navy" />
-            <span>Penalty Slabs:</span>
-          </span>
-          {PENALTY_SLABS.map((slab) => {
-            const isActive = selectedPenaltySlab === slab.id;
-            return (
-              <button
-                key={slab.id}
-                type="button"
-                onClick={() => {
-                  setSelectedPenaltySlab(slab.id);
-                  updateUrl({ penalty_slab: slab.id || undefined, page: 1 });
-                }}
-                className={`px-3 py-1 rounded-full text-xs font-mono transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
-                  isActive
-                    ? "bg-brivo-navy text-brivo-paper font-semibold shadow-xs"
-                    : "bg-white hover:bg-brivo-paper border border-brivo-navy/15 text-brivo-slate hover:text-brivo-navy"
-                }`}
-              >
-                <span>{slab.label}</span>
-                <span
-                  className={`text-[0.6rem] px-1.5 py-0.2 rounded-full ${
-                    isActive
-                      ? "bg-brivo-cyan/30 text-brivo-paper"
-                      : "bg-brivo-paper text-brivo-slate/80"
-                  }`}
-                >
-                  {slab.badge}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
         {/* Collapsible Filter Panel */}
         {showFilters && (
           <div className="p-5 rounded-xl bg-white border border-brivo-navy/10 space-y-4 animate-fade-in shadow-sm">
