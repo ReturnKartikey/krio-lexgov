@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { MicroLabel } from "@/components/common/MicroLabel";
 import { HighlightedText } from "@/components/common/HighlightedText";
+import { CustomSelect, SelectOption } from "@/components/common/CustomSelect";
 import { IntelligenceModal } from "@/components/ai/IntelligenceModal";
 import { QuickLookModal } from "@/components/motion/QuickLookModal";
 import { getRecords } from "@/lib/api";
@@ -41,13 +42,43 @@ const STATES = [
   "Tamil Nadu",
 ];
 
-const PENALTY_SLABS = [
-  { id: "", label: "All Slabs", badge: "Any Amount" },
-  { id: "non_zero", label: "Non-Zero (>₹0)", badge: "Monetary Fines" },
-  { id: "zero", label: "Non-Monetary (₹0)", badge: "Debarments" },
-  { id: "thousands", label: "Thousands", badge: "₹1K – ₹1L" },
-  { id: "lakhs", label: "Lakhs", badge: "₹1L – ₹1Cr" },
-  { id: "crores", label: "Crores", badge: "≥ ₹1Cr" },
+const STATE_OPTIONS: SelectOption[] = [
+  { value: "", label: "All States" },
+  ...STATES.map((st) => ({ value: st, label: st })),
+];
+
+const PENALTY_OPTIONS: SelectOption[] = [
+  { value: "", label: "All Slabs (Any Amount)", badge: "All" },
+  { value: "non_zero", label: "Non-Zero Penalties (> ₹0)", subLabel: "Active monetary penalties", badge: "> ₹0" },
+  { value: "zero", label: "Non-Monetary / Debarment (₹0)", subLabel: "Market restrictions & directions", badge: "₹0" },
+  { value: "thousands", label: "Thousands (₹1,000 – ₹99,999)", subLabel: "₹1K to ₹99.9K", badge: "₹K" },
+  { value: "lakhs", label: "Lakhs (₹1,00,000 – ₹99,99,999)", subLabel: "₹1L to ₹99.9L", badge: "₹L" },
+  { value: "crores", label: "Crores (≥ ₹1,00,00,000)", subLabel: "₹1 Crore and above", badge: "₹Cr" },
+];
+
+const SORT_BY_OPTIONS: SelectOption[] = [
+  { value: "published_date", label: "Date" },
+  { value: "amount", label: "Penalty Amount" },
+  { value: "title", label: "Title" },
+];
+
+const SORT_ORDER_OPTIONS: SelectOption[] = [
+  { value: "desc", label: "DESC" },
+  { value: "asc", label: "ASC" },
+];
+
+const PAGE_SIZE_OPTIONS: SelectOption[] = [
+  { value: "10", label: "10 Orders Per Page" },
+  { value: "20", label: "20 Orders Per Page" },
+  { value: "50", label: "50 Orders Per Page" },
+  { value: "100", label: "100 Orders Per Page" },
+];
+
+const TOP_PAGE_SIZE_OPTIONS: SelectOption[] = [
+  { value: "10", label: "10 / page" },
+  { value: "20", label: "20 / page" },
+  { value: "50", label: "50 / page" },
+  { value: "100", label: "100 / page" },
 ];
 
 function ExplorerContent() {
@@ -192,22 +223,19 @@ function ExplorerContent() {
           </span>
 
           {/* Orders Per Page Selector */}
-          <div className="flex items-center gap-1.5 border border-brivo-navy/15 rounded-lg bg-white px-2.5 py-1 shadow-sm text-xs font-mono text-brivo-slate">
+          <div className="flex items-center gap-1.5 text-xs font-mono text-brivo-slate">
             <span>Show:</span>
-            <select
-              value={pageSize}
-              onChange={(e) => {
-                const newSize = parseInt(e.target.value, 10);
+            <CustomSelect
+              value={String(pageSize)}
+              onChange={(val) => {
+                const newSize = parseInt(val, 10);
                 setPageSize(newSize);
                 updateUrl({ page_size: newSize, page: 1 });
               }}
-              className="bg-transparent text-brivo-navy font-bold outline-none cursor-pointer"
-            >
-              <option value="10">10 / page</option>
-              <option value="20">20 / page</option>
-              <option value="50">50 / page</option>
-              <option value="100">100 / page</option>
-            </select>
+              options={TOP_PAGE_SIZE_OPTIONS}
+              size="compact"
+              className="w-28"
+            />
           </div>
 
           <div className="flex items-center border border-brivo-navy/15 rounded-lg bg-white p-0.5 shadow-sm relative">
@@ -319,21 +347,15 @@ function ExplorerContent() {
                 <label className="text-[0.7rem] font-mono text-brivo-slate uppercase tracking-wider">
                   State / Jurisdiction
                 </label>
-                <select
+                <CustomSelect
                   value={selectedState}
-                  onChange={(e) => {
-                    setSelectedState(e.target.value);
-                    updateUrl({ state: e.target.value, page: 1 });
+                  onChange={(val) => {
+                    setSelectedState(val);
+                    updateUrl({ state: val, page: 1 });
                   }}
-                  className="w-full px-3 py-1.5 rounded-lg bg-brivo-paper border border-brivo-navy/15 text-xs text-brivo-navy outline-none focus:border-brivo-navy"
-                >
-                  <option value="">All States</option>
-                  {STATES.map((st) => (
-                    <option key={st} value={st}>
-                      {st}
-                    </option>
-                  ))}
-                </select>
+                  options={STATE_OPTIONS}
+                  placeholder="All States"
+                />
               </div>
 
               {/* Penalty Slabs */}
@@ -341,21 +363,15 @@ function ExplorerContent() {
                 <label className="text-[0.7rem] font-mono text-brivo-slate uppercase tracking-wider">
                   Penalty Sanction Slab
                 </label>
-                <select
+                <CustomSelect
                   value={selectedPenaltySlab}
-                  onChange={(e) => {
-                    setSelectedPenaltySlab(e.target.value);
-                    updateUrl({ penalty_slab: e.target.value || undefined, page: 1 });
+                  onChange={(val) => {
+                    setSelectedPenaltySlab(val);
+                    updateUrl({ penalty_slab: val || undefined, page: 1 });
                   }}
-                  className="w-full px-3 py-1.5 rounded-lg bg-brivo-paper border border-brivo-navy/15 text-xs text-brivo-navy outline-none focus:border-brivo-navy"
-                >
-                  <option value="">All Slabs (Any Amount)</option>
-                  <option value="non_zero">Non-Zero Penalties (&gt; ₹0)</option>
-                  <option value="zero">Non-Monetary / Debarment (₹0)</option>
-                  <option value="thousands">Thousands (₹1,000 – ₹99,999)</option>
-                  <option value="lakhs">Lakhs (₹1,00,000 – ₹99,99,999)</option>
-                  <option value="crores">Crores (≥ ₹1,00,00,000)</option>
-                </select>
+                  options={PENALTY_OPTIONS}
+                  placeholder="All Slabs (Any Amount)"
+                />
               </div>
 
               {/* Date From */}
@@ -370,7 +386,7 @@ function ExplorerContent() {
                     setDateFrom(e.target.value);
                     updateUrl({ date_from: e.target.value, page: 1 });
                   }}
-                  className="w-full px-3 py-1.5 rounded-lg bg-brivo-paper border border-brivo-navy/15 text-xs text-brivo-navy outline-none focus:border-brivo-navy font-mono"
+                  className="w-full h-9.5 px-3 py-1.5 rounded-lg bg-brivo-paper border border-brivo-navy/15 text-xs text-brivo-navy outline-none focus:border-brivo-navy/50 font-mono transition-colors hover:border-brivo-navy/35 cursor-pointer shadow-2xs"
                 />
               </div>
 
@@ -386,7 +402,7 @@ function ExplorerContent() {
                     setDateTo(e.target.value);
                     updateUrl({ date_to: e.target.value, page: 1 });
                   }}
-                  className="w-full px-3 py-1.5 rounded-lg bg-brivo-paper border border-brivo-navy/15 text-xs text-brivo-navy outline-none focus:border-brivo-navy font-mono"
+                  className="w-full h-9.5 px-3 py-1.5 rounded-lg bg-brivo-paper border border-brivo-navy/15 text-xs text-brivo-navy outline-none focus:border-brivo-navy/50 font-mono transition-colors hover:border-brivo-navy/35 cursor-pointer shadow-2xs"
                 />
               </div>
 
@@ -396,30 +412,25 @@ function ExplorerContent() {
                   Sort Order
                 </label>
                 <div className="flex gap-2">
-                  <select
+                  <CustomSelect
                     value={sortBy}
-                    onChange={(e) => {
-                      setSortBy(e.target.value);
-                      updateUrl({ sort_by: e.target.value, page: 1 });
+                    onChange={(val) => {
+                      setSortBy(val);
+                      updateUrl({ sort_by: val, page: 1 });
                     }}
-                    className="flex-1 px-3 py-1.5 rounded-lg bg-brivo-paper border border-brivo-navy/15 text-xs text-brivo-navy outline-none focus:border-brivo-navy"
-                  >
-                    <option value="published_date">Date</option>
-                    <option value="amount">Penalty Amount</option>
-                    <option value="title">Title</option>
-                  </select>
+                    options={SORT_BY_OPTIONS}
+                    className="flex-1"
+                  />
 
-                  <select
+                  <CustomSelect
                     value={sortOrder}
-                    onChange={(e) => {
-                      setSortOrder(e.target.value);
-                      updateUrl({ sort_order: e.target.value, page: 1 });
+                    onChange={(val) => {
+                      setSortOrder(val);
+                      updateUrl({ sort_order: val, page: 1 });
                     }}
-                    className="w-20 px-2 py-1.5 rounded-lg bg-brivo-paper border border-brivo-navy/15 text-xs text-brivo-navy outline-none focus:border-brivo-navy font-mono"
-                  >
-                    <option value="desc">DESC</option>
-                    <option value="asc">ASC</option>
-                  </select>
+                    options={SORT_ORDER_OPTIONS}
+                    className="w-24 font-mono"
+                  />
                 </div>
               </div>
 
@@ -428,20 +439,15 @@ function ExplorerContent() {
                 <label className="text-[0.7rem] font-mono text-brivo-slate uppercase tracking-wider">
                   Orders Per View
                 </label>
-                <select
-                  value={pageSize}
-                  onChange={(e) => {
-                    const newSize = parseInt(e.target.value, 10);
+                <CustomSelect
+                  value={String(pageSize)}
+                  onChange={(val) => {
+                    const newSize = parseInt(val, 10);
                     setPageSize(newSize);
                     updateUrl({ page_size: newSize, page: 1 });
                   }}
-                  className="w-full px-3 py-1.5 rounded-lg bg-brivo-paper border border-brivo-navy/15 text-xs text-brivo-navy outline-none focus:border-brivo-navy"
-                >
-                  <option value="10">10 Orders Per Page</option>
-                  <option value="20">20 Orders Per Page</option>
-                  <option value="50">50 Orders Per Page</option>
-                  <option value="100">100 Orders Per Page</option>
-                </select>
+                  options={PAGE_SIZE_OPTIONS}
+                />
               </div>
             </div>
 
@@ -465,7 +471,7 @@ function ExplorerContent() {
                   )}
                   {selectedPenaltySlab && (
                     <span className="px-2 py-0.5 rounded bg-brivo-paper border border-brivo-navy/10 text-xs font-mono text-brivo-navy flex items-center gap-1">
-                      Penalty: {PENALTY_SLABS.find((s) => s.id === selectedPenaltySlab)?.label || selectedPenaltySlab}
+                      Penalty: {PENALTY_OPTIONS.find((s) => s.value === selectedPenaltySlab)?.label || selectedPenaltySlab}
                       <button
                         onClick={() => {
                           setSelectedPenaltySlab("");
