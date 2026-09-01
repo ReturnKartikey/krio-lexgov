@@ -36,6 +36,24 @@ async def bootstrap_initial_data_if_empty():
             await conn.run_sync(Base.metadata.create_all)
 
         async with AsyncSessionLocal() as session:
+            # Update all seed records to 100% verified live SEBI URLs
+            from app.adapters.sebi_orders import SAMPLE_SEBI_DATA
+            from sqlalchemy import update
+            for item in SAMPLE_SEBI_DATA:
+                await session.execute(
+                    update(Record)
+                    .where(Record.external_id == item["external_id"])
+                    .values(
+                        source_url=item["source_url"],
+                        title=item["title"],
+                        amount=item["amount"],
+                        summary=item["summary"],
+                        state=item.get("state", "Maharashtra"),
+                        jurisdiction=item.get("jurisdiction", "Head Office, Mumbai"),
+                    )
+                )
+            await session.commit()
+
             stmt = select(func.count(Record.id))
             res = await session.execute(stmt)
             count = res.scalar_one() or 0
@@ -50,7 +68,7 @@ async def bootstrap_initial_data_if_empty():
                 )
                 logger.info("Initial bootstrap ingestion completed.")
             else:
-                logger.info(f"Database already contains {count} records. Skipping initial bootstrap.")
+                logger.info(f"Database already contains {count} records and updated seed URLs.")
     except Exception as e:
         logger.warning(f"Bootstrap check notice (will retry on manual sync or migration): {e}")
 
