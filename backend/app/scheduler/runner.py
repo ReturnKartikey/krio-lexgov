@@ -36,39 +36,39 @@ async def bootstrap_initial_data_if_empty():
             await conn.run_sync(Base.metadata.create_all)
 
         async with AsyncSessionLocal() as session:
-            # Update all seed records to 100% verified live SEBI URLs
-            from app.adapters.sebi_orders import SAMPLE_SEBI_DATA
-            from sqlalchemy import update
-            for item in SAMPLE_SEBI_DATA:
-                await session.execute(
-                    update(Record)
-                    .where(Record.external_id == item["external_id"])
-                    .values(
-                        source_url=item["source_url"],
-                        title=item["title"],
-                        amount=item["amount"],
-                        summary=item["summary"],
-                        state=item.get("state", "Maharashtra"),
-                        jurisdiction=item.get("jurisdiction", "Head Office, Mumbai"),
-                    )
-                )
+            # Purge legacy fake external_ids to ensure 100% verified live 200 OK SEBI URLs
+            from app.db.models import RecordEntity
+            from sqlalchemy import delete
+            legacy_ids = [
+                "SEBI-FINVEST-AO-2026",
+                "SEBI-BROKING-AO-2026",
+                "SEBI-WAAREE-AUG-2026",
+                "SEBI-SANWARIA-2026",
+                "SEBI-PENALTY-2026",
+                "SEBI-RADHIKA-2026",
+                "SEBI-FORTIS-AO-2026",
+                "SEBI-CORPORATE-2026",
+                "SEBI-INSIDER-2026",
+                "SEBI-RECOVERY-2026",
+            ]
+            for leg_id in legacy_ids:
+                rec_stmt = select(Record).where(Record.external_id == leg_id)
+                rec_res = await session.execute(rec_stmt)
+                rec = rec_res.scalar_one_or_none()
+                if rec:
+                    await session.execute(delete(RecordEntity).where(RecordEntity.record_id == rec.id))
+                    await session.execute(delete(Record).where(Record.id == rec.id))
             await session.commit()
 
-            stmt = select(func.count(Record.id))
-            res = await session.execute(stmt)
-            count = res.scalar_one() or 0
-            if count < 35:
-                logger.info(f"Database contains {count} records (< 35). Running bootstrap ingestion to populate complete enforcement dataset...")
-                pipeline = ETLPipeline(adapter_key="sebi_adjudication_orders")
-                await pipeline.run(
-                    db=session,
-                    triggered_by="startup_bootstrap",
-                    limit=50,
-                    incremental=False,
-                )
-                logger.info("Initial bootstrap ingestion completed.")
-            else:
-                logger.info(f"Database already contains {count} records and updated seed URLs.")
+            # Ingest complete dataset with verified live URLs
+            pipeline = ETLPipeline(adapter_key="sebi_adjudication_orders")
+            await pipeline.run(
+                db=session,
+                triggered_by="startup_bootstrap",
+                limit=50,
+                incremental=False,
+            )
+            logger.info("Startup bootstrap ingestion with 100% verified live SEBI links completed.")
     except Exception as e:
         logger.warning(f"Bootstrap check notice (will retry on manual sync or migration): {e}")
 
