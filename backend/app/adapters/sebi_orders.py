@@ -326,8 +326,31 @@ class SEBIOrdersAdapter(SourceAdapter):
                 return content_bytes.decode("utf-8", errors="ignore")
         elif "html" in mime_type.lower():
             try:
+                import re
                 soup = BeautifulSoup(content_bytes, "html.parser")
-                return soup.get_text(separator=" ", strip=True)
+                # Remove non-content tags
+                for tag in soup(["script", "style", "nav", "header", "footer", "ol", "ul"]):
+                    tag.decompose()
+                # Remove breadcrumb and header elements
+                for bc in soup.find_all("div", class_=re.compile(r"breadcrumb|header|nav|top-bar", re.I)):
+                    bc.decompose()
+                
+                core = (
+                    soup.find("div", {"class": "card-body"}) or
+                    soup.find("div", {"class": "content-box"}) or
+                    soup.find("div", {"class": "article-content"}) or
+                    soup.find("div", {"class": "col-md-12"}) or
+                    soup.find("body") or
+                    soup
+                )
+                text = core.get_text(separator=" ", strip=True)
+                clean_text = re.sub(
+                    r"^SEBI\s*\|\s*.*?Home\s*[»>]\s*Enforcement\s*[»>].*?(?:Chairperson/Members|Adjudication|Orders)\s*",
+                    "",
+                    text,
+                    flags=re.IGNORECASE,
+                )
+                return clean_text.strip()
             except Exception:
                 return content_bytes.decode("utf-8", errors="ignore")
         else:
@@ -387,7 +410,14 @@ class SEBIOrdersAdapter(SourceAdapter):
 
         # 5. Regulations & Metadata
         regulations = meta.get("regulations") or extract_regulations(text_corpus)
-        summary = meta.get("summary") or text_corpus[:600].strip()
+        
+        raw_summary = (meta.get("summary") or "").strip()
+        if not raw_summary or "Home »" in raw_summary or "SEBI |" in raw_summary or len(raw_summary) < 40:
+            noticee_list = [e.name for e in entities[:3]] if entities else []
+            noticee_desc = ", ".join(noticee_list) if noticee_list else "the cited respondents"
+            penalty_desc = f"with aggregate penalty sanction of INR {amount:,.2f}" if amount else "imposing non-monetary market debarments and regulatory directions"
+            raw_summary = f"{ref.title}. Regulatory enforcement proceeding issued by Securities and Exchange Board of India (SEBI) in the matter of {noticee_desc}, {penalty_desc} under applicable market governance provisions."
+        summary = raw_summary
 
         entity_names_list = [e.name for e in entities]
 
