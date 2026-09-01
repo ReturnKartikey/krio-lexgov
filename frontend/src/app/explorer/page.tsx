@@ -74,13 +74,6 @@ const PAGE_SIZE_OPTIONS: SelectOption[] = [
   { value: "100", label: "100 Orders Per Page" },
 ];
 
-const TOP_PAGE_SIZE_OPTIONS: SelectOption[] = [
-  { value: "10", label: "10 / page" },
-  { value: "20", label: "20 / page" },
-  { value: "50", label: "50 / page" },
-  { value: "100", label: "100 / page" },
-];
-
 function ExplorerContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -216,27 +209,11 @@ function ExplorerContent() {
           </p>
         </div>
 
-        {/* View Switcher, Page Size & Result Count */}
+        {/* View Switcher & Result Count */}
         <div className="flex flex-wrap items-center gap-3">
           <span className="text-xs font-mono text-brivo-slate">
             Showing <strong className="text-brivo-navy"><RollingNumber value={meta.total} /></strong> results
           </span>
-
-          {/* Orders Per Page Selector */}
-          <div className="flex items-center gap-1.5 text-xs font-mono text-brivo-slate">
-            <span>Show:</span>
-            <CustomSelect
-              value={String(pageSize)}
-              onChange={(val) => {
-                const newSize = parseInt(val, 10);
-                setPageSize(newSize);
-                updateUrl({ page_size: newSize, page: 1 });
-              }}
-              options={TOP_PAGE_SIZE_OPTIONS}
-              size="compact"
-              className="w-28"
-            />
-          </div>
 
           <div className="flex items-center border border-brivo-navy/15 rounded-lg bg-white p-0.5 shadow-sm relative">
             <button
@@ -630,10 +607,11 @@ function ExplorerContent() {
                             setQuickLookRecord(record);
                             setIsQuickLookOpen(true);
                           }}
-                          className="px-3 py-1 rounded-full bg-brivo-paper hover:bg-brivo-mist text-brivo-slate hover:text-brivo-navy text-xs font-mono border border-brivo-navy/10 transition-all flex items-center gap-1 cursor-pointer active:scale-95"
-                          title="Quick Look preview (Space)"
+                          className="px-3 py-1 rounded-full bg-brivo-paper hover:bg-brivo-mist text-brivo-slate hover:text-brivo-navy text-xs font-mono border border-brivo-navy/10 transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-2xs"
+                          title="Quick Look preview"
                         >
-                          <span>⎵ Peek</span>
+                          <Eye className="w-3.5 h-3.5 text-brivo-slate shrink-0" />
+                          <span>Peek</span>
                         </button>
 
                         <Link
@@ -705,9 +683,11 @@ function ExplorerContent() {
                                 setQuickLookRecord(r);
                                 setIsQuickLookOpen(true);
                               }}
-                              className="px-2 py-0.5 rounded bg-brivo-paper hover:bg-brivo-mist text-[0.65rem] font-mono text-brivo-slate hover:text-brivo-navy border border-brivo-navy/10 transition-colors cursor-pointer"
+                              className="px-2 py-0.5 rounded bg-brivo-paper hover:bg-brivo-mist text-[0.65rem] font-mono text-brivo-slate hover:text-brivo-navy border border-brivo-navy/10 transition-colors cursor-pointer flex items-center gap-1"
+                              title="Quick Look preview"
                             >
-                              ⎵ Peek
+                              <Eye className="w-3 h-3 text-brivo-slate shrink-0" />
+                              <span>Peek</span>
                             </button>
                             <Link
                               href={`/explorer/${r.id}`}

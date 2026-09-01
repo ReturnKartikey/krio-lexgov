@@ -1,6 +1,43 @@
 import { jsPDF } from "jspdf";
 import { RecordDetailItem } from "./types";
-import { formatINR, formatDate } from "./utils";
+import { formatDate } from "./utils";
+
+function formatRecordType(type?: string): string {
+  if (!type) return "Adjudication Order";
+  const t = type.toLowerCase().replace(/_/g, " ");
+  return t
+    .split(" ")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
+function formatPdfINR(amount: number | null | undefined): string {
+  if (!amount || amount === 0) return "Non-Monetary / Debarment";
+  if (amount >= 10000000) {
+    const cr = amount / 10000000;
+    const formattedNum = Number(amount).toLocaleString("en-IN");
+    return `INR ${cr % 1 === 0 ? cr.toFixed(0) : cr.toFixed(2)} Cr (Rs. ${formattedNum})`;
+  }
+  if (amount >= 100000) {
+    const lakh = amount / 100000;
+    const formattedNum = Number(amount).toLocaleString("en-IN");
+    return `INR ${lakh % 1 === 0 ? lakh.toFixed(0) : lakh.toFixed(2)} Lakh (Rs. ${formattedNum})`;
+  }
+  return `INR ${Number(amount).toLocaleString("en-IN")}`;
+}
+
+function formatPdfINRCompact(amount: number | null | undefined): string {
+  if (!amount || amount === 0) return "Non-Monetary";
+  if (amount >= 10000000) {
+    const cr = amount / 10000000;
+    return `INR ${cr % 1 === 0 ? cr.toFixed(0) : cr.toFixed(2)} Cr`;
+  }
+  if (amount >= 100000) {
+    const lakh = amount / 100000;
+    return `INR ${lakh % 1 === 0 ? lakh.toFixed(0) : lakh.toFixed(2)} Lakh`;
+  }
+  return `INR ${Number(amount).toLocaleString("en-IN")}`;
+}
 
 function sanitizeExecutiveSummary(record: RecordDetailItem): string {
   let summary = (record.summary || "").trim();
@@ -25,7 +62,7 @@ function sanitizeExecutiveSummary(record: RecordDetailItem): string {
 
     const penaltyClause =
       record.amount && record.amount > 0
-        ? `imposing aggregate monetary sanctions of ${formatINR(record.amount)}`
+        ? `imposing aggregate monetary sanctions of ${formatPdfINRCompact(record.amount)}`
         : "imposing market debarment, directional compliance sanctions, and statutory injunctions";
 
     return `Regulatory enforcement adjudication order issued by the Securities and Exchange Board of India (SEBI) in the matter of ${noticees}, ${penaltyClause} pursuant to statutory market regulations and corporate governance provisions.`;
@@ -48,12 +85,12 @@ export function generateExecutivePdfMemo(record: RecordDetailItem): void {
   const contentWidth = pageWidth - margin * 2;
   let y = margin;
 
-  // Obsidian Brand Palette
-  const navy = [26, 35, 51]; // #1a2333
+  // Obsidian Brand Palette (RGB)
+  const navy = [15, 23, 42]; // #0f172a
   const cyan = [0, 194, 209]; // #00c2d1
-  const slate = [102, 112, 133]; // #667085
-  const lightBg = [250, 248, 252]; // #faf8fc
-  const borderGray = [228, 231, 236]; // #e4e7ec
+  const slate = [100, 116, 139]; // #64748b
+  const lightBg = [248, 250, 252]; // #f8fafc
+  const borderGray = [226, 232, 240]; // #e2e8f0
 
   // --- HEADER BANNER ---
   doc.setFillColor(navy[0], navy[1], navy[2]);
@@ -64,9 +101,9 @@ export function generateExecutivePdfMemo(record: RecordDetailItem): void {
   doc.setFontSize(9.5);
   doc.text("KRIO // REGULATORY INTELLIGENCE NETWORK", margin + 6, y + 9);
 
-  doc.setFont("helvetica", "normal");
+  doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
-  doc.setTextColor(0, 194, 209);
+  doc.setTextColor(cyan[0], cyan[1], cyan[2]);
   doc.text("CONFIDENTIAL EXECUTIVE BRIEF", pageWidth - margin - 6, y + 9, { align: "right" });
 
   y += 20;
@@ -80,17 +117,17 @@ export function generateExecutivePdfMemo(record: RecordDetailItem): void {
   doc.setTextColor(navy[0], navy[1], navy[2]);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8.5);
-  doc.text(record.external_id, margin + 30, y);
+  doc.text(record.external_id, margin + 32, y);
 
   doc.setTextColor(slate[0], slate[1], slate[2]);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7.5);
-  doc.text("STATUS:", pageWidth - margin - 38, y);
+  doc.text("STATUS:", pageWidth - margin - 40, y);
 
   doc.setTextColor(4, 120, 87); // Emerald green
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8.5);
-  doc.text((record.status || "ACTIVE").toUpperCase(), pageWidth - margin, y, { align: "right" });
+  doc.text((record.status || "PUBLISHED").toUpperCase(), pageWidth - margin, y, { align: "right" });
 
   y += 3.5;
   doc.setDrawColor(borderGray[0], borderGray[1], borderGray[2]);
@@ -107,21 +144,21 @@ export function generateExecutivePdfMemo(record: RecordDetailItem): void {
   doc.text(splitTitle, margin, y);
   y += splitTitle.length * 5.5 + 4;
 
-  // --- KEY METADATA GRID (Crisp 2-Row x 3-Column Layout) ---
+  // --- KEY METADATA GRID (2-Row x 3-Column Layout) ---
   const gridHeight = 32;
   doc.setFillColor(lightBg[0], lightBg[1], lightBg[2]);
   doc.roundedRect(margin, y, contentWidth, gridHeight, 2, 2, "F");
   doc.setDrawColor(borderGray[0], borderGray[1], borderGray[2]);
   doc.roundedRect(margin, y, contentWidth, gridHeight, 2, 2, "D");
 
-  // Inner Divider Line
+  // Horizontal Divider Line
   doc.setDrawColor(borderGray[0], borderGray[1], borderGray[2]);
   doc.setLineWidth(0.2);
   doc.line(margin + 4, y + 16, pageWidth - margin - 4, y + 16);
 
   const col1 = margin + 6;
-  const col2 = margin + 62;
-  const col3 = margin + 118;
+  const col2 = margin + 58;
+  const col3 = margin + 114;
 
   // Row 1 - Labels
   doc.setFontSize(7);
@@ -139,8 +176,13 @@ export function generateExecutivePdfMemo(record: RecordDetailItem): void {
   doc.text(record.jurisdiction || "Head Office, Mumbai", col2, y + 11.5);
 
   doc.setFont("helvetica", "bold");
-  doc.setTextColor(record.amount ? 190 : 26, record.amount ? 18 : 35, record.amount ? 60 : 51);
-  doc.text(record.amount ? formatINR(record.amount) : "Non-Monetary / Debarment", col3, y + 11.5);
+  if (record.amount && record.amount > 0) {
+    doc.setTextColor(180, 20, 50); // Red highlight for monetary sanctions
+    doc.text(formatPdfINR(record.amount), col3, y + 11.5);
+  } else {
+    doc.setTextColor(navy[0], navy[1], navy[2]);
+    doc.text("Non-Monetary / Debarment", col3, y + 11.5);
+  }
 
   // Row 2 - Labels
   doc.setFontSize(7);
@@ -156,9 +198,9 @@ export function generateExecutivePdfMemo(record: RecordDetailItem): void {
   doc.setTextColor(navy[0], navy[1], navy[2]);
   doc.text(formatDate(record.ingested_at), col1, y + 27.5);
   doc.text(record.state || "Maharashtra", col2, y + 27.5);
-  doc.text((record.record_type || "Adjudication Order").toUpperCase(), col3, y + 27.5);
+  doc.text(formatRecordType(record.record_type), col3, y + 27.5);
 
-  y += gridHeight + 10;
+  y += gridHeight + 9;
 
   // --- 1. EXECUTIVE SUMMARY SECTION ---
   doc.setFont("helvetica", "bold");
@@ -179,7 +221,7 @@ export function generateExecutivePdfMemo(record: RecordDetailItem): void {
   const splitSummary = doc.splitTextToSize(cleanSummary, contentWidth);
   doc.text(splitSummary, margin, y, { lineHeightFactor: 1.35 });
 
-  y += splitSummary.length * 4.8 + 12;
+  y += splitSummary.length * 4.8 + 10;
 
   // --- 2. NOTICEE & RESPONDENT ENTITIES ---
   doc.setFont("helvetica", "bold");
@@ -197,31 +239,32 @@ export function generateExecutivePdfMemo(record: RecordDetailItem): void {
   const entityNames = record.entity_names && record.entity_names.length > 0 ? record.entity_names : [];
 
   if (entities.length > 0) {
-    // Render structured entity table
     const tableHeaderHeight = 6.5;
-    doc.setFillColor(243, 244, 246);
+    doc.setFillColor(241, 245, 249);
     doc.roundedRect(margin, y, contentWidth, tableHeaderHeight, 1, 1, "F");
 
     doc.setFontSize(7.5);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(slate[0], slate[1], slate[2]);
     doc.text("ENTITY / NOTICEE NAME", margin + 4, y + 4.5);
-    doc.text("ROLE", margin + contentWidth * 0.55, y + 4.5);
-    doc.text("SANCTION EXPOSURE", margin + contentWidth * 0.8, y + 4.5);
+    doc.text("ROLE", margin + contentWidth * 0.52, y + 4.5);
+    doc.text("SANCTION EXPOSURE", margin + contentWidth * 0.76, y + 4.5);
 
     y += tableHeaderHeight + 1.5;
 
-    entities.slice(0, 5).forEach((ent) => {
+    entities.slice(0, 6).forEach((ent) => {
       doc.setFontSize(8.5);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(navy[0], navy[1], navy[2]);
       doc.text(ent.name, margin + 4, y + 4);
-      doc.text(ent.role || "Respondent", margin + contentWidth * 0.55, y + 4);
+      doc.text(ent.role ? ent.role.charAt(0).toUpperCase() + ent.role.slice(1) : "Noticee", margin + contentWidth * 0.52, y + 4);
       doc.text(
         ent.total_penalty_amount && ent.total_penalty_amount > 0
-          ? formatINR(ent.total_penalty_amount)
+          ? formatPdfINRCompact(ent.total_penalty_amount)
+          : record.amount && record.amount > 0
+          ? formatPdfINRCompact(record.amount)
           : "Non-Monetary",
-        margin + contentWidth * 0.8,
+        margin + contentWidth * 0.76,
         y + 4
       );
 
@@ -232,9 +275,9 @@ export function generateExecutivePdfMemo(record: RecordDetailItem): void {
       y += 1.5;
     });
 
-    y += 6;
+    y += 5;
   } else if (entityNames.length > 0) {
-    const listHeight = entityNames.length * 7 + 4;
+    const listHeight = entityNames.length * 6.5 + 4;
     doc.setFillColor(lightBg[0], lightBg[1], lightBg[2]);
     doc.roundedRect(margin, y, contentWidth, listHeight, 2, 2, "F");
     doc.setDrawColor(borderGray[0], borderGray[1], borderGray[2]);
@@ -244,7 +287,7 @@ export function generateExecutivePdfMemo(record: RecordDetailItem): void {
       doc.setFontSize(8.5);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(navy[0], navy[1], navy[2]);
-      doc.text(`•  ${name}`, margin + 5, y + 5.5 + idx * 7);
+      doc.text(`-  ${name}`, margin + 5, y + 5 + idx * 6.5);
     });
 
     y += listHeight + 8;
@@ -252,12 +295,12 @@ export function generateExecutivePdfMemo(record: RecordDetailItem): void {
     doc.setFontSize(8.5);
     doc.setFont("helvetica", "italic");
     doc.setTextColor(slate[0], slate[1], slate[2]);
-    doc.text("No primary noticees cataloged in this summary.", margin + 4, y + 4);
-    y += 10;
+    doc.text("No individual noticees cataloged in this summary.", margin + 4, y + 4);
+    y += 9;
   }
 
   // --- 3. CRYPTOGRAPHIC PROVENANCE & SOURCE AUDIT ---
-  if (y > pageHeight - 50) {
+  if (y > pageHeight - 55) {
     doc.addPage();
     y = margin;
   }
@@ -273,7 +316,9 @@ export function generateExecutivePdfMemo(record: RecordDetailItem): void {
 
   y += 7.5;
 
-  const provenanceHeight = 26;
+  const fullUrl = record.source_url || "https://www.sebi.gov.in";
+  const provenanceHeight = 30;
+
   doc.setFillColor(lightBg[0], lightBg[1], lightBg[2]);
   doc.roundedRect(margin, y, contentWidth, provenanceHeight, 2, 2, "F");
   doc.setDrawColor(borderGray[0], borderGray[1], borderGray[2]);
@@ -298,20 +343,19 @@ export function generateExecutivePdfMemo(record: RecordDetailItem): void {
   doc.setTextColor(slate[0], slate[1], slate[2]);
   doc.text("VERIFIED REGISTRY LINK:", margin + 6, y + 17);
 
-  const fullUrl = record.source_url || "https://www.sebi.gov.in";
+  // Clickable URL title
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(7.5);
-  doc.setTextColor(14, 116, 144);
-  
-  // Render clickable link using textWithLink & bounding box
-  doc.textWithLink("Official SEBI Order Document (Click to Open in Browser ↗)", margin + 44, y + 17, { url: fullUrl });
-  doc.link(margin + 44, y + 13, contentWidth - 50, 6, { url: fullUrl });
+  doc.setFontSize(8);
+  doc.setTextColor(2, 132, 199); // Sky blue
+  doc.textWithLink("Official SEBI Order Document (Click to Open in Browser ->)", margin + 46, y + 17, { url: fullUrl });
+  doc.link(margin + 46, y + 13, contentWidth - 52, 6, { url: fullUrl });
 
-  doc.setFont("helvetica", "normal");
+  // Direct Full URL display (wrapping if long)
+  doc.setFont("courier", "normal");
   doc.setFontSize(6.5);
   doc.setTextColor(slate[0], slate[1], slate[2]);
-  const displayUrl = fullUrl.length > 85 ? fullUrl.slice(0, 82) + "..." : fullUrl;
-  doc.text(`Direct URI: ${displayUrl}`, margin + 44, y + 22);
+  const splitUrl = doc.splitTextToSize(`Direct URI: ${fullUrl}`, contentWidth - 52);
+  doc.text(splitUrl, margin + 46, y + 22.5);
 
   // --- FOOTER ---
   doc.setFont("helvetica", "normal");
