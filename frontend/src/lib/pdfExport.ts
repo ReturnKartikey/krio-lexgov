@@ -273,7 +273,7 @@ export function generateExecutivePdfMemo(record: RecordDetailItem): void {
 
   y += 7.5;
 
-  const provenanceHeight = 24;
+  const provenanceHeight = 26;
   doc.setFillColor(lightBg[0], lightBg[1], lightBg[2]);
   doc.roundedRect(margin, y, contentWidth, provenanceHeight, 2, 2, "F");
   doc.setDrawColor(borderGray[0], borderGray[1], borderGray[2]);
@@ -296,16 +296,22 @@ export function generateExecutivePdfMemo(record: RecordDetailItem): void {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7);
   doc.setTextColor(slate[0], slate[1], slate[2]);
-  doc.text("VERIFIED REGISTRY LINK:", margin + 6, y + 16);
+  doc.text("VERIFIED REGISTRY LINK:", margin + 6, y + 17);
 
-  doc.setFont("helvetica", "normal");
+  const fullUrl = record.source_url || "https://www.sebi.gov.in";
+  doc.setFont("helvetica", "bold");
   doc.setFontSize(7.5);
   doc.setTextColor(14, 116, 144);
-  const truncatedUrl =
-    record.source_url && record.source_url.length > 78
-      ? record.source_url.slice(0, 75) + "..."
-      : record.source_url || "https://www.sebi.gov.in";
-  doc.text(truncatedUrl, margin + 42, y + 16);
+  
+  // Render clickable link using textWithLink & bounding box
+  doc.textWithLink("Official SEBI Order Document (Click to Open in Browser ↗)", margin + 44, y + 17, { url: fullUrl });
+  doc.link(margin + 44, y + 13, contentWidth - 50, 6, { url: fullUrl });
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(6.5);
+  doc.setTextColor(slate[0], slate[1], slate[2]);
+  const displayUrl = fullUrl.length > 85 ? fullUrl.slice(0, 82) + "..." : fullUrl;
+  doc.text(`Direct URI: ${displayUrl}`, margin + 44, y + 22);
 
   // --- FOOTER ---
   doc.setFont("helvetica", "normal");

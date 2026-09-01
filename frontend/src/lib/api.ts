@@ -183,6 +183,7 @@ export async function getRecords(params?: {
   date_to?: string;
   min_amount?: number;
   max_amount?: number;
+  penalty_slab?: string;
   sort_by?: string;
   sort_order?: string;
   page?: number;

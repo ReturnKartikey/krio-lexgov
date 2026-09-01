@@ -41,6 +41,15 @@ const STATES = [
   "Tamil Nadu",
 ];
 
+const PENALTY_SLABS = [
+  { id: "", label: "All Slabs", badge: "Any Amount" },
+  { id: "non_zero", label: "Non-Zero (>₹0)", badge: "Monetary Fines" },
+  { id: "zero", label: "Non-Monetary (₹0)", badge: "Debarments" },
+  { id: "thousands", label: "Thousands", badge: "₹1K – ₹1L" },
+  { id: "lakhs", label: "Lakhs", badge: "₹1L – ₹1Cr" },
+  { id: "crores", label: "Crores", badge: "≥ ₹1Cr" },
+];
+
 function ExplorerContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -49,28 +58,32 @@ function ExplorerContent() {
   const qParam = searchParams.get("q") || "";
   const stateParam = searchParams.get("state") || "";
   const entityParam = searchParams.get("entity") || "";
+  const penaltySlabParam = searchParams.get("penalty_slab") || "";
   const dateFromParam = searchParams.get("date_from") || "";
   const dateToParam = searchParams.get("date_to") || "";
   const sortByParam = searchParams.get("sort_by") || "published_date";
   const sortOrderParam = searchParams.get("sort_order") || "desc";
   const pageParam = parseInt(searchParams.get("page") || "1", 10);
+  const pageSizeParam = parseInt(searchParams.get("page_size") || "10", 10);
 
   // Local state
   const [searchInput, setSearchInput] = useState(qParam);
   const [selectedState, setSelectedState] = useState(stateParam);
   const [selectedEntity, setSelectedEntity] = useState(entityParam);
+  const [selectedPenaltySlab, setSelectedPenaltySlab] = useState(penaltySlabParam);
   const [dateFrom, setDateFrom] = useState(dateFromParam);
   const [dateTo, setDateTo] = useState(dateToParam);
   const [sortBy, setSortBy] = useState(sortByParam);
   const [sortOrder, setSortOrder] = useState(sortOrderParam);
   const [page, setPage] = useState(pageParam);
+  const [pageSize, setPageSize] = useState(pageSizeParam);
   const [viewMode, setViewMode] = useState<"table" | "cards">("cards");
 
   const [records, setRecords] = useState<RecordListItem[]>([]);
   const [meta, setMeta] = useState<PaginationMeta>({
     total: 0,
     page: 1,
-    page_size: 10,
+    page_size: pageSizeParam,
     total_pages: 1,
   });
   const [initialLoading, setInitialLoading] = useState(true);
@@ -117,12 +130,13 @@ function ExplorerContent() {
         q: qParam,
         state: stateParam,
         entity: entityParam,
+        penalty_slab: penaltySlabParam,
         date_from: dateFromParam,
         date_to: dateToParam,
         sort_by: sortByParam,
         sort_order: sortOrderParam,
         page: pageParam,
-        page_size: 10,
+        page_size: pageSizeParam,
       });
       setRecords(res.data);
       if (res.meta) setMeta(res.meta);
@@ -132,7 +146,7 @@ function ExplorerContent() {
       setInitialLoading(false);
       setIsFetching(false);
     }
-  }, [qParam, stateParam, entityParam, dateFromParam, dateToParam, sortByParam, sortOrderParam, pageParam]);
+  }, [qParam, stateParam, entityParam, penaltySlabParam, dateFromParam, dateToParam, sortByParam, sortOrderParam, pageParam, pageSizeParam]);
 
   useEffect(() => {
     loadData();
@@ -148,10 +162,12 @@ function ExplorerContent() {
     setSearchInput("");
     setSelectedState("");
     setSelectedEntity("");
+    setSelectedPenaltySlab("");
     setDateFrom("");
     setDateTo("");
     setSortBy("published_date");
     setSortOrder("desc");
+    setPageSize(10);
     router.push("/explorer");
   };
 
@@ -169,11 +185,30 @@ function ExplorerContent() {
           </p>
         </div>
 
-        {/* View Switcher & Result Count */}
-        <div className="flex items-center gap-3">
+        {/* View Switcher, Page Size & Result Count */}
+        <div className="flex flex-wrap items-center gap-3">
           <span className="text-xs font-mono text-brivo-slate">
             Showing <strong className="text-brivo-navy"><RollingNumber value={meta.total} /></strong> results
           </span>
+
+          {/* Orders Per Page Selector */}
+          <div className="flex items-center gap-1.5 border border-brivo-navy/15 rounded-lg bg-white px-2.5 py-1 shadow-sm text-xs font-mono text-brivo-slate">
+            <span>Show:</span>
+            <select
+              value={pageSize}
+              onChange={(e) => {
+                const newSize = parseInt(e.target.value, 10);
+                setPageSize(newSize);
+                updateUrl({ page_size: newSize, page: 1 });
+              }}
+              className="bg-transparent text-brivo-navy font-bold outline-none cursor-pointer"
+            >
+              <option value="10">10 / page</option>
+              <option value="20">20 / page</option>
+              <option value="50">50 / page</option>
+              <option value="100">100 / page</option>
+            </select>
+          </div>
 
           <div className="flex items-center border border-brivo-navy/15 rounded-lg bg-white p-0.5 shadow-sm relative">
             <button
@@ -215,7 +250,7 @@ function ExplorerContent() {
       </div>
 
       {/* Main Search Bar & Quick Toggles */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-brivo-slate" />
@@ -264,7 +299,7 @@ function ExplorerContent() {
               type="button"
               onClick={() => setShowFilters(!showFilters)}
               className={`px-3.5 py-2.5 rounded-xl border text-sm font-medium transition-colors flex items-center justify-center gap-2 shadow-sm ${
-                showFilters || selectedState || selectedEntity || dateFrom || dateTo
+                showFilters || selectedState || selectedEntity || selectedPenaltySlab || dateFrom || dateTo
                   ? "bg-brivo-navy text-brivo-paper border-brivo-navy"
                   : "bg-white border-brivo-navy/15 text-brivo-navy hover:bg-brivo-paper"
               }`}
@@ -274,6 +309,43 @@ function ExplorerContent() {
             </button>
           </div>
         </form>
+
+        {/* Quick Penalty Slabs Pill Filter Bar */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs font-mono scrollbar-none">
+          <span className="text-[0.68rem] text-brivo-slate uppercase tracking-wider shrink-0 mr-1 flex items-center gap-1">
+            <Scale className="w-3 h-3 text-brivo-navy" />
+            <span>Penalty Slabs:</span>
+          </span>
+          {PENALTY_SLABS.map((slab) => {
+            const isActive = selectedPenaltySlab === slab.id;
+            return (
+              <button
+                key={slab.id}
+                type="button"
+                onClick={() => {
+                  setSelectedPenaltySlab(slab.id);
+                  updateUrl({ penalty_slab: slab.id || undefined, page: 1 });
+                }}
+                className={`px-3 py-1 rounded-full text-xs font-mono transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
+                  isActive
+                    ? "bg-brivo-navy text-brivo-paper font-semibold shadow-xs"
+                    : "bg-white hover:bg-brivo-paper border border-brivo-navy/15 text-brivo-slate hover:text-brivo-navy"
+                }`}
+              >
+                <span>{slab.label}</span>
+                <span
+                  className={`text-[0.6rem] px-1.5 py-0.2 rounded-full ${
+                    isActive
+                      ? "bg-brivo-cyan/30 text-brivo-paper"
+                      : "bg-brivo-paper text-brivo-slate/80"
+                  }`}
+                >
+                  {slab.badge}
+                </span>
+              </button>
+            );
+          })}
+        </div>
 
         {/* Collapsible Filter Panel */}
         {showFilters && (
@@ -298,6 +370,28 @@ function ExplorerContent() {
                       {st}
                     </option>
                   ))}
+                </select>
+              </div>
+
+              {/* Penalty Slabs */}
+              <div className="space-y-1.5">
+                <label className="text-[0.7rem] font-mono text-brivo-slate uppercase tracking-wider">
+                  Penalty Sanction Slab
+                </label>
+                <select
+                  value={selectedPenaltySlab}
+                  onChange={(e) => {
+                    setSelectedPenaltySlab(e.target.value);
+                    updateUrl({ penalty_slab: e.target.value || undefined, page: 1 });
+                  }}
+                  className="w-full px-3 py-1.5 rounded-lg bg-brivo-paper border border-brivo-navy/15 text-xs text-brivo-navy outline-none focus:border-brivo-navy"
+                >
+                  <option value="">All Slabs (Any Amount)</option>
+                  <option value="non_zero">Non-Zero Penalties (&gt; ₹0)</option>
+                  <option value="zero">Non-Monetary / Debarment (₹0)</option>
+                  <option value="thousands">Thousands (₹1,000 – ₹99,999)</option>
+                  <option value="lakhs">Lakhs (₹1,00,000 – ₹99,99,999)</option>
+                  <option value="crores">Crores (≥ ₹1,00,00,000)</option>
                 </select>
               </div>
 
@@ -365,10 +459,31 @@ function ExplorerContent() {
                   </select>
                 </div>
               </div>
+
+              {/* Orders Per Page */}
+              <div className="space-y-1.5">
+                <label className="text-[0.7rem] font-mono text-brivo-slate uppercase tracking-wider">
+                  Orders Per View
+                </label>
+                <select
+                  value={pageSize}
+                  onChange={(e) => {
+                    const newSize = parseInt(e.target.value, 10);
+                    setPageSize(newSize);
+                    updateUrl({ page_size: newSize, page: 1 });
+                  }}
+                  className="w-full px-3 py-1.5 rounded-lg bg-brivo-paper border border-brivo-navy/15 text-xs text-brivo-navy outline-none focus:border-brivo-navy"
+                >
+                  <option value="10">10 Orders Per Page</option>
+                  <option value="20">20 Orders Per Page</option>
+                  <option value="50">50 Orders Per Page</option>
+                  <option value="100">100 Orders Per Page</option>
+                </select>
+              </div>
             </div>
 
             {/* Active Filters Pill Bar */}
-            {(selectedState || selectedEntity || dateFrom || dateTo || qParam) && (
+            {(selectedState || selectedEntity || selectedPenaltySlab || dateFrom || dateTo || qParam) && (
               <div className="pt-3 border-t border-brivo-navy/10 flex flex-wrap items-center justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-1.5">
                   <span className="text-[0.65rem] font-mono text-brivo-slate uppercase">
@@ -379,6 +494,20 @@ function ExplorerContent() {
                       Query: &ldquo;{qParam}&rdquo;
                       <button
                         onClick={() => updateUrl({ q: undefined, page: 1 })}
+                        className="hover:text-rose-500"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                  {selectedPenaltySlab && (
+                    <span className="px-2 py-0.5 rounded bg-brivo-paper border border-brivo-navy/10 text-xs font-mono text-brivo-navy flex items-center gap-1">
+                      Penalty: {PENALTY_SLABS.find((s) => s.id === selectedPenaltySlab)?.label || selectedPenaltySlab}
+                      <button
+                        onClick={() => {
+                          setSelectedPenaltySlab("");
+                          updateUrl({ penalty_slab: undefined, page: 1 });
+                        }}
                         className="hover:text-rose-500"
                       >
                         ×

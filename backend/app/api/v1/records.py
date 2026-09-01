@@ -32,6 +32,7 @@ async def list_records(
     date_to: date | None = Query(None, description="Filter orders published on or before date"),
     min_amount: float | None = Query(None, description="Filter minimum penalty amount (INR)"),
     max_amount: float | None = Query(None, description="Filter maximum penalty amount (INR)"),
+    penalty_slab: str | None = Query(None, description="Filter by penalty slab (zero, non_zero, thousands, lakhs, crores)"),
     sort_by: str = Query("published_date", description="Field to sort by (published_date, amount, ingested_at, title)"),
     sort_order: str = Query("desc", description="Sort order (asc, desc)"),
     page: int = Query(1, ge=1, description="Page number"),
@@ -124,6 +125,19 @@ async def list_records(
 
     if isinstance(max_amount, (int, float)):
         filters.append(Record.amount <= max_amount)
+
+    if isinstance(penalty_slab, str) and penalty_slab.strip():
+        ps = penalty_slab.strip().lower()
+        if ps == "zero":
+            filters.append(or_(Record.amount.is_(None), Record.amount == 0))
+        elif ps == "non_zero":
+            filters.append(and_(Record.amount.isnot(None), Record.amount > 0))
+        elif ps in ("thousands", "k"):
+            filters.append(and_(Record.amount >= 1000, Record.amount < 100000))
+        elif ps in ("lakhs", "lakh"):
+            filters.append(and_(Record.amount >= 100000, Record.amount < 10000000))
+        elif ps in ("crores", "crore", "cr"):
+            filters.append(Record.amount >= 10000000)
 
     if filters:
         for f in filters:
