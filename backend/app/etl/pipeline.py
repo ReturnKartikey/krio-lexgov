@@ -3,7 +3,7 @@ import traceback
 import uuid
 from datetime import UTC, datetime
 
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.adapters.base import SourceAdapter
@@ -41,9 +41,15 @@ class ETLPipeline:
         logger.info(f"Starting ETL Ingestion run for adapter [{self.adapter_key}] triggered by [{triggered_by}]")
 
         # 1. Ensure Source exists
-        stmt = select(Source).where(Source.adapter_key == self.adapter_key)
+        stmt = select(Source).where(
+            or_(
+                Source.adapter_key == self.adapter_key,
+                Source.adapter_key == self.adapter.adapter_key,
+                Source.name == self.adapter.name,
+            )
+        )
         result = await db.execute(stmt)
-        source = result.scalar_one_or_none()
+        source = result.scalars().first()
 
         if not source:
             source = Source(
@@ -54,6 +60,9 @@ class ETLPipeline:
                 description=self.adapter.description,
             )
             db.add(source)
+            await db.flush()
+        else:
+            source.adapter_key = self.adapter.adapter_key
             await db.flush()
 
         # 2. Retrieve Crawl State
