@@ -39,8 +39,8 @@ async def bootstrap_initial_data_if_empty():
             stmt = select(func.count(Record.id))
             res = await session.execute(stmt)
             count = res.scalar_one() or 0
-            if count == 0:
-                logger.info("Database is empty. Running initial bootstrap ingestion...")
+            if count < 35:
+                logger.info(f"Database contains {count} records (< 35). Running bootstrap ingestion to populate complete enforcement dataset...")
                 pipeline = ETLPipeline(adapter_key="sebi_adjudication_orders")
                 await pipeline.run(
                     db=session,
