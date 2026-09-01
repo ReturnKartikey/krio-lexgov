@@ -99,26 +99,26 @@ async def trigger_sync(
 ):
     """
     Trigger manual incremental or full synchronization from the public registry.
-    Executes ETL pipeline and records ingestion audit trail.
+    Executes ETL pipeline asynchronously in background to prevent HTTP gateway timeouts.
     """
     try:
-        pipeline = ETLPipeline(adapter_key=payload.adapter_key)
-        run_record = await pipeline.run(
-            db=db,
-            triggered_by="manual_api",
-            limit=payload.limit,
-            incremental=payload.incremental,
+        run_id = uuid.uuid4()
+        background_tasks.add_task(
+            execute_background_sync,
+            payload.adapter_key,
+            payload.limit,
+            payload.incremental,
         )
 
         return SyncJobResponse(
-            message=f"Sync completed with status: {run_record.status}",
-            run_id=run_record.id,
-            status=run_record.status,
-            records_seen=run_record.records_seen,
-            records_added=run_record.records_added,
-            records_updated=run_record.records_updated,
-            records_failed=run_record.records_failed,
-            duration_seconds=float(run_record.duration_seconds) if run_record.duration_seconds else None,
+            message=f"Ingestion sync initiated in background for adapter: {payload.adapter_key}",
+            run_id=run_id,
+            status="queued",
+            records_seen=0,
+            records_added=0,
+            records_updated=0,
+            records_failed=0,
+            duration_seconds=None,
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to execute ingestion sync: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to initiate ingestion sync: {str(e)}")
