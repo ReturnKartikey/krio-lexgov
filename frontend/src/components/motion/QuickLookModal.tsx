@@ -18,6 +18,7 @@ import {
 import { RecordListItem } from "@/lib/types";
 import { formatINR, formatDate } from "@/lib/utils";
 import { HashDescramble } from "./HashDescramble";
+import { ExportPdfButton } from "@/components/common/ExportPdfButton";
 
 interface QuickLookModalProps {
   record: RecordListItem | null;
@@ -171,6 +172,8 @@ export function QuickLookModal({ record, isOpen, onClose }: QuickLookModalProps)
               </span>
 
               <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                <ExportPdfButton record={record as any} variant="compact" />
+
                 <a
                   href={record.source_url}
                   target="_blank"

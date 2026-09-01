@@ -30,7 +30,7 @@ import { IntelligenceModal } from "@/components/ai/IntelligenceModal";
 import { QuickLookModal } from "@/components/motion/QuickLookModal";
 import { MagneticButton } from "@/components/motion/MagneticButton";
 import { TiltCard } from "@/components/motion/TiltCard";
-import { getRecords, getTrends, getProcessingStats, getHealth } from "@/lib/api";
+import { getRecords, getTrends, getProcessingStats, getHealth, getDocsUrl } from "@/lib/api";
 import { formatINR, formatDate, truncateText } from "@/lib/utils";
 import { gsap, ScrollTrigger, SplitType, animateHeroHeadline, animateCounter, prefersReducedMotion } from "@/lib/motion";
 
@@ -283,28 +283,33 @@ export default function LandingPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 pt-2 text-xs font-mono">
-            <div className="scroll-reveal-item p-4 rounded-xl border border-brivo-navy/10 bg-brivo-paper/40 flex flex-col justify-between hover:border-brivo-navy/25 transition-all">
-              <span className="text-[0.68rem] text-brivo-slate uppercase">Primary Source</span>
+            <div className="scroll-reveal-item p-4 rounded-xl border border-emerald-500/30 bg-emerald-50/20 flex flex-col justify-between hover:border-emerald-500/50 transition-all shadow-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-[0.68rem] text-emerald-800 font-semibold uppercase">Primary Source</span>
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+              </div>
               <span className="text-sm font-semibold text-brivo-navy mt-1">SEBI Enforcement Orders</span>
-              <span className="text-[0.68rem] text-emerald-600 font-normal mt-2">Ingested & Verified</span>
+              <span className="text-[0.68rem] text-emerald-700 font-medium mt-2 flex items-center gap-1">
+                <span>● Ingested & Verified</span>
+              </span>
             </div>
 
-            <div className="scroll-reveal-item p-4 rounded-xl border border-brivo-navy/10 bg-brivo-paper/40 flex flex-col justify-between hover:border-brivo-navy/25 transition-all">
+            <div className="scroll-reveal-item p-4 rounded-xl border border-brivo-navy/10 bg-brivo-paper/40 flex flex-col justify-between hover:border-brivo-navy/25 transition-all opacity-85">
               <span className="text-[0.68rem] text-brivo-slate uppercase">Exchange Filings</span>
               <span className="text-sm font-semibold text-brivo-navy mt-1">BSE Corporate Disclosures</span>
-              <span className="text-[0.68rem] text-brivo-slate font-normal mt-2">Adapter Ready</span>
+              <span className="text-[0.68rem] text-brivo-slate font-normal mt-2">Planned (Q4 Roadmap)</span>
             </div>
 
-            <div className="scroll-reveal-item p-4 rounded-xl border border-brivo-navy/10 bg-brivo-paper/40 flex flex-col justify-between hover:border-brivo-navy/25 transition-all">
+            <div className="scroll-reveal-item p-4 rounded-xl border border-brivo-navy/10 bg-brivo-paper/40 flex flex-col justify-between hover:border-brivo-navy/25 transition-all opacity-85">
               <span className="text-[0.68rem] text-brivo-slate uppercase">Market Surveillance</span>
               <span className="text-sm font-semibold text-brivo-navy mt-1">NSE Member Bulletins</span>
-              <span className="text-[0.68rem] text-brivo-slate font-normal mt-2">Adapter Ready</span>
+              <span className="text-[0.68rem] text-brivo-slate font-normal mt-2">Planned (Q4 Roadmap)</span>
             </div>
 
-            <div className="scroll-reveal-item p-4 rounded-xl border border-brivo-navy/10 bg-brivo-paper/40 flex flex-col justify-between hover:border-brivo-navy/25 transition-all">
+            <div className="scroll-reveal-item p-4 rounded-xl border border-brivo-navy/10 bg-brivo-paper/40 flex flex-col justify-between hover:border-brivo-navy/25 transition-all opacity-85">
               <span className="text-[0.68rem] text-brivo-slate uppercase">Corporate Filings</span>
               <span className="text-sm font-semibold text-brivo-navy mt-1">MCA-21 RoC Orders</span>
-              <span className="text-[0.68rem] text-brivo-slate font-normal mt-2">Planned Roadmap</span>
+              <span className="text-[0.68rem] text-brivo-slate font-normal mt-2">Planned (Q4 Roadmap)</span>
             </div>
           </div>
         </div>
@@ -664,7 +669,7 @@ export default function LandingPage() {
             </MagneticButton>
 
             <a
-              href="http://127.0.0.1:8005/docs"
+              href={getDocsUrl()}
               target="_blank"
               rel="noopener noreferrer"
               className="px-6 py-3 rounded-full bg-brivo-navy hover:bg-brivo-navy/90 text-brivo-paper text-xs font-mono flex items-center gap-2 shadow-xs transition-all active:scale-95"

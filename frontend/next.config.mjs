@@ -45,7 +45,10 @@ const nextConfig = {
       process.env.INTERNAL_API_URL ||
       process.env.API_URL ||
       process.env.NEXT_PUBLIC_API_URL ||
-      "http://127.0.0.1:8005";
+      process.env.NEXT_PUBLIC_API_BASE_URL ||
+      (process.env.NODE_ENV === "production"
+        ? "https://krio-lexgov-api.onrender.com"
+        : "http://127.0.0.1:8005");
     return [
       {
         source: "/api/:path*",

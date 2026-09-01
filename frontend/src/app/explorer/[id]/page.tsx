@@ -20,6 +20,7 @@ import { MicroLabel } from "@/components/common/MicroLabel";
 import { JsonViewer } from "@/components/common/JsonViewer";
 import { SynthesizeButton } from "@/components/ai/SynthesizeButton";
 import { HashDescramble } from "@/components/motion/HashDescramble";
+import { ExportPdfButton } from "@/components/common/ExportPdfButton";
 import { getRecordDetail } from "@/lib/api";
 import { formatINR, formatDate } from "@/lib/utils";
 
@@ -56,7 +57,7 @@ export default async function RecordDetailPage({ params }: PageProps) {
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
       {/* Breadcrumbs & Navigation */}
-      <div className="flex items-center justify-between border-b border-brivo-navy/10 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-brivo-navy/10 pb-4 gap-4">
         <Link
           href="/explorer"
           className="text-xs font-mono text-brivo-slate hover:text-brivo-navy transition-colors flex items-center gap-1.5"
@@ -65,11 +66,12 @@ export default async function RecordDetailPage({ params }: PageProps) {
           <span>Back to Records Explorer</span>
         </Link>
 
-        <div className="flex items-center gap-2">
-          <span className="font-mono text-[0.65rem] px-2 py-0.5 rounded bg-brivo-paper border border-brivo-navy/15 text-brivo-navy font-semibold">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <ExportPdfButton record={record} variant="compact" />
+          <span className="font-mono text-[0.65rem] px-2.5 py-1 rounded-md bg-brivo-paper border border-brivo-navy/15 text-brivo-navy font-semibold">
             {record.external_id}
           </span>
-          <span className="font-mono text-[0.65rem] px-2 py-0.5 rounded bg-emerald-50 border border-emerald-200 text-emerald-700 uppercase">
+          <span className="font-mono text-[0.65rem] px-2.5 py-1 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 uppercase font-medium">
             {record.status}
           </span>
         </div>
@@ -235,7 +237,8 @@ export default async function RecordDetailPage({ params }: PageProps) {
               </div>
             </div>
 
-            <div className="pt-2">
+            <div className="pt-2 space-y-2">
+              <ExportPdfButton record={record} variant="primary" className="w-full" />
               <SynthesizeButton
                 query={record.title}
                 label="Synthesize Risk Brief"

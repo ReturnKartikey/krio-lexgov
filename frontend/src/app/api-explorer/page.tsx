@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { MicroLabel } from "@/components/common/MicroLabel";
 import { JsonViewer } from "@/components/common/JsonViewer";
+import { getApiBaseUrl, getDocsUrl } from "@/lib/api";
 
 interface ApiParam {
   key: string;
@@ -168,7 +169,8 @@ export default function ApiExplorerPage() {
   };
 
   const generateCurl = () => {
-    const url = `http://127.0.0.1:8005${getFullUrl()}`;
+    const baseUrl = getApiBaseUrl();
+    const url = `${baseUrl}${getFullUrl()}`;
     if (selectedEndpoint.method === "POST") {
       const body = {
         adapter_key: paramValues.adapter_key || "sebi_adjudication_orders",
@@ -235,7 +237,7 @@ export default function ApiExplorerPage() {
         {/* OpenAPI Link */}
         <div className="flex items-center gap-3">
           <a
-            href="http://127.0.0.1:8005/docs"
+            href={getDocsUrl()}
             target="_blank"
             rel="noopener noreferrer"
             className="px-4 py-2 rounded-full bg-white hover:bg-brivo-paper border border-brivo-navy/15 text-xs font-mono text-brivo-navy transition-colors flex items-center gap-1.5 shadow-sm"

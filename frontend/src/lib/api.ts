@@ -55,16 +55,38 @@ export function clearCache(pattern?: string): void {
   });
 }
 
-function getApiBase(): string {
+export function getApiBaseUrl(): string {
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, "");
+  }
+  if (process.env.NEXT_PUBLIC_API_BASE_URL) {
+    return process.env.NEXT_PUBLIC_API_BASE_URL.replace(/\/$/, "");
+  }
   if (typeof window !== "undefined") {
-    return "";
+    if (
+      !window.location.hostname.includes("localhost") &&
+      !window.location.hostname.includes("127.0.0.1")
+    ) {
+      return "https://krio-lexgov-api.onrender.com";
+    }
   }
   return (
     process.env.INTERNAL_API_URL ||
     process.env.API_URL ||
-    process.env.NEXT_PUBLIC_API_URL ||
     "http://127.0.0.1:8005"
-  );
+  ).replace(/\/$/, "");
+}
+
+export function getDocsUrl(): string {
+  const base = getApiBaseUrl();
+  return `${base}/docs`;
+}
+
+function getApiBase(): string {
+  if (typeof window !== "undefined") {
+    return "";
+  }
+  return getApiBaseUrl();
 }
 
 const inflightRequests = new Map<string, Promise<any>>();

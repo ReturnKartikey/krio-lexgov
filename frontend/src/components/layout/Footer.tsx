@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Shield, FileText, Database, Scale, ArrowUpRight } from "lucide-react";
 import { MascotSentinel } from "@/components/motion/MascotSentinel";
+import { getDocsUrl } from "@/lib/api";
 
 export function Footer() {
   return (
@@ -70,7 +71,7 @@ export function Footer() {
             <h4 className="font-mono text-xs text-brivo-paper uppercase tracking-wider">Specifications</h4>
             <ul className="space-y-2 text-xs font-mono">
               <li>
-                <a href="http://127.0.0.1:8005/docs" target="_blank" rel="noopener noreferrer" className="hover:text-brivo-cyan transition-colors flex items-center gap-1">
+                <a href={getDocsUrl()} target="_blank" rel="noopener noreferrer" className="hover:text-brivo-cyan transition-colors flex items-center gap-1">
                   <span>OpenAPI 3.1 Spec</span>
                   <ArrowUpRight className="w-3 h-3" />
                 </a>
