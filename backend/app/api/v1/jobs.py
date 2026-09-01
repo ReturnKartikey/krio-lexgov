@@ -80,6 +80,31 @@ async def execute_background_sync(adapter_key: str, limit: int, incremental: boo
     """Execute ETL run in background with fresh database session."""
     async with AsyncSessionLocal() as session:
         try:
+            from app.db.models import Record, RecordEntity
+            from sqlalchemy import select, delete
+            legacy_ids = [
+                "SEBI-FINVEST-AO-2026",
+                "SEBI-BROKING-AO-2026",
+                "SEBI-WAAREE-AUG-2026",
+                "SEBI-SANWARIA-2026",
+                "SEBI-PENALTY-2026",
+                "SEBI-RADHIKA-2026",
+                "SEBI-FORTIS-AO-2026",
+                "SEBI-CORPORATE-2026",
+                "SEBI-INSIDER-2026",
+                "SEBI-RECOVERY-2026",
+                "SEBI-ZENITH-2026",
+                "SEBI-WINSOME-2026",
+            ]
+            for leg_id in legacy_ids:
+                rec_stmt = select(Record).where(Record.external_id == leg_id)
+                rec_res = await session.execute(rec_stmt)
+                rec = rec_res.scalar_one_or_none()
+                if rec:
+                    await session.execute(delete(RecordEntity).where(RecordEntity.record_id == rec.id))
+                    await session.execute(delete(Record).where(Record.id == rec.id))
+            await session.commit()
+
             pipeline = ETLPipeline(adapter_key=adapter_key)
             await pipeline.run(
                 db=session,
