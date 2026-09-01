@@ -278,7 +278,7 @@ function ExplorerContent() {
       </div>
 
       {/* Main Search Bar & Quick Toggles */}
-      <div className="space-y-3">
+      <div className="space-y-3 relative z-30">
         <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-brivo-slate" />
@@ -340,7 +340,7 @@ function ExplorerContent() {
 
         {/* Collapsible Filter Panel */}
         {showFilters && (
-          <div className="p-5 rounded-xl bg-white border border-brivo-navy/10 space-y-4 animate-fade-in shadow-sm">
+          <div className="p-5 rounded-xl bg-white border border-brivo-navy/10 space-y-4 animate-fade-in shadow-sm relative z-30">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* State */}
               <div className="space-y-1.5">
@@ -539,7 +539,7 @@ function ExplorerContent() {
           </button>
         </div>
       ) : (
-        <div className={`relative transition-opacity duration-200 ${isFetching ? "opacity-60 pointer-events-none" : "opacity-100"}`}>
+        <div className={`relative z-10 transition-opacity duration-200 ${isFetching ? "opacity-60 pointer-events-none" : "opacity-100"}`}>
           {isFetching && (
             <div className="absolute -top-3 left-0 right-0 h-1 bg-brivo-cyan/20 overflow-hidden rounded-full z-20">
               <div className="h-full bg-brivo-cyan animate-pulse w-full" />

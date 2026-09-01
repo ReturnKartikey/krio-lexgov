@@ -76,7 +76,7 @@ export function CustomSelect({
   };
 
   return (
-    <div ref={containerRef} className={`relative select-none ${className}`}>
+    <div ref={containerRef} className={`relative select-none ${isOpen ? "z-50" : "z-10"} ${className}`}>
       {/* Trigger Button */}
       <button
         type="button"
@@ -109,7 +109,7 @@ export function CustomSelect({
             animate={{ opacity: 1, y: 4, scale: 1 }}
             exit={{ opacity: 0, y: -4, scale: 0.98 }}
             transition={{ duration: 0.12, ease: "easeOut" }}
-            className={`absolute left-0 z-50 mt-1 max-h-60 min-w-[140px] overflow-y-auto rounded-xl bg-white border border-brivo-navy/15 p-1 shadow-xl shadow-brivo-navy/10 custom-scrollbar ${menuClassName}`}
+            className={`absolute left-0 z-50 mt-1 max-h-60 min-w-[140px] overflow-y-auto rounded-xl bg-white border border-brivo-navy/15 p-1 shadow-2xl shadow-brivo-navy/20 custom-scrollbar ${menuClassName}`}
             style={{ width: "100%", minWidth: "max-content" }}
             role="listbox"
           >
