@@ -98,7 +98,7 @@ MATTER_REGEX = re.compile(
 )
 
 PENALTY_REGEX = re.compile(
-    r"(?:penalty\s+(?:of|amount\s+of)|impose(?:d|s)?\s+(?:a\s+)?penalty\s+of|fine\s+of|total\s+penalty\s+of|impound(?:ing)?\s+(?:an\s+amount\s+of\s+)?|disgorge\s+(?:an\s+amount\s+of\s+)?)\s*(?:Rs\.?|INR|₹)\s*([\d,]+(?:\.\d+)?)\s*(lakhs?|crores?|cr\.?|thousand|million|billion)?(?:\s*/-)?",
+    r"(?:penalty\s+(?:of|amount\s+of)|impose(?:d|s)?\s+(?:a\s+)?penalty\s+of|fine\s+of|total\s+penalty\s+of|impound(?:ing)?\s+(?:an\s+amount\s+of\s+)?|disgorge\s+(?:an\s+amount\s+of\s+)?|settlement\s+(?:amount|terms|charges|sum)?\s*(?:of|is)?|settle\s+for(?:\s+an\s+amount\s+of)?|proposing\s+to\s+offer|recommended\s+an\s+amount\s+of)\s*(?:Rs\.?|INR|₹|\u20b9)?\s*([\d,]+(?:\.\d+)?)\s*(lakhs?|crores?|cr\.?|thousand|million|billion)?(?:\s*/-)?",
     re.IGNORECASE,
 )
 

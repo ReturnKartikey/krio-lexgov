@@ -103,6 +103,25 @@ async def execute_background_sync(adapter_key: str, limit: int, incremental: boo
                 if rec:
                     await session.execute(delete(RecordEntity).where(RecordEntity.record_id == rec.id))
                     await session.execute(delete(Record).where(Record.id == rec.id))
+
+            # Update all seed records to exact static ISO published dates and verified PDF penalty amounts
+            from app.adapters.sebi_orders import SAMPLE_SEBI_DATA
+            from sqlalchemy import update
+            from datetime import date
+            for item in SAMPLE_SEBI_DATA:
+                await session.execute(
+                    update(Record)
+                    .where(Record.external_id == item["external_id"])
+                    .values(
+                        published_date=date.fromisoformat(item["published_date"]),
+                        amount=item["amount"],
+                        source_url=item["source_url"],
+                        title=item["title"],
+                        summary=item["summary"],
+                        state=item.get("state", "Maharashtra"),
+                        jurisdiction=item.get("jurisdiction", "Head Office, Mumbai"),
+                    )
+                )
             await session.commit()
 
             pipeline = ETLPipeline(adapter_key=adapter_key)
