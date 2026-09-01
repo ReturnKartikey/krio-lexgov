@@ -57,6 +57,8 @@ async def bootstrap_initial_data_if_empty():
                 rec = rec_res.scalar_one_or_none()
                 if rec:
                     await session.execute(delete(RecordEntity).where(RecordEntity.record_id == rec.id))
+                    await session.execute(delete(Record).where(Record.id == rec.id))
+            await session.commit()
             # Update all seed records to exact static ISO published dates and verified PDF penalty amounts
             from app.adapters.sebi_orders import SAMPLE_SEBI_DATA
             from sqlalchemy import update
