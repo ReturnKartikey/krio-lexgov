@@ -429,55 +429,63 @@ class SEBIOrdersAdapter(SourceAdapter):
         if settings.ENVIRONMENT == "test":
             return self._get_seed_refs(since, page_num, limit)
 
-        refs: list[RawRecordRef] = []
-        listing_url = (
-            f"{self.base_url}/sebiweb/home/HomeAction.do?doListing=yes&sid=2&ssid=9&smid=6&pageNo={page_num}"
-        )
+        categories = [
+            ("AO", 6),
+            ("Chairperson", 2),
+            ("Settlement", 3),
+        ]
 
         try:
             # Respect robots.txt
             if settings.ENABLE_ROBOTS_TXT_CHECK:
-                allowed = await robots_validator.can_fetch(listing_url)
+                allowed = await robots_validator.can_fetch(f"{self.base_url}/sebiweb/home/HomeAction.do?doListing=yes&sid=2&ssid=9&smid=6&pageNo={page_num}")
                 if not allowed:
-                    logger.warning(f"Robots.txt disallowed crawling {listing_url}. Using cached public seed.")
+                    logger.warning("Robots.txt disallowed crawling SEBI. Using cached public seed.")
                     return self._get_seed_refs(since, page_num, limit)
 
             await rate_limiter.acquire(1.0)
             async with httpx.AsyncClient(timeout=settings.CRAWLER_REQUEST_TIMEOUT, follow_redirects=True) as client:
-                response = await client.get(listing_url, headers=self._get_headers())
-                if response.status_code == 200:
-                    soup = BeautifulSoup(response.text, "html.parser")
-                    table = soup.find("table", {"class": "table"}) or soup.find("table")
-                    if table:
-                        rows = table.find_all("tr")[1:]  # skip header
-                        for row in rows:
-                            cols = row.find_all("td")
-                            if len(cols) >= 2:
-                                date_str = cols[0].get_text(strip=True)
-                                link_tag = cols[1].find("a")
-                                title = cols[1].get_text(strip=True)
-                                if link_tag and link_tag.get("href"):
-                                    href = link_tag["href"]
-                                    full_url = href if href.startswith("http") else f"{self.base_url}{href}"
-                                    ext_id = hashlib.md5(full_url.encode()).hexdigest()[:16].upper()
-                                    
-                                    # Parse date
-                                    pub_date = None
-                                    for fmt in ("%b %d, %Y", "%d-%m-%Y", "%d/%m/%Y", "%Y-%m-%d"):
-                                        try:
-                                            pub_date = datetime.strptime(date_str, fmt).date()
-                                            break
-                                        except Exception:
-                                            pass
+                for cat_name, smid in categories:
+                    listing_url = (
+                        f"{self.base_url}/sebiweb/home/HomeAction.do?doListing=yes&sid=2&ssid=9&smid={smid}&pageNo={page_num}"
+                    )
+                    try:
+                        response = await client.get(listing_url, headers=self._get_headers())
+                        if response.status_code == 200:
+                            soup = BeautifulSoup(response.text, "html.parser")
+                            table = soup.find("table", {"class": "table"}) or soup.find("table")
+                            if table:
+                                rows = table.find_all("tr")[1:]  # skip header
+                                for row in rows:
+                                    cols = row.find_all("td")
+                                    if len(cols) >= 2:
+                                        date_str = cols[0].get_text(strip=True)
+                                        link_tag = cols[1].find("a")
+                                        title = cols[1].get_text(strip=True)
+                                        if link_tag and link_tag.get("href"):
+                                            href = link_tag["href"]
+                                            full_url = href if href.startswith("http") else f"{self.base_url}{href}"
+                                            ext_id = hashlib.md5(full_url.encode()).hexdigest()[:16].upper()
+                                            
+                                            # Parse date accurately
+                                            pub_date = None
+                                            for fmt in ("%b %d, %Y", "%B %d, %Y", "%d-%m-%Y", "%d/%m/%Y", "%Y-%m-%d", "%d %b %Y"):
+                                                try:
+                                                    pub_date = datetime.strptime(date_str, fmt).date()
+                                                    break
+                                                except Exception:
+                                                    pass
 
-                                    ref = RawRecordRef(
-                                        external_id=f"SEBI-{ext_id}",
-                                        source_url=full_url,
-                                        title=title,
-                                        published_date=pub_date,
-                                        metadata={"scraped_date": date_str},
-                                    )
-                                    refs.append(ref)
+                                            ref = RawRecordRef(
+                                                external_id=f"SEBI-{ext_id}",
+                                                source_url=full_url,
+                                                title=title,
+                                                published_date=pub_date,
+                                                metadata={"scraped_date": date_str, "category": cat_name},
+                                            )
+                                            refs.append(ref)
+                    except Exception as cat_err:
+                        logger.debug(f"Failed crawling category {cat_name}: {cat_err}")
 
         except Exception as e:
             logger.info(f"Live SEBI crawler encountered: {e}. Utilizing public seed registry for continuous service.")
