@@ -239,8 +239,12 @@ class SEBIOrdersAdapter(SourceAdapter):
         except Exception as e:
             logger.info(f"Live SEBI crawler encountered: {e}. Utilizing public seed registry for continuous service.")
 
-        if not refs and settings.AUTO_SEED_FALLBACK:
-            return self._get_seed_refs(since, page_num, limit)
+        if settings.AUTO_SEED_FALLBACK:
+            seed_refs, _ = self._get_seed_refs(since, 1, 50)
+            existing_urls = {r.source_url for r in refs}
+            for sref in seed_refs:
+                if sref.source_url not in existing_urls:
+                    refs.append(sref)
 
         next_cursor = str(page_num + 1) if len(refs) >= limit else None
         return refs, next_cursor
