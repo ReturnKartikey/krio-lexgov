@@ -276,21 +276,14 @@ export default function LandingPage() {
             <span className="text-[0.68rem] font-mono tracking-[0.2em] uppercase text-brivo-slate">
               PUBLIC REGULATORY ARCHIVE // OFFICIAL INDIAN REGULATORY DISCLOSURES
             </span>
-            <span className="text-[0.68rem] font-mono text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1.5 shadow-xs">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span>SYNC ACTIVE</span>
-            </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 pt-2 text-xs font-mono">
             <div className="scroll-reveal-item p-4 rounded-xl border border-emerald-500/30 bg-emerald-50/20 flex flex-col justify-between hover:border-emerald-500/50 transition-all shadow-xs">
-              <div className="flex items-center justify-between">
-                <span className="text-[0.68rem] text-emerald-800 font-semibold uppercase">Primary Source</span>
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-              </div>
+              <span className="text-[0.68rem] text-emerald-800 font-semibold uppercase">Primary Source</span>
               <span className="text-sm font-semibold text-brivo-navy mt-1">SEBI Enforcement Orders</span>
               <span className="text-[0.68rem] text-emerald-700 font-medium mt-2 flex items-center gap-1">
-                <span>● Ingested & Verified</span>
+                <span>Ingested & Verified</span>
               </span>
             </div>
 
