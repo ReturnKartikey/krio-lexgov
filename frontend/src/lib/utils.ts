@@ -70,3 +70,19 @@ export function truncateText(text?: string | null, length: number = 120): string
   if (text.length <= length) return text;
   return text.substring(0, length).trim() + "...";
 }
+
+export function formatCleanSummary(title?: string | null, summary?: string | null): string {
+  if (!summary) return "No extracted summary available.";
+  const cleanSummary = summary.trim();
+  if (!title) return cleanSummary;
+
+  const cleanTitle = title.trim().replace(/\.+$/, "").toLowerCase();
+  if (cleanSummary.toLowerCase().startsWith(cleanTitle)) {
+    const remaining = cleanSummary.slice(cleanTitle.length).replace(/^[\.\s,:-]+/, "").trim();
+    if (remaining.length > 20) {
+      return remaining.charAt(0).toUpperCase() + remaining.slice(1);
+    }
+  }
+  return cleanSummary;
+}
+

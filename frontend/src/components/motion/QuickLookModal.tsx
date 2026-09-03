@@ -16,7 +16,7 @@ import {
   Hash,
 } from "lucide-react";
 import { RecordListItem } from "@/lib/types";
-import { formatINR, formatDate } from "@/lib/utils";
+import { formatINR, formatDate, formatCleanSummary } from "@/lib/utils";
 import { HashDescramble } from "./HashDescramble";
 import { ExportPdfButton } from "@/components/common/ExportPdfButton";
 
@@ -121,7 +121,7 @@ export function QuickLookModal({ record, isOpen, onClose }: QuickLookModalProps)
                   {record.title}
                 </h3>
                 <p className="text-xs text-brivo-slate leading-relaxed font-sans line-clamp-3">
-                  {record.summary || "Adjudication order issued under SEBI enforcement statutory provisions."}
+                  {formatCleanSummary(record.title, record.summary)}
                 </p>
               </div>
 

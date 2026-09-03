@@ -22,7 +22,7 @@ import { SynthesizeButton } from "@/components/ai/SynthesizeButton";
 import { HashDescramble } from "@/components/motion/HashDescramble";
 import { ExportPdfButton } from "@/components/common/ExportPdfButton";
 import { getRecordDetail } from "@/lib/api";
-import { formatINR, formatDate } from "@/lib/utils";
+import { formatINR, formatDate, formatCleanSummary } from "@/lib/utils";
 
 interface PageProps {
   params: { id: string };
@@ -113,7 +113,7 @@ export default async function RecordDetailPage({ params }: PageProps) {
               <span>Order Summary & Findings</span>
             </h2>
             <div className="text-sm text-brivo-navy leading-relaxed whitespace-pre-line">
-              {record.summary || "No extracted summary available."}
+              {formatCleanSummary(record.title, record.summary)}
             </div>
           </div>
 

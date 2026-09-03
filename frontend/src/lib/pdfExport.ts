@@ -68,6 +68,15 @@ function sanitizeExecutiveSummary(record: RecordDetailItem): string {
     return `Regulatory enforcement adjudication order issued by the Securities and Exchange Board of India (SEBI) in the matter of ${noticees}, ${penaltyClause} pursuant to statutory market regulations and corporate governance provisions.`;
   }
 
+  // Strip redundant title prefix if summary starts with the title
+  const cleanTitle = (record.title || "").trim().replace(/\.+$/, "").toLowerCase();
+  if (summary.toLowerCase().startsWith(cleanTitle)) {
+    const remaining = summary.slice(cleanTitle.length).replace(/^[\.\s,:-]+/, "").trim();
+    if (remaining.length > 20) {
+      summary = remaining.charAt(0).toUpperCase() + remaining.slice(1);
+    }
+  }
+
   // Clean any leading punctuation or whitespace
   return summary.replace(/^[\s»>|•\-]+/, "");
 }

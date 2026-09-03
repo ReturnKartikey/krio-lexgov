@@ -670,8 +670,17 @@ class SEBIOrdersAdapter(SourceAdapter):
         if not raw_summary or "Home »" in raw_summary or "SEBI |" in raw_summary or len(raw_summary) < 40:
             noticee_list = [e.name for e in entities[:3]] if entities else []
             noticee_desc = ", ".join(noticee_list) if noticee_list else "the cited respondents"
-            penalty_desc = f"with aggregate penalty sanction of INR {amount:,.2f}" if amount else "imposing non-monetary market debarments and regulatory directions"
-            raw_summary = f"{ref.title}. Regulatory enforcement proceeding issued by Securities and Exchange Board of India (SEBI) in the matter of {noticee_desc}, {penalty_desc} under applicable market governance provisions."
+            penalty_desc = f"with aggregate monetary sanction of INR {amount:,.2f}" if amount else "imposing non-monetary market debarments and statutory regulatory directions"
+            type_label = record_type.replace("_", " ").title()
+            raw_summary = f"Regulatory enforcement proceeding ({type_label}) issued by Securities and Exchange Board of India (SEBI) concerning {noticee_desc}, {penalty_desc} under applicable market governance and statutory provisions."
+        
+        # Strip redundant title prefix if summary starts with the title
+        clean_title = ref.title.strip().rstrip(".").lower()
+        if raw_summary.lower().startswith(clean_title):
+            remaining = raw_summary[len(clean_title):].lstrip(" .:-;,")
+            if len(remaining) > 20:
+                raw_summary = remaining[0].upper() + remaining[1:]
+
         summary = raw_summary
 
         entity_names_list = [e.name for e in entities]

@@ -29,7 +29,7 @@ import { IntelligenceModal } from "@/components/ai/IntelligenceModal";
 import { QuickLookModal } from "@/components/motion/QuickLookModal";
 import { getRecords } from "@/lib/api";
 import { RecordListItem, PaginationMeta } from "@/lib/types";
-import { formatINR, formatDate, truncateText } from "@/lib/utils";
+import { formatINR, formatDate, truncateText, formatCleanSummary } from "@/lib/utils";
 import { RollingNumber } from "@/components/ui/RollingNumber";
 
 const STATES = [
@@ -576,7 +576,7 @@ function ExplorerContent() {
                         <HighlightedText text={record.title} highlight={qParam} />
                       </Link>
                       <p className="text-xs text-brivo-slate leading-relaxed line-clamp-2">
-                        <HighlightedText text={record.summary} highlight={qParam} />
+                        <HighlightedText text={formatCleanSummary(record.title, record.summary)} highlight={qParam} />
                       </p>
                     </div>
 
