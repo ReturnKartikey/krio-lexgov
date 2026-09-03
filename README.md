@@ -1,12 +1,12 @@
 # KRIO // LexGov
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Status-Production%20Ready-emerald?style=for-the-badge&logo=fastapi" alt="Status" />
-  <img src="https://img.shields.io/badge/Deployment-Vercel%20%2B%20Render-blue?style=for-the-badge&logo=vercel" alt="Deployment" />
-  <img src="https://img.shields.io/badge/FastAPI-0.111.0-009688?style=for-the-badge&logo=fastapi" alt="FastAPI" />
-  <img src="https://img.shields.io/badge/Next.js-14.2.5-black?style=for-the-badge&logo=next.js" alt="Next.js" />
-  <img src="https://img.shields.io/badge/PostgreSQL-16%20%2B%20pg__trgm-4169E1?style=for-the-badge&logo=postgresql" alt="PostgreSQL" />
-  <img src="https://img.shields.io/badge/License-MIT-amber?style=for-the-badge" alt="License" />
+<p align="left">
+  <a href="https://krio-lexgov-api.onrender.com"><img src="https://img.shields.io/badge/Status-Live_Production-059669?style=flat-square&logo=render&logoColor=white" alt="Status" /></a>
+  <a href="https://krio-rust.vercel.app"><img src="https://img.shields.io/badge/Web_App-Vercel-000000?style=flat-square&logo=vercel&logoColor=white" alt="Web App" /></a>
+  <a href="https://krio-lexgov-api.onrender.com/docs"><img src="https://img.shields.io/badge/FastAPI-0.111.0-009688?style=flat-square&logo=fastapi&logoColor=white" alt="FastAPI" /></a>
+  <a href="https://krio-rust.vercel.app"><img src="https://img.shields.io/badge/Next.js-14.2.5-000000?style=flat-square&logo=nextdotjs&logoColor=white" alt="Next.js" /></a>
+  <a href="https://krio-lexgov-api.onrender.com"><img src="https://img.shields.io/badge/PostgreSQL-16_(pg__trgm)-4169E1?style=flat-square&logo=postgresql&logoColor=white" alt="PostgreSQL" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square" alt="License" /></a>
 </p>
 
 > **Autonomous Regulatory Intelligence & Legal Enforcement Platform**  
