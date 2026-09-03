@@ -1,10 +1,12 @@
 import math
 import uuid
+from datetime import date
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
-from sqlalchemy import desc, func, select
+from sqlalchemy import delete, desc, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.adapters.sebi_orders import SAMPLE_SEBI_DATA
 from app.api.schemas import (
     EnvelopeResponse,
     IngestionRunItem,
@@ -13,7 +15,7 @@ from app.api.schemas import (
     SyncJobResponse,
 )
 from app.core.database import AsyncSessionLocal, get_db
-from app.db.models import IngestionRun
+from app.db.models import IngestionRun, Record, RecordEntity
 from app.etl.pipeline import ETLPipeline
 
 router = APIRouter(prefix="/jobs", tags=["Ingestion Jobs"])
@@ -80,8 +82,6 @@ async def execute_background_sync(adapter_key: str, limit: int, incremental: boo
     """Execute ETL run in background with fresh database session."""
     async with AsyncSessionLocal() as session:
         try:
-            from app.db.models import Record, RecordEntity
-            from sqlalchemy import select, delete
             legacy_ids = [
                 "SEBI-FINVEST-AO-2026",
                 "SEBI-BROKING-AO-2026",
@@ -105,9 +105,6 @@ async def execute_background_sync(adapter_key: str, limit: int, incremental: boo
                     await session.execute(delete(Record).where(Record.id == rec.id))
 
             # Update all seed records to exact static ISO published dates and verified PDF penalty amounts
-            from app.adapters.sebi_orders import SAMPLE_SEBI_DATA
-            from sqlalchemy import update
-            from datetime import date
             for item in SAMPLE_SEBI_DATA:
                 await session.execute(
                     update(Record)

@@ -429,6 +429,7 @@ class SEBIOrdersAdapter(SourceAdapter):
         if settings.ENVIRONMENT == "test":
             return self._get_seed_refs(since, page_num, limit)
 
+        refs: list[RawRecordRef] = []
         categories = [
             ("AO", 6),
             ("Chairperson", 2),

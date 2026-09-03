@@ -1,11 +1,14 @@
+from datetime import date
+
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
-from sqlalchemy import func, select
+from sqlalchemy import delete, select, update
 
+from app.adapters.sebi_orders import SAMPLE_SEBI_DATA
 from app.core.config import get_settings
 from app.core.database import AsyncSessionLocal, Base, engine
 from app.core.logging import logger
-from app.db.models import Record
+from app.db.models import Record, RecordEntity
 from app.etl.pipeline import ETLPipeline
 
 settings = get_settings()
@@ -37,8 +40,6 @@ async def bootstrap_initial_data_if_empty():
 
         async with AsyncSessionLocal() as session:
             # Purge legacy fake external_ids to ensure 100% verified live 200 OK SEBI URLs
-            from app.db.models import RecordEntity
-            from sqlalchemy import delete
             legacy_ids = [
                 "SEBI-FINVEST-AO-2026",
                 "SEBI-BROKING-AO-2026",
@@ -60,9 +61,6 @@ async def bootstrap_initial_data_if_empty():
                     await session.execute(delete(Record).where(Record.id == rec.id))
             await session.commit()
             # Update all seed records to exact static ISO published dates and verified PDF penalty amounts
-            from app.adapters.sebi_orders import SAMPLE_SEBI_DATA
-            from sqlalchemy import update
-            from datetime import date
             for item in SAMPLE_SEBI_DATA:
                 await session.execute(
                     update(Record)
