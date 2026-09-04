@@ -74,7 +74,12 @@ async def get_trends(
     prev_stmt = select(
         func.count(Record.id),
         func.coalesce(func.sum(Record.amount), 0.0),
-    ).where(and_(Record.published_date >= previous_period_start, Record.published_date < current_period_start))
+    ).where(
+        and_(
+            Record.published_date >= previous_period_start,
+            Record.published_date < current_period_start,
+        )
+    )
     prev_res = await db.execute(prev_stmt)
     prev_orders, prev_penalties = prev_res.one()
 
@@ -107,7 +112,8 @@ async def get_trends(
     ts_res = await db.execute(ts_stmt)
     ts_data = [
         {"date": r[0].isoformat() if r[0] else "", "orders": r[1], "penalties": float(r[2])}
-        for r in ts_res.all() if r[0] is not None
+        for r in ts_res.all()
+        if r[0] is not None
     ]
 
     return TrendsResponse(
@@ -216,11 +222,7 @@ async def get_geo_distribution(db: AsyncSession = Depends(get_db)):
 @router.get("/processing-stats", response_model=ProcessingStatsResponse)
 async def get_processing_stats(db: AsyncSession = Depends(get_db)):
     """Ingestion pipeline audit statistics, success rates, and execution latency."""
-    runs_stmt = (
-        select(IngestionRun)
-        .order_by(desc(IngestionRun.started_at))
-        .limit(20)
-    )
+    runs_stmt = select(IngestionRun).order_by(desc(IngestionRun.started_at)).limit(20)
     runs_res = await db.execute(runs_stmt)
     runs = runs_res.scalars().all()
 

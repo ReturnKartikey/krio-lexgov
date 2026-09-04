@@ -6,13 +6,7 @@ const nextConfig = {
   poweredByHeader: false,
   swcMinify: true,
   experimental: {
-    optimizePackageImports: [
-      "lucide-react",
-      "framer-motion",
-      "recharts",
-      "gsap",
-      "lenis",
-    ],
+    optimizePackageImports: ["lucide-react"],
   },
   images: {
     formats: ["image/avif", "image/webp"],

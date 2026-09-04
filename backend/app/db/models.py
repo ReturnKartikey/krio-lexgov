@@ -21,6 +21,7 @@ from app.core.database import Base
 
 class SafeUUID(TypeDecorator):
     """Platform-independent GUID/UUID type."""
+
     impl = String(36)
     cache_ok = True
 
@@ -42,6 +43,7 @@ class SafeUUID(TypeDecorator):
 
 class SafeJSON(TypeDecorator):
     """Platform-independent JSON type."""
+
     impl = Text
     cache_ok = True
 
@@ -53,6 +55,7 @@ class SafeJSON(TypeDecorator):
 
     def process_bind_param(self, value, dialect):
         import json
+
         if value is None:
             return None
         if dialect.name == "postgresql":
@@ -61,6 +64,7 @@ class SafeJSON(TypeDecorator):
 
     def process_result_value(self, value, dialect):
         import json
+
         if value is None:
             return {}
         if isinstance(value, str):
@@ -75,6 +79,7 @@ class SafeJSON(TypeDecorator):
 
 class SafeArray(TypeDecorator):
     """Platform-independent String Array type."""
+
     impl = Text
     cache_ok = True
 
@@ -86,6 +91,7 @@ class SafeArray(TypeDecorator):
 
     def process_bind_param(self, value, dialect):
         import json
+
         if value is None:
             return [] if dialect.name == "postgresql" else "[]"
         if isinstance(value, str):
@@ -96,6 +102,7 @@ class SafeArray(TypeDecorator):
 
     def process_result_value(self, value, dialect):
         import json
+
         if value is None:
             return []
         if isinstance(value, list):
@@ -104,6 +111,7 @@ class SafeArray(TypeDecorator):
                 if joined.startswith("{") and joined.endswith("}"):
                     import csv
                     import io
+
                     try:
                         reader = csv.reader(io.StringIO(joined[1:-1]))
                         for row in reader:
@@ -121,6 +129,7 @@ class SafeArray(TypeDecorator):
             if value.startswith("{") and value.endswith("}"):
                 import csv
                 import io
+
                 try:
                     reader = csv.reader(io.StringIO(value[1:-1]))
                     for row in reader:
@@ -139,9 +148,7 @@ class SafeArray(TypeDecorator):
 class Source(Base):
     __tablename__ = "sources"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        SafeUUID, primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(SafeUUID, primary_key=True, default=uuid.uuid4)
     name: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     base_url: Mapped[str] = mapped_column(String(1024), nullable=False)
     adapter_key: Mapped[str] = mapped_column(String(100), nullable=False, unique=True)
@@ -151,18 +158,24 @@ class Source(Base):
     )
 
     # Relationships
-    raw_documents: Mapped[list["RawDocument"]] = relationship("RawDocument", back_populates="source", cascade="all, delete-orphan")
-    records: Mapped[list["Record"]] = relationship("Record", back_populates="source", cascade="all, delete-orphan")
-    ingestion_runs: Mapped[list["IngestionRun"]] = relationship("IngestionRun", back_populates="source", cascade="all, delete-orphan")
-    crawl_state: Mapped[Optional["CrawlState"]] = relationship("CrawlState", back_populates="source", uselist=False, cascade="all, delete-orphan")
+    raw_documents: Mapped[list["RawDocument"]] = relationship(
+        "RawDocument", back_populates="source", cascade="all, delete-orphan"
+    )
+    records: Mapped[list["Record"]] = relationship(
+        "Record", back_populates="source", cascade="all, delete-orphan"
+    )
+    ingestion_runs: Mapped[list["IngestionRun"]] = relationship(
+        "IngestionRun", back_populates="source", cascade="all, delete-orphan"
+    )
+    crawl_state: Mapped[Optional["CrawlState"]] = relationship(
+        "CrawlState", back_populates="source", uselist=False, cascade="all, delete-orphan"
+    )
 
 
 class RawDocument(Base):
     __tablename__ = "raw_documents"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        SafeUUID, primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(SafeUUID, primary_key=True, default=uuid.uuid4)
     source_id: Mapped[uuid.UUID] = mapped_column(
         SafeUUID, ForeignKey("sources.id", ondelete="CASCADE"), nullable=False, index=True
     )
@@ -178,19 +191,17 @@ class RawDocument(Base):
 
     # Relationships
     source: Mapped["Source"] = relationship("Source", back_populates="raw_documents")
-    record: Mapped[Optional["Record"]] = relationship("Record", back_populates="raw_document", uselist=False)
-
-    __table_args__ = (
-        Index("ix_raw_documents_hash_source", "source_id", "content_hash"),
+    record: Mapped[Optional["Record"]] = relationship(
+        "Record", back_populates="raw_document", uselist=False
     )
+
+    __table_args__ = (Index("ix_raw_documents_hash_source", "source_id", "content_hash"),)
 
 
 class Record(Base):
     __tablename__ = "records"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        SafeUUID, primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(SafeUUID, primary_key=True, default=uuid.uuid4)
     source_id: Mapped[uuid.UUID] = mapped_column(
         SafeUUID, ForeignKey("sources.id", ondelete="CASCADE"), nullable=False, index=True
     )
@@ -198,7 +209,9 @@ class Record(Base):
         SafeUUID, ForeignKey("raw_documents.id", ondelete="SET NULL"), nullable=True, index=True
     )
     external_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
-    record_type: Mapped[str] = mapped_column(String(100), default="order", nullable=False, index=True)
+    record_type: Mapped[str] = mapped_column(
+        String(100), default="order", nullable=False, index=True
+    )
     title: Mapped[str] = mapped_column(Text, nullable=False)
     summary: Mapped[str | None] = mapped_column(Text, nullable=True)
     entity_names: Mapped[list[str]] = mapped_column(SafeArray, default=list, nullable=False)
@@ -213,13 +226,18 @@ class Record(Base):
         DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC), nullable=False
+        DateTime(timezone=True),
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
+        nullable=False,
     )
     raw_metadata: Mapped[dict[str, Any]] = mapped_column(SafeJSON, default=dict, nullable=False)
 
     # Relationships
     source: Mapped["Source"] = relationship("Source", back_populates="records")
-    raw_document: Mapped[Optional["RawDocument"]] = relationship("RawDocument", back_populates="record")
+    raw_document: Mapped[Optional["RawDocument"]] = relationship(
+        "RawDocument", back_populates="record"
+    )
     record_entities: Mapped[list["RecordEntity"]] = relationship(
         "RecordEntity", back_populates="record", cascade="all, delete-orphan"
     )
@@ -233,14 +251,18 @@ class Record(Base):
 class Entity(Base):
     __tablename__ = "entities"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        SafeUUID, primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(SafeUUID, primary_key=True, default=uuid.uuid4)
     name: Mapped[str] = mapped_column(String(512), nullable=False)
     normalized_name: Mapped[str] = mapped_column(String(512), nullable=False, index=True)
-    entity_type: Mapped[str] = mapped_column(String(100), default="company", nullable=False, index=True)  # company, individual, intermediary
-    first_seen: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False)
-    last_seen: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False)
+    entity_type: Mapped[str] = mapped_column(
+        String(100), default="company", nullable=False, index=True
+    )  # company, individual, intermediary
+    first_seen: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False
+    )
+    last_seen: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False
+    )
     record_count: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
     total_penalty_amount: Mapped[float] = mapped_column(Numeric(18, 2), default=0.0, nullable=False)
 
@@ -253,16 +275,16 @@ class Entity(Base):
 class RecordEntity(Base):
     __tablename__ = "record_entities"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        SafeUUID, primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(SafeUUID, primary_key=True, default=uuid.uuid4)
     record_id: Mapped[uuid.UUID] = mapped_column(
         SafeUUID, ForeignKey("records.id", ondelete="CASCADE"), nullable=False, index=True
     )
     entity_id: Mapped[uuid.UUID] = mapped_column(
         SafeUUID, ForeignKey("entities.id", ondelete="CASCADE"), nullable=False, index=True
     )
-    role: Mapped[str] = mapped_column(String(100), default="noticee", nullable=False)  # noticee, respondent, intermediary, regulator
+    role: Mapped[str] = mapped_column(
+        String(100), default="noticee", nullable=False
+    )  # noticee, respondent, intermediary, regulator
 
     # Relationships
     record: Mapped["Record"] = relationship("Record", back_populates="record_entities")
@@ -276,9 +298,7 @@ class RecordEntity(Base):
 class IngestionRun(Base):
     __tablename__ = "ingestion_runs"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        SafeUUID, primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(SafeUUID, primary_key=True, default=uuid.uuid4)
     source_id: Mapped[uuid.UUID] = mapped_column(
         SafeUUID, ForeignKey("sources.id", ondelete="CASCADE"), nullable=False, index=True
     )
@@ -286,7 +306,9 @@ class IngestionRun(Base):
         DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False
     )
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    status: Mapped[str] = mapped_column(String(50), default="running", nullable=False, index=True)  # queued, running, success, partial, failed
+    status: Mapped[str] = mapped_column(
+        String(50), default="running", nullable=False, index=True
+    )  # queued, running, success, partial, failed
     records_seen: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     records_added: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     records_updated: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
@@ -302,9 +324,7 @@ class IngestionRun(Base):
 class CrawlState(Base):
     __tablename__ = "crawl_state"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        SafeUUID, primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(SafeUUID, primary_key=True, default=uuid.uuid4)
     source_id: Mapped[uuid.UUID] = mapped_column(
         SafeUUID, ForeignKey("sources.id", ondelete="CASCADE"), nullable=False, unique=True
     )

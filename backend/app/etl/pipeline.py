@@ -38,7 +38,9 @@ class ETLPipeline:
     ) -> IngestionRun:
         """Execute a full or incremental ingestion pipeline run."""
         start_time = time.monotonic()
-        logger.info(f"Starting ETL Ingestion run for adapter [{self.adapter_key}] triggered by [{triggered_by}]")
+        logger.info(
+            f"Starting ETL Ingestion run for adapter [{self.adapter_key}] triggered by [{triggered_by}]"
+        )
 
         # 1. Ensure Source exists
         stmt = select(Source).where(
@@ -258,7 +260,11 @@ class ETLPipeline:
             # Finalize run status
             status = "success"
             if ingestion_run.records_failed > 0:
-                status = "partial" if ingestion_run.records_added + ingestion_run.records_updated > 0 else "failed"
+                status = (
+                    "partial"
+                    if ingestion_run.records_added + ingestion_run.records_updated > 0
+                    else "failed"
+                )
 
             duration = round(time.monotonic() - start_time, 2)
             ingestion_run.status = status

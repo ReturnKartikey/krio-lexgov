@@ -2,13 +2,14 @@ import asyncio
 from collections.abc import AsyncGenerator
 
 import pytest
+from httpx import ASGITransport, AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+
 from app.core.config import get_settings
 from app.core.database import Base, get_db
 from app.core.rate_limiter import rate_limiter
 from app.etl.pipeline import ETLPipeline
 from app.main import app
-from httpx import ASGITransport, AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 # Configure rate limiter and network settings for instantaneous execution in tests
 rate_limiter.rate = 10000.0

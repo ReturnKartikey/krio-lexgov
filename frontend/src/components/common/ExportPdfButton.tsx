@@ -53,7 +53,7 @@ export function ExportPdfButton({
         ) : (
           <Download className="w-3.5 h-3.5 text-brivo-slate" />
         )}
-        <span>{downloaded ? "Downloaded" : "PDF Memo"}</span>
+        <span>{downloaded ? "Downloaded" : "PDF"}</span>
       </button>
     );
   }
@@ -70,7 +70,7 @@ export function ExportPdfButton({
           ? "bg-white hover:bg-brivo-paper border-brivo-navy/15 text-brivo-navy hover:border-brivo-cyan"
           : "bg-brivo-navy hover:bg-brivo-void text-brivo-paper border-brivo-navy hover:shadow-md"
       } ${className}`}
-      title="Generate and download official compliance briefing memo"
+      title="Generate and download official compliance briefing (.pdf)"
     >
       {isExporting ? (
         <Loader2 className="w-4 h-4 animate-spin text-brivo-cyan" />
@@ -79,7 +79,7 @@ export function ExportPdfButton({
       ) : (
         <FileText className="w-4 h-4 text-brivo-cyan" />
       )}
-      <span>{downloaded ? "Executive Memo Exported" : "Export Briefing Memo (.pdf)"}</span>
+      <span>{downloaded ? "Briefing Exported" : "Export Briefing (.pdf)"}</span>
     </button>
   );
 }

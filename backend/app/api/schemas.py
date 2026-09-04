@@ -68,6 +68,7 @@ class RecordListItem(BaseModel):
             import csv
             import io
             import json
+
             if v.startswith("[") and v.endswith("]"):
                 try:
                     return json.loads(v)
@@ -107,6 +108,7 @@ class RecordDetailItem(RecordListItem):
         if isinstance(v, str):
             try:
                 import json
+
                 return json.loads(v)
             except Exception:
                 return {}

@@ -7,6 +7,7 @@ from typing import Any
 @dataclass
 class RawRecordRef:
     """Discovered reference to a record on the source registry."""
+
     external_id: str
     source_url: str
     title: str
@@ -17,6 +18,7 @@ class RawRecordRef:
 @dataclass
 class RawDocumentPayload:
     """Fetched raw content snapshot of a registry document/page."""
+
     source_ref: str
     content_bytes: bytes
     content_hash: str
@@ -29,6 +31,7 @@ class RawDocumentPayload:
 @dataclass
 class ExtractedEntityItem:
     """Extracted entity associated with a record."""
+
     name: str
     normalized_name: str
     entity_type: str  # company, individual, intermediary
@@ -38,6 +41,7 @@ class ExtractedEntityItem:
 @dataclass
 class NormalizedRecord:
     """Standardized record ready for database storage and indexing."""
+
     external_id: str
     record_type: str  # order, notice, case, adjudication
     title: str
@@ -100,8 +104,6 @@ class SourceAdapter(ABC):
         pass
 
     @abstractmethod
-    async def parse(
-        self, raw: RawDocumentPayload, ref: RawRecordRef
-    ) -> NormalizedRecord:
+    async def parse(self, raw: RawDocumentPayload, ref: RawRecordRef) -> NormalizedRecord:
         """Parse raw document into normalized schema with entity extraction."""
         pass

@@ -23,7 +23,9 @@ router = APIRouter(prefix="/jobs", tags=["Ingestion Jobs"])
 
 @router.get("", response_model=EnvelopeResponse[list[IngestionRunItem]])
 async def list_jobs(
-    status: str | None = Query(None, description="Filter by status (queued, running, success, partial, failed)"),
+    status: str | None = Query(
+        None, description="Filter by status (queued, running, success, partial, failed)"
+    ),
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
@@ -101,7 +103,9 @@ async def execute_background_sync(adapter_key: str, limit: int, incremental: boo
                 rec_res = await session.execute(rec_stmt)
                 rec = rec_res.scalar_one_or_none()
                 if rec:
-                    await session.execute(delete(RecordEntity).where(RecordEntity.record_id == rec.id))
+                    await session.execute(
+                        delete(RecordEntity).where(RecordEntity.record_id == rec.id)
+                    )
                     await session.execute(delete(Record).where(Record.id == rec.id))
 
             # Update all seed records to exact static ISO published dates and verified PDF penalty amounts
@@ -144,6 +148,7 @@ async def trigger_sync(
     """
     try:
         from app.core.config import get_settings
+
         settings = get_settings()
 
         if settings.ENVIRONMENT == "test":

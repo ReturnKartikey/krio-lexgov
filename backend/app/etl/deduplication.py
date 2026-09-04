@@ -54,7 +54,9 @@ def calculate_text_similarity(a: str, b: str) -> float:
     return SequenceMatcher(None, clean_a, clean_b).ratio()
 
 
-def detect_near_duplicates(records: list[dict[str, Any]], similarity_threshold: float = 0.75) -> list[DuplicateCluster]:
+def detect_near_duplicates(
+    records: list[dict[str, Any]], similarity_threshold: float = 0.75
+) -> list[DuplicateCluster]:
     """
     Detect authentic near-duplicate records and cross-matter clusters using distinctive subject matter similarity,
     entity set overlap, and penalty amount parity.
@@ -107,7 +109,9 @@ def detect_near_duplicates(records: list[dict[str, Any]], similarity_threshold: 
             if is_dup:
                 score = max(
                     title_sim,
-                    0.85 if shared_entities and amount_matches else (0.80 if shared_entities else title_sim),
+                    0.85
+                    if shared_entities and amount_matches
+                    else (0.80 if shared_entities else title_sim),
                 )
                 duplicates.append(
                     DuplicateCluster(

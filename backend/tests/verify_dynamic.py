@@ -2,7 +2,7 @@ import json
 import sys
 import urllib.request
 
-sys.stdout.reconfigure(encoding='utf-8')
+sys.stdout.reconfigure(encoding="utf-8")
 
 # Arbitrary, unique terms to prove dynamic database retrieval & synthesis
 queries = [
@@ -22,7 +22,9 @@ for q in queries:
     with urllib.request.urlopen(req) as resp:
         data = json.loads(resp.read().decode("utf-8"))
         print(f"QUERY: [{q}]")
-        print(f"  • Matched Orders: {data['order_count']} | Penalty Exposure: Rs. {data['total_penalty_exposure']:,.2f}")
+        print(
+            f"  • Matched Orders: {data['order_count']} | Penalty Exposure: Rs. {data['total_penalty_exposure']:,.2f}"
+        )
         print(f"  • Headline:       {data['headline']}")
         print(f"  • Live Summary:   {data['executive_summary']}")
         print(f"  • Precedents:     {[p['title'] for p in data['precedents']]}")

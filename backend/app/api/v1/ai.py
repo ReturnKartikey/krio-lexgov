@@ -14,7 +14,10 @@ router = APIRouter(prefix="/ai", tags=["AI Intelligence"])
 
 class SynthesisRequest(BaseModel):
     query: str | None = Field(None, description="Custom query or entity name")
-    mode: str = Field("risk_brief", description="Mode: 'risk_brief', 'precedent_analysis', 'entity_exposure', 'statutory_memo'")
+    mode: str = Field(
+        "risk_brief",
+        description="Mode: 'risk_brief', 'precedent_analysis', 'entity_exposure', 'statutory_memo'",
+    )
     entity_id: str | None = None
     state: str | None = None
 
@@ -49,7 +52,7 @@ def clean_summary_text(raw_text: str | None, title: str) -> str:
     """Strip website scraping artifacts, breadcrumbs, and redundant prefixes."""
     if not raw_text:
         return f"SEBI Adjudication Order concerning {title}."
-    
+
     # Remove scraping header breadcrumbs
     cleaned = re.sub(
         r"^(SEBI\s*\|\s*)?.*?(Home\s*»\s*Enforcement\s*»\s*Orders\s*»\s*.*?▼\s*)",
@@ -61,10 +64,10 @@ def clean_summary_text(raw_text: str | None, title: str) -> str:
     cleaned = re.sub(r"^\s*" + re.escape(title) + r"\s*", "", cleaned, flags=re.IGNORECASE)
     # Remove multiple whitespace
     cleaned = re.sub(r"\s+", " ", cleaned).strip()
-    
+
     if len(cleaned) < 30:
         return f"SEBI Adjudication Order in the matter of {title} establishing regulatory liability and evidentiary findings."
-    
+
     if len(cleaned) > 220:
         return cleaned[:217] + "..."
     return cleaned
@@ -80,16 +83,16 @@ async def synthesize_regulatory_intelligence(
     across indexed SEBI adjudication orders and entities.
     """
     query_str = (req.query or "").strip()
-    
+
     # 1. Flexible Multi-Token Query Matching
     matched_records = []
     has_specific_query = bool(query_str)
-    
+
     if has_specific_query:
         # Normalize punctuation: replace hyphens, underscores with spaces
         normalized_q = re.sub(r"[-_/,.:;]+", " ", query_str).strip()
         tokens = [t.lower() for t in normalized_q.split() if len(t) > 1]
-        
+
         # Build token match filters
         token_filters = []
         for t in tokens:
@@ -101,7 +104,7 @@ async def synthesize_regulatory_intelligence(
                     cast(Record.entity_names, String).ilike(f"%{t}%"),
                 )
             )
-        
+
         # Primary search: match all tokens (AND)
         if token_filters:
             stmt_and = (
@@ -112,7 +115,7 @@ async def synthesize_regulatory_intelligence(
             )
             res_and = await db.execute(stmt_and)
             matched_records = res_and.scalars().all()
-            
+
             # Secondary search: if AND has 0 results, try matching ANY token (OR)
             if not matched_records and len(token_filters) > 1:
                 stmt_or = (
@@ -159,7 +162,7 @@ async def synthesize_regulatory_intelligence(
         )
 
     records = matched_records
-    
+
     # 3. Calculate Financial Exposure & Extract Entities
     total_penalty = 0.0
     all_entities = set()
@@ -171,11 +174,11 @@ async def synthesize_regulatory_intelligence(
                 pass
         if r.entity_names:
             all_entities.update(r.entity_names)
-            
+
     # 4. Extract Applicable Statutes from Record Context
     statutes_found = set()
     combined_text = " ".join([f"{r.title} {r.summary or ''}" for r in records])
-    
+
     if re.search(r"15HA|PFUTP|Fraudulent|Front\s*Run|Manipulat", combined_text, re.I):
         statutes_found.add("SEBI (PFUTP) Regulations, 2003 — Regulations 3(a)-(d), 4(1), 4(2)(a)")
         statutes_found.add("SEBI Act 1992 — Section 15HA (Fraudulent / Unfair Trade Practices)")
@@ -186,11 +189,15 @@ async def synthesize_regulatory_intelligence(
     if re.search(r"Advisory|IA\s*Reg|PMS|Portfolio", combined_text, re.I):
         statutes_found.add("SEBI (Investment Advisers) Regulations, 2013 — Section 12(1)")
     if re.search(r"Insider|PIT|Unpublished", combined_text, re.I):
-        statutes_found.add("SEBI (Prohibition of Insider Trading) Regulations, 2015 — Regulation 3 & 4")
+        statutes_found.add(
+            "SEBI (Prohibition of Insider Trading) Regulations, 2015 — Regulation 3 & 4"
+        )
     if re.search(r"LODR|Listing|Disclosure", combined_text, re.I):
         statutes_found.add("SEBI (LODR) Regulations, 2015 — Regulation 30 & 33")
     if re.search(r"AIF|Alternative\s*Investment", combined_text, re.I):
-        statutes_found.add("SEBI (Alternative Investment Funds) Regulations, 2012 — Pro-Rata Rights")
+        statutes_found.add(
+            "SEBI (Alternative Investment Funds) Regulations, 2012 — Pro-Rata Rights"
+        )
 
     if not statutes_found:
         statutes_found.add("SEBI Act 1992 — Section 15-I & 15HA")
@@ -214,8 +221,10 @@ async def synthesize_regulatory_intelligence(
         )
 
     # 6. Dynamic Context-Aware Synthesis & Takeaways
-    risk_level = "HIGH" if total_penalty > 5000000 else ("MEDIUM" if len(records) > 2 else "MODERATE")
-    
+    risk_level = (
+        "HIGH" if total_penalty > 5000000 else ("MEDIUM" if len(records) > 2 else "MODERATE")
+    )
+
     # Topic detection
     is_front_running = bool(re.search(r"front\s*run", combined_text, re.I))
     is_settlement = bool(re.search(r"settlement", combined_text, re.I))
@@ -265,20 +274,38 @@ async def synthesize_regulatory_intelligence(
     # Dynamic takeaways based on detected violations
     takeaways = []
     if is_front_running:
-        takeaways.append("Information sharing with front-running rings triggers maximum statutory multiplier penalties under Section 15HA.")
-        takeaways.append("Electronic communication archives and order placement timestamps serve as conclusive evidentiary proof.")
+        takeaways.append(
+            "Information sharing with front-running rings triggers maximum statutory multiplier penalties under Section 15HA."
+        )
+        takeaways.append(
+            "Electronic communication archives and order placement timestamps serve as conclusive evidentiary proof."
+        )
     if is_settlement:
-        takeaways.append("Settlement terms under 2018 Regulations require full disgorgement of wrongful gains plus compounding penalties.")
-        takeaways.append("Consent terms do not constitute an admission of guilt but remain permanently searchable regulatory precedents.")
+        takeaways.append(
+            "Settlement terms under 2018 Regulations require full disgorgement of wrongful gains plus compounding penalties."
+        )
+        takeaways.append(
+            "Consent terms do not constitute an admission of guilt but remain permanently searchable regulatory precedents."
+        )
     if is_advisory:
-        takeaways.append("Unregistered investment advice via messaging apps or social platforms triggers immediate bank account freezing.")
-        takeaways.append("Interim ex-parte orders mandate immediate impounding of subscription fees collected without SEBI IA registration.")
+        takeaways.append(
+            "Unregistered investment advice via messaging apps or social platforms triggers immediate bank account freezing."
+        )
+        takeaways.append(
+            "Interim ex-parte orders mandate immediate impounding of subscription fees collected without SEBI IA registration."
+        )
     if is_insider:
-        takeaways.append("Trading during unpublished price sensitive information (UPSI) blackout windows is treated under strict liability.")
-    
+        takeaways.append(
+            "Trading during unpublished price sensitive information (UPSI) blackout windows is treated under strict liability."
+        )
+
     if len(takeaways) < 3:
-        takeaways.append("SEBI Adjudicating Officers strictly enforce statutory penalties under Section 15HA of the SEBI Act, 1992.")
-        takeaways.append("Maintain exhaustive digital audit logs with SHA-256 integrity hashing for all compliance filings.")
+        takeaways.append(
+            "SEBI Adjudicating Officers strictly enforce statutory penalties under Section 15HA of the SEBI Act, 1992."
+        )
+        takeaways.append(
+            "Maintain exhaustive digital audit logs with SHA-256 integrity hashing for all compliance filings."
+        )
     # Calculate Authentic Dynamic Confidence Score based on Semantic Specificity & Match Density
     if not has_specific_query:
         confidence_score = 0.94  # General cohort baseline
@@ -286,12 +313,25 @@ async def synthesize_regulatory_intelligence(
         confidence_score = 0.98  # Exact matter precision
     else:
         # High cardinality generic queries reduce synthesis confidence
-        generic_terms = {"limited", "ltd", "fund", "order", "trading", "india", "private", "pvt", "capital", "sebi"}
+        generic_terms = {
+            "limited",
+            "ltd",
+            "fund",
+            "order",
+            "trading",
+            "india",
+            "private",
+            "pvt",
+            "capital",
+            "sebi",
+        }
         query_words = set(query_str.lower().split())
         is_generic = bool(query_words.intersection(generic_terms))
-        
+
         if is_generic and len(records) >= 8:
-            confidence_score = 0.58  # Low confidence: High semantic dispersion across disparate sectors
+            confidence_score = (
+                0.58  # Low confidence: High semantic dispersion across disparate sectors
+            )
         elif is_generic or len(records) > 4:
             confidence_score = 0.74  # Moderate confidence: Broad multi-matter cohort
         else:

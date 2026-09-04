@@ -9,7 +9,10 @@ from app.etl.entity_extractor import (
 
 
 def test_normalize_entity_name():
-    assert normalize_entity_name("Reliance Infrastructure Advisory Pvt Ltd") == "reliance infrastructure advisory"
+    assert (
+        normalize_entity_name("Reliance Infrastructure Advisory Pvt Ltd")
+        == "reliance infrastructure advisory"
+    )
     assert normalize_entity_name("M/s. Zenith Birla (India) Limited") == "zenith birla india"
     assert normalize_entity_name("Shri Arvind Shenoy") == "arvind shenoy"
 

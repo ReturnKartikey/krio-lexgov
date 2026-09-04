@@ -26,6 +26,7 @@ from app.etl.entity_extractor import (
 
 settings = get_settings()
 
+
 # Dynamic date helper for realistic recent timestamps
 def _days_ago(n: int) -> str:
     return (date.today() - timedelta(days=n)).isoformat()
@@ -73,7 +74,6 @@ SAMPLE_SEBI_DATA = [
         "entities": ["Late Mr. Bhagwati Prasad Deora"],
         "regulations": ["PFUTP Regulations, 2003", "Section 15HA"],
     },
-
     # --- LAKHS SLAB (Rs. 1,00,000 - Rs. 99,99,999) ---
     {
         "external_id": "SEBI-JETHA-AUG-2026",
@@ -86,7 +86,10 @@ SAMPLE_SEBI_DATA = [
         "state": "Maharashtra",
         "city": "Mumbai",
         "entities": ["Jetha Global Master Fund"],
-        "regulations": ["SEBI (Settlement Proceedings) Regulations, 2018", "SEBI (FPI) Regulations, 2019"],
+        "regulations": [
+            "SEBI (Settlement Proceedings) Regulations, 2018",
+            "SEBI (FPI) Regulations, 2019",
+        ],
     },
     {
         "external_id": "SEBI-3ONE4-AUG-2026",
@@ -125,7 +128,10 @@ SAMPLE_SEBI_DATA = [
         "state": "Maharashtra",
         "city": "Mumbai",
         "entities": ["Modulus Alternatives Investment Managers Limited"],
-        "regulations": ["SEBI (AIF) Regulations, 2012", "SEBI (Settlement Proceedings) Regulations, 2018"],
+        "regulations": [
+            "SEBI (AIF) Regulations, 2012",
+            "SEBI (Settlement Proceedings) Regulations, 2018",
+        ],
     },
     {
         "external_id": "SEBI-NIPPON-JUL-2026",
@@ -205,7 +211,6 @@ SAMPLE_SEBI_DATA = [
         "entities": ["Ram Asava HUF"],
         "regulations": ["PFUTP Regulations, 2003", "Section 15HA"],
     },
-
     # --- CRORES SLAB (>= Rs. 1,00,00,000) ---
     {
         "external_id": "SEBI-FRONTRUN-2026",
@@ -246,7 +251,6 @@ SAMPLE_SEBI_DATA = [
         "entities": ["Decillion Finance Limited"],
         "regulations": ["PFUTP Regulations, 2003", "Section 15HA", "LODR Regulations, 2015"],
     },
-
     # --- NON-MONETARY / DEBARMENTS & DIRECTIONS (Rs. 0 / None) ---
     {
         "external_id": "SEBI-VEERKRUPA-2026",
@@ -363,7 +367,10 @@ SAMPLE_SEBI_DATA = [
         "state": "Delhi",
         "city": "New Delhi",
         "entities": ["Corporate Capital Ventures Private Limited"],
-        "regulations": ["SEBI (Merchant Bankers) Regulations, 1992", "SEBI (Intermediaries) Regulations, 2008"],
+        "regulations": [
+            "SEBI (Merchant Bankers) Regulations, 1992",
+            "SEBI (Intermediaries) Regulations, 2008",
+        ],
     },
     {
         "external_id": "SEBI-DHENU-AUG-2026",
@@ -381,11 +388,9 @@ SAMPLE_SEBI_DATA = [
 ]
 
 
-
-
 class SEBIOrdersAdapter(SourceAdapter):
     """
-    Source Adapter for SEBI (Securities and Exchange Board of India) 
+    Source Adapter for SEBI (Securities and Exchange Board of India)
     Adjudication and Enforcement Orders.
     """
 
@@ -439,17 +444,19 @@ class SEBIOrdersAdapter(SourceAdapter):
         try:
             # Respect robots.txt
             if settings.ENABLE_ROBOTS_TXT_CHECK:
-                allowed = await robots_validator.can_fetch(f"{self.base_url}/sebiweb/home/HomeAction.do?doListing=yes&sid=2&ssid=9&smid=6&pageNo={page_num}")
+                allowed = await robots_validator.can_fetch(
+                    f"{self.base_url}/sebiweb/home/HomeAction.do?doListing=yes&sid=2&ssid=9&smid=6&pageNo={page_num}"
+                )
                 if not allowed:
                     logger.warning("Robots.txt disallowed crawling SEBI. Using cached public seed.")
                     return self._get_seed_refs(since, page_num, limit)
 
             await rate_limiter.acquire(1.0)
-            async with httpx.AsyncClient(timeout=settings.CRAWLER_REQUEST_TIMEOUT, follow_redirects=True) as client:
+            async with httpx.AsyncClient(
+                timeout=settings.CRAWLER_REQUEST_TIMEOUT, follow_redirects=True
+            ) as client:
                 for cat_name, smid in categories:
-                    listing_url = (
-                        f"{self.base_url}/sebiweb/home/HomeAction.do?doListing=yes&sid=2&ssid=9&smid={smid}&pageNo={page_num}"
-                    )
+                    listing_url = f"{self.base_url}/sebiweb/home/HomeAction.do?doListing=yes&sid=2&ssid=9&smid={smid}&pageNo={page_num}"
                     try:
                         response = await client.get(listing_url, headers=self._get_headers())
                         if response.status_code == 200:
@@ -465,14 +472,31 @@ class SEBIOrdersAdapter(SourceAdapter):
                                         title = cols[1].get_text(strip=True)
                                         if link_tag and link_tag.get("href"):
                                             href = link_tag["href"]
-                                            full_url = href if href.startswith("http") else f"{self.base_url}{href}"
-                                            ext_id = hashlib.md5(full_url.encode()).hexdigest()[:16].upper()
-                                            
+                                            full_url = (
+                                                href
+                                                if href.startswith("http")
+                                                else f"{self.base_url}{href}"
+                                            )
+                                            ext_id = (
+                                                hashlib.md5(full_url.encode())
+                                                .hexdigest()[:16]
+                                                .upper()
+                                            )
+
                                             # Parse date accurately
                                             pub_date = None
-                                            for fmt in ("%b %d, %Y", "%B %d, %Y", "%d-%m-%Y", "%d/%m/%Y", "%Y-%m-%d", "%d %b %Y"):
+                                            for fmt in (
+                                                "%b %d, %Y",
+                                                "%B %d, %Y",
+                                                "%d-%m-%Y",
+                                                "%d/%m/%Y",
+                                                "%Y-%m-%d",
+                                                "%d %b %Y",
+                                            ):
                                                 try:
-                                                    pub_date = datetime.strptime(date_str, fmt).date()
+                                                    pub_date = datetime.strptime(
+                                                        date_str, fmt
+                                                    ).date()
                                                     break
                                                 except Exception:
                                                     pass
@@ -482,14 +506,19 @@ class SEBIOrdersAdapter(SourceAdapter):
                                                 source_url=full_url,
                                                 title=title,
                                                 published_date=pub_date,
-                                                metadata={"scraped_date": date_str, "category": cat_name},
+                                                metadata={
+                                                    "scraped_date": date_str,
+                                                    "category": cat_name,
+                                                },
                                             )
                                             refs.append(ref)
                     except Exception as cat_err:
                         logger.debug(f"Failed crawling category {cat_name}: {cat_err}")
 
         except Exception as e:
-            logger.info(f"Live SEBI crawler encountered: {e}. Utilizing public seed registry for continuous service.")
+            logger.info(
+                f"Live SEBI crawler encountered: {e}. Utilizing public seed registry for continuous service."
+            )
 
         if settings.AUTO_SEED_FALLBACK:
             seed_refs, _ = self._get_seed_refs(None, 1, 100)
@@ -538,14 +567,20 @@ class SEBIOrdersAdapter(SourceAdapter):
         if settings.ENVIRONMENT != "test":
             await rate_limiter.acquire(1.0)
             try:
-                async with httpx.AsyncClient(timeout=settings.CRAWLER_REQUEST_TIMEOUT, follow_redirects=True) as client:
+                async with httpx.AsyncClient(
+                    timeout=settings.CRAWLER_REQUEST_TIMEOUT, follow_redirects=True
+                ) as client:
                     resp = await client.get(ref.source_url, headers=self._get_headers())
                     if resp.status_code == 200:
                         content_bytes = resp.content
-                        mime_type = resp.headers.get("content-type", mime_type).split(";")[0].strip()
+                        mime_type = (
+                            resp.headers.get("content-type", mime_type).split(";")[0].strip()
+                        )
                         http_status = 200
             except Exception as e:
-                logger.debug(f"Live fetch for {ref.source_url} bypassed: {e}. Generating snapshot from record metadata.")
+                logger.debug(
+                    f"Live fetch for {ref.source_url} bypassed: {e}. Generating snapshot from record metadata."
+                )
 
         if not content_bytes:
             # Generate reproducible raw document snapshot
@@ -583,21 +618,24 @@ class SEBIOrdersAdapter(SourceAdapter):
         elif "html" in mime_type.lower():
             try:
                 import re
+
                 soup = BeautifulSoup(content_bytes, "html.parser")
                 # Remove non-content tags
                 for tag in soup(["script", "style", "nav", "header", "footer", "ol", "ul"]):
                     tag.decompose()
                 # Remove breadcrumb and header elements
-                for bc in soup.find_all("div", class_=re.compile(r"breadcrumb|header|nav|top-bar", re.I)):
+                for bc in soup.find_all(
+                    "div", class_=re.compile(r"breadcrumb|header|nav|top-bar", re.I)
+                ):
                     bc.decompose()
-                
+
                 core = (
-                    soup.find("div", {"class": "card-body"}) or
-                    soup.find("div", {"class": "content-box"}) or
-                    soup.find("div", {"class": "article-content"}) or
-                    soup.find("div", {"class": "col-md-12"}) or
-                    soup.find("body") or
-                    soup
+                    soup.find("div", {"class": "card-body"})
+                    or soup.find("div", {"class": "content-box"})
+                    or soup.find("div", {"class": "article-content"})
+                    or soup.find("div", {"class": "col-md-12"})
+                    or soup.find("body")
+                    or soup
                 )
                 text = core.get_text(separator=" ", strip=True)
                 clean_text = re.sub(
@@ -612,9 +650,7 @@ class SEBIOrdersAdapter(SourceAdapter):
         else:
             return content_bytes.decode("utf-8", errors="ignore")
 
-    async def parse(
-        self, raw: RawDocumentPayload, ref: RawRecordRef
-    ) -> NormalizedRecord:
+    async def parse(self, raw: RawDocumentPayload, ref: RawRecordRef) -> NormalizedRecord:
         """
         Normalize raw document into core registry schema with extracted entities.
         """
@@ -631,7 +667,11 @@ class SEBIOrdersAdapter(SourceAdapter):
                         ExtractedEntityItem(
                             name=ent_name,
                             normalized_name=norm,
-                            entity_type="company" if "ltd" in ent_name.lower() or "llp" in ent_name.lower() or "corp" in ent_name.lower() else "individual",
+                            entity_type="company"
+                            if "ltd" in ent_name.lower()
+                            or "llp" in ent_name.lower()
+                            or "corp" in ent_name.lower()
+                            else "individual",
                             role="noticee",
                         )
                     )
@@ -666,19 +706,28 @@ class SEBIOrdersAdapter(SourceAdapter):
 
         # 5. Regulations & Metadata
         regulations = meta.get("regulations") or extract_regulations(text_corpus)
-        
+
         raw_summary = (meta.get("summary") or "").strip()
-        if not raw_summary or "Home »" in raw_summary or "SEBI |" in raw_summary or len(raw_summary) < 40:
+        if (
+            not raw_summary
+            or "Home »" in raw_summary
+            or "SEBI |" in raw_summary
+            or len(raw_summary) < 40
+        ):
             noticee_list = [e.name for e in entities[:3]] if entities else []
             noticee_desc = ", ".join(noticee_list) if noticee_list else "the cited respondents"
-            penalty_desc = f"with aggregate monetary sanction of INR {amount:,.2f}" if amount else "imposing non-monetary market debarments and statutory regulatory directions"
+            penalty_desc = (
+                f"with aggregate monetary sanction of INR {amount:,.2f}"
+                if amount
+                else "imposing non-monetary market debarments and statutory regulatory directions"
+            )
             type_label = record_type.replace("_", " ").title()
             raw_summary = f"Regulatory enforcement proceeding ({type_label}) issued by Securities and Exchange Board of India (SEBI) concerning {noticee_desc}, {penalty_desc} under applicable market governance and statutory provisions."
-        
+
         # Strip redundant title prefix if summary starts with the title
         clean_title = ref.title.strip().rstrip(".").lower()
         if raw_summary.lower().startswith(clean_title):
-            remaining = raw_summary[len(clean_title):].lstrip(" .:-;,")
+            remaining = raw_summary[len(clean_title) :].lstrip(" .:-;,")
             if len(remaining) > 20:
                 raw_summary = remaining[0].upper() + remaining[1:]
 

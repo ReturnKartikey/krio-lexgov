@@ -2,7 +2,7 @@ import json
 import sys
 import urllib.request
 
-sys.stdout.reconfigure(encoding='utf-8')
+sys.stdout.reconfigure(encoding="utf-8")
 
 test_queries = [
     # 1. Broad / high-cardinality terms (Expected: LOW confidence 58%)
@@ -11,11 +11,9 @@ test_queries = [
     "Trading",
     "Order",
     "India",
-    
     # 2. Moderate scope terms (Expected: MODERATE confidence 74%)
     "Advisory",
     "Settlement",
-    
     # 3. Exact target entities (Expected: HIGH confidence 98%)
     "Angel One",
     "Jetha",
@@ -31,5 +29,11 @@ for q in test_queries:
     with urllib.request.urlopen(req) as resp:
         data = json.loads(resp.read().decode("utf-8"))
         score_pct = int(data["confidence_score"] * 100)
-        grade = "High Precision" if score_pct >= 85 else ("Moderate Cohort" if score_pct >= 70 else "Low / High Dispersion")
-        print(f"QUERY: [{q:18}] -> Confidence: {score_pct}% ({grade}) | Matches: {data['order_count']} orders")
+        grade = (
+            "High Precision"
+            if score_pct >= 85
+            else ("Moderate Cohort" if score_pct >= 70 else "Low / High Dispersion")
+        )
+        print(
+            f"QUERY: [{q:18}] -> Confidence: {score_pct}% ({grade}) | Matches: {data['order_count']} orders"
+        )

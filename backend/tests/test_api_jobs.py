@@ -4,7 +4,10 @@ import pytest
 @pytest.mark.asyncio
 async def test_jobs_list_and_sync(client):
     # 1. Trigger manual sync
-    sync_resp = await client.post("/api/jobs/sync", json={"adapter_key": "sebi_adjudication_orders", "limit": 5, "incremental": False})
+    sync_resp = await client.post(
+        "/api/jobs/sync",
+        json={"adapter_key": "sebi_adjudication_orders", "limit": 5, "incremental": False},
+    )
     assert sync_resp.status_code == 200
     sync_data = sync_resp.json()
     assert "run_id" in sync_data

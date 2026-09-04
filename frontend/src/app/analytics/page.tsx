@@ -23,7 +23,6 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { MicroLabel } from "@/components/common/MicroLabel";
-import { SynthesizeButton } from "@/components/ai/SynthesizeButton";
 import { motion } from "framer-motion";
 import {
   getTrends,
@@ -125,14 +124,8 @@ export default function AnalyticsPage() {
           </p>
         </div>
 
-        {/* Interval Switcher & AI Button */}
-        <div className="flex flex-wrap items-center gap-2">
-          <SynthesizeButton
-            label="Synthesize Market Risk"
-            variant="outline"
-            className="shadow-sm"
-          />
-
+        {/* Interval Switcher */}
+        <div className="flex items-center gap-2">
           <div className="flex items-center p-1 rounded-full bg-white border border-brivo-navy/15 shadow-sm">
             <button
               onClick={() => setInterval("week")}

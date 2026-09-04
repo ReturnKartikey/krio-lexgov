@@ -23,7 +23,9 @@ router = APIRouter(prefix="/records", tags=["Records"])
 
 @router.get("", response_model=EnvelopeResponse[list[RecordListItem]])
 async def list_records(
-    q: str | None = Query(None, description="Full-text search query across title, summary, and jurisdiction"),
+    q: str | None = Query(
+        None, description="Full-text search query across title, summary, and jurisdiction"
+    ),
     state: str | None = Query(None, description="Filter by state (e.g. Maharashtra, Delhi)"),
     record_type: str | None = Query(None, description="Filter by record type"),
     status: str | None = Query(None, description="Filter by status"),
@@ -32,8 +34,13 @@ async def list_records(
     date_to: date | None = Query(None, description="Filter orders published on or before date"),
     min_amount: float | None = Query(None, description="Filter minimum penalty amount (INR)"),
     max_amount: float | None = Query(None, description="Filter maximum penalty amount (INR)"),
-    penalty_slab: str | None = Query(None, description="Filter by penalty slab (zero, non_zero, thousands, lakhs, crores)"),
-    sort_by: str = Query("published_date", description="Field to sort by (published_date, amount, ingested_at, title)"),
+    penalty_slab: str | None = Query(
+        None, description="Filter by penalty slab (zero, non_zero, thousands, lakhs, crores)"
+    ),
+    sort_by: str = Query(
+        "published_date",
+        description="Field to sort by (published_date, amount, ingested_at, title)",
+    ),
     sort_order: str = Query("desc", description="Sort order (asc, desc)"),
     page: int = Query(1, ge=1, description="Page number"),
     page_size: int = Query(10, ge=1, le=100, description="Records per page"),
@@ -52,7 +59,7 @@ async def list_records(
     if isinstance(q, str) and q.strip():
         search_term = q.strip()
         tokens = [t for t in search_term.split() if len(t) > 1]
-        
+
         # Base full-phrase match
         full_phrase_filter = or_(
             Record.title.ilike(f"%{search_term}%"),
@@ -61,7 +68,7 @@ async def list_records(
             Record.external_id.ilike(f"%{search_term}%"),
             cast(Record.entity_names, String).ilike(f"%{search_term}%"),
         )
-        
+
         if len(tokens) > 1:
             # Multi-token match: every word in query must match a field
             token_filters = []
@@ -240,6 +247,7 @@ async def get_record_detail(
     if isinstance(raw_meta, str):
         try:
             import json
+
             raw_meta = json.loads(raw_meta)
         except Exception:
             raw_meta = {}

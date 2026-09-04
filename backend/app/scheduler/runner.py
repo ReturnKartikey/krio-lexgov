@@ -57,7 +57,9 @@ async def bootstrap_initial_data_if_empty():
                 rec_res = await session.execute(rec_stmt)
                 rec = rec_res.scalar_one_or_none()
                 if rec:
-                    await session.execute(delete(RecordEntity).where(RecordEntity.record_id == rec.id))
+                    await session.execute(
+                        delete(RecordEntity).where(RecordEntity.record_id == rec.id)
+                    )
                     await session.execute(delete(Record).where(Record.id == rec.id))
             await session.commit()
             # Update all seed records to exact static ISO published dates and verified PDF penalty amounts
@@ -102,7 +104,9 @@ def start_scheduler():
             replace_existing=True,
         )
         scheduler.start()
-        logger.info(f"APScheduler started. Job will trigger every {settings.SCHEDULE_INTERVAL_HOURS} hours.")
+        logger.info(
+            f"APScheduler started. Job will trigger every {settings.SCHEDULE_INTERVAL_HOURS} hours."
+        )
 
 
 def shutdown_scheduler():

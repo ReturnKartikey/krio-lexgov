@@ -2,7 +2,7 @@ import json
 import sys
 import urllib.request
 
-sys.stdout.reconfigure(encoding='utf-8')
+sys.stdout.reconfigure(encoding="utf-8")
 
 new_test_values = [
     {"name": "Bharat Global", "type": "Listed Agro/Infra Developer"},
@@ -15,9 +15,9 @@ new_test_values = [
     {"name": "Saurashtra", "type": "Cement Manufacturing Corporation"},
 ]
 
-print("\n" + "="*80)
+print("\n" + "=" * 80)
 print("           BRAND NEW VERIFIED VALUES FOR SYNTHESIZER TESTING (`⌘K`)")
-print("="*80 + "\n")
+print("=" * 80 + "\n")
 
 for item in new_test_values:
     val = item["name"]
@@ -33,7 +33,7 @@ for item in new_test_values:
         amt_str = f"Rs. {exposure:,.2f}" if exposure > 0 else "Non-Monetary Injunction"
         score_str = f"{int(d['confidence_score'] * 100)}%"
         p = d["precedents"][0]
-        
+
         print(f"🔹 QUERY: [{val}]  ({category})")
         print(f"   • Expected Orders:    {d['order_count']} Proceeding(s)")
         print(f"   • Expected Exposure:  {amt_str}")

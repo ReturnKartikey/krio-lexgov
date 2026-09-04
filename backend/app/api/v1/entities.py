@@ -22,8 +22,12 @@ router = APIRouter(prefix="/entities", tags=["Entities"])
 @router.get("", response_model=EnvelopeResponse[list[EntitySimple]])
 async def list_entities(
     q: str | None = Query(None, description="Search entity by name or normalized name"),
-    entity_type: str | None = Query(None, description="Filter by type (company, individual, intermediary)"),
-    sort_by: str = Query("record_count", description="Sort by (record_count, total_penalty_amount, name)"),
+    entity_type: str | None = Query(
+        None, description="Filter by type (company, individual, intermediary)"
+    ),
+    sort_by: str = Query(
+        "record_count", description="Sort by (record_count, total_penalty_amount, name)"
+    ),
     sort_order: str = Query("desc", description="Sort order (asc, desc)"),
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
@@ -35,7 +39,9 @@ async def list_entities(
 
     if isinstance(q, str) and q.strip():
         term = q.strip().lower()
-        search_filter = or_(Entity.normalized_name.ilike(f"%{term}%"), Entity.name.ilike(f"%{term}%"))
+        search_filter = or_(
+            Entity.normalized_name.ilike(f"%{term}%"), Entity.name.ilike(f"%{term}%")
+        )
         stmt = stmt.where(search_filter)
         count_stmt = count_stmt.where(search_filter)
 
@@ -102,16 +108,18 @@ async def get_entity_detail(
     id_filter = None
     try:
         val = uuid.UUID(clean_id)
-        id_filter = or_(Entity.id == val, Entity.name.ilike(clean_id), Entity.normalized_name.ilike(clean_id.lower()))
+        id_filter = or_(
+            Entity.id == val,
+            Entity.name.ilike(clean_id),
+            Entity.normalized_name.ilike(clean_id.lower()),
+        )
     except (ValueError, AttributeError):
         id_filter = or_(Entity.name.ilike(clean_id), Entity.normalized_name.ilike(clean_id.lower()))
 
     stmt = (
         select(Entity)
         .where(id_filter)
-        .options(
-            selectinload(Entity.record_links).selectinload(RecordEntity.record)
-        )
+        .options(selectinload(Entity.record_links).selectinload(RecordEntity.record))
     )
     result = await db.execute(stmt)
     entity = result.scalar_one_or_none()

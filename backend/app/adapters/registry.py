@@ -1,4 +1,3 @@
-
 from app.adapters.base import SourceAdapter
 from app.adapters.sebi_orders import SEBIOrdersAdapter
 

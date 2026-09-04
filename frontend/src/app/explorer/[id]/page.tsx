@@ -19,7 +19,6 @@ import {
 import { MicroLabel } from "@/components/common/MicroLabel";
 import { JsonViewer } from "@/components/common/JsonViewer";
 import { SynthesizeButton } from "@/components/ai/SynthesizeButton";
-import { HashDescramble } from "@/components/motion/HashDescramble";
 import { ExportPdfButton } from "@/components/common/ExportPdfButton";
 import { getRecordDetail } from "@/lib/api";
 import { formatINR, formatDate, formatCleanSummary } from "@/lib/utils";
@@ -248,45 +247,27 @@ export default async function RecordDetailPage({ params }: PageProps) {
             </div>
           </div>
 
-          {/* Provenance & Audit Trail Card */}
-          <div className="p-6 rounded-lg bg-white border border-brivo-navy/10 space-y-4 shadow-sm">
+          {/* Registry Source Card */}
+          <div className="p-6 rounded-lg bg-white border border-brivo-navy/10 space-y-3 shadow-sm">
             <h3 className="text-xs font-mono text-brivo-slate uppercase tracking-wider flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-emerald-600" />
-              <span>Traceable Provenance</span>
+              <ExternalLink className="w-3.5 h-3.5 text-brivo-cyan" />
+              <span>Registry Source Link</span>
             </h3>
 
             <p className="text-[0.7rem] text-brivo-slate leading-relaxed">
-              Every finding is verifiable against the immutable cryptographic digest fetched from SEBI.
+              Official regulatory order published on the Securities and Exchange Board of India (SEBI) enforcement registry.
             </p>
 
-            <div className="space-y-2.5 text-xs font-mono">
-              <div className="space-y-1.5">
-                <span className="text-[0.65rem] text-brivo-slate uppercase block">Cryptographic Digest</span>
-                <HashDescramble
-                  hash={record.raw_document?.content_hash || "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}
-                  className="w-full justify-between"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <span className="text-[0.65rem] text-brivo-slate uppercase">Registry Source Link</span>
-                <a
-                  href={record.source_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-brivo-navy hover:text-brivo-cyan hover:underline text-xs truncate"
-                >
-                  <span className="truncate">{record.source_url}</span>
-                  <ExternalLink className="w-3 h-3 shrink-0" />
-                </a>
-              </div>
-
-              <div className="flex justify-between text-[0.7rem] pt-2 border-t border-brivo-navy/10">
-                <span className="text-brivo-slate">HTTP Status</span>
-                <span className="text-emerald-600 font-medium">
-                  {record.raw_document?.http_status || 200} OK
-                </span>
-              </div>
+            <div className="pt-1">
+              <a
+                href={record.source_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between gap-2 p-3 rounded-lg bg-brivo-paper border border-brivo-navy/10 text-brivo-navy hover:text-brivo-cyan hover:border-brivo-cyan/40 text-xs font-mono transition-all group"
+              >
+                <span className="truncate flex-1">{record.source_url}</span>
+                <ExternalLink className="w-3.5 h-3.5 shrink-0 text-brivo-slate group-hover:text-brivo-cyan transition-colors" />
+              </a>
             </div>
           </div>
         </div>

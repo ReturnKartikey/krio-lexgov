@@ -70,7 +70,9 @@ class RobotsTxtValidator:
                     else:
                         parser.allow_all = True
                 except Exception as e:
-                    logger.warning(f"Could not fetch robots.txt for {host}: {e}. Defaulting to allow.")
+                    logger.warning(
+                        f"Could not fetch robots.txt for {host}: {e}. Defaulting to allow."
+                    )
                     parser.allow_all = True
                 finally:
                     if should_close and client:

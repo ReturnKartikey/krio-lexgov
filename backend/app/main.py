@@ -22,7 +22,7 @@ settings = get_settings()
 async def lifespan(app: FastAPI):
     # Startup actions
     logger.info(f"Starting {settings.PROJECT_NAME} v{settings.VERSION} [{settings.ENVIRONMENT}]")
-    
+
     # Run initial seed check asynchronously
     if settings.AUTO_SEED_FALLBACK:
         asyncio.create_task(bootstrap_initial_data_if_empty())
@@ -66,6 +66,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 # Exception handlers
 @app.exception_handler(Exception)
@@ -573,6 +574,7 @@ async def custom_swagger_ui_html():
 </body>
 </html>"""
     return HTMLResponse(content=html_content)
+
 
 # Include API routes
 app.include_router(api_router, prefix=settings.API_V1_STR)

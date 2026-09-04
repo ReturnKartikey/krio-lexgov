@@ -12,7 +12,9 @@ class Settings(BaseSettings):
 
     # Database
     DATABASE_URL: str = "postgresql+asyncpg://postgres:change_me_in_env@localhost:5432/opengov_db"
-    SYNC_DATABASE_URL: str = "postgresql+psycopg://postgres:change_me_in_env@localhost:5432/opengov_db"
+    SYNC_DATABASE_URL: str = (
+        "postgresql+psycopg://postgres:change_me_in_env@localhost:5432/opengov_db"
+    )
     DB_ECHO: bool = False
     DB_POOL_SIZE: int = 10
     DB_MAX_OVERFLOW: int = 20
@@ -21,7 +23,9 @@ class Settings(BaseSettings):
     REDIS_URL: str = "redis://localhost:6379/0"
 
     # Scraping & Crawler Settings
-    CRAWLER_USER_AGENT: str = "OpenGov-Bot/1.0 (+https://github.com/opengov/explorer; public registry compliance bot)"
+    CRAWLER_USER_AGENT: str = (
+        "OpenGov-Bot/1.0 (+https://github.com/opengov/explorer; public registry compliance bot)"
+    )
     CRAWLER_DELAY_SECONDS: float = 1.0
     CRAWLER_MAX_RETRIES: int = 5
     CRAWLER_BACKOFF_FACTOR: float = 1.5

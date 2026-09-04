@@ -17,7 +17,6 @@ import {
 } from "lucide-react";
 import { RecordListItem } from "@/lib/types";
 import { formatINR, formatDate, formatCleanSummary } from "@/lib/utils";
-import { HashDescramble } from "./HashDescramble";
 import { ExportPdfButton } from "@/components/common/ExportPdfButton";
 
 interface QuickLookModalProps {
@@ -151,17 +150,6 @@ export function QuickLookModal({ record, isOpen, onClose }: QuickLookModalProps)
                     ))}
                   </div>
                 </div>
-              </div>
-
-              {/* SHA-256 Provenance */}
-              <div className="space-y-1.5">
-                <span className="text-[0.65rem] font-mono text-brivo-slate uppercase block">
-                  Cryptographic Digest Verification
-                </span>
-                <HashDescramble
-                  hash="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-                  className="w-full justify-between"
-                />
               </div>
             </div>
 

@@ -2,7 +2,7 @@ import json
 import sys
 import urllib.request
 
-sys.stdout.reconfigure(encoding='utf-8')
+sys.stdout.reconfigure(encoding="utf-8")
 
 test_cases = [
     {"query": "Front Running", "mode": "risk_brief"},
@@ -26,7 +26,9 @@ for tc in test_cases:
         label = q if q else "FULL COHORT OVERVIEW"
         print(f"\n==================== TEST CASE: [{label}] (Mode: {mode}) ====================")
         print(f"HEADLINE:     {data['headline']}")
-        print(f"ORDERS FOUND: {data['order_count']} | EXPOSURE: Rs. {data['total_penalty_exposure']:,.2f} | RISK: {data['risk_level']}")
+        print(
+            f"ORDERS FOUND: {data['order_count']} | EXPOSURE: Rs. {data['total_penalty_exposure']:,.2f} | RISK: {data['risk_level']}"
+        )
         print(f"CONFIDENCE:   {int(data['confidence_score'] * 100)}% Audit Grade")
         print(f"SUMMARY:      {data['executive_summary']}")
         print(f"STATUTES:     {data['applicable_statutes']}")

@@ -147,7 +147,11 @@ def normalize_entity_name(name: str) -> str:
     if not name:
         return ""
     s = unicodedata.normalize("NFKD", name).lower().strip()
-    s = re.sub(r"^(?:in\s+the\s+matter\s+of|in\s+respect\s+of|against|m/s\.?|shri|smt\.?|mr\.?|ms\.?|dr\.?)\s+", "", s)
+    s = re.sub(
+        r"^(?:in\s+the\s+matter\s+of|in\s+respect\s+of|against|m/s\.?|shri|smt\.?|mr\.?|ms\.?|dr\.?)\s+",
+        "",
+        s,
+    )
     s = re.sub(r"\b(private\s+limited|pvt\.?\s*ltd\.?|limited|ltd\.?|llp|inc\.?|corp\.?)\b", "", s)
     s = re.sub(r"[^a-z0-9\s]", " ", s)
     s = re.sub(r"\s+", " ", s).strip()
@@ -158,7 +162,7 @@ def is_valid_entity_candidate(name: str) -> bool:
     """Rigorous sanity check on candidate entity strings to eliminate boilerplate legal noise."""
     if not name:
         return False
-    
+
     clean = name.strip(" ,.-/:;\"'()")
     if len(clean) < 4 or len(clean) > 70:
         return False
@@ -171,16 +175,42 @@ def is_valid_entity_candidate(name: str) -> bool:
         return False
 
     words = clean.split()
-    if len(words) < 2 and not any(clean.endswith(sfx) for sfx in ["Ltd", "Limited", "LLP", "Corp", "Inc", "Trust", "Fund"]):
+    if len(words) < 2 and not any(
+        clean.endswith(sfx) for sfx in ["Ltd", "Limited", "LLP", "Corp", "Inc", "Trust", "Fund"]
+    ):
         return False
 
     lower = clean.lower()
     bad_starts = (
-        "of ", "and ", "or ", "in ", "the ", "to ", "for ", "with ",
-        "by ", "from ", "that ", "which ", "are ", "as ", "at ", "be ",
-        "under ", "vide ", "dated ", "order ", "members ", "final ",
-        "exemption ", "revocation ", "adjudication ", "ipo of ",
-        "equity shares ", "acquirer ", "settlors ",
+        "of ",
+        "and ",
+        "or ",
+        "in ",
+        "the ",
+        "to ",
+        "for ",
+        "with ",
+        "by ",
+        "from ",
+        "that ",
+        "which ",
+        "are ",
+        "as ",
+        "at ",
+        "be ",
+        "under ",
+        "vide ",
+        "dated ",
+        "order ",
+        "members ",
+        "final ",
+        "exemption ",
+        "revocation ",
+        "adjudication ",
+        "ipo of ",
+        "equity shares ",
+        "acquirer ",
+        "settlors ",
     )
     if any(lower.startswith(prefix) for prefix in bad_starts):
         return False
@@ -191,13 +221,26 @@ def is_valid_entity_candidate(name: str) -> bool:
         return False
 
     bad_phrases = (
-        "are not contrary", "conditions", "dissolution of", "voting rights",
-        "beneficial interest", "acquirer trust", "settlors", "beneficiaries",
-        "share capital", "stock exchange", "takeover regulations",
-        "application may be", "matter of unregistered", "unregistered investment",
-        "regarding insider trading", "financial announcements",
-        "unregistered investment advisory", "national stock exchange",
-        "target company", "acquirer",
+        "are not contrary",
+        "conditions",
+        "dissolution of",
+        "voting rights",
+        "beneficial interest",
+        "acquirer trust",
+        "settlors",
+        "beneficiaries",
+        "share capital",
+        "stock exchange",
+        "takeover regulations",
+        "application may be",
+        "matter of unregistered",
+        "unregistered investment",
+        "regarding insider trading",
+        "financial announcements",
+        "unregistered investment advisory",
+        "national stock exchange",
+        "target company",
+        "acquirer",
     )
     if any(phrase in lower for phrase in bad_phrases):
         return False
@@ -210,9 +253,21 @@ def clean_entity_name(name: str) -> str:
     s = name.strip(" ,.-/:;\"'()")
     s = re.sub(r"^M/s\.?\s+", "", s, flags=re.IGNORECASE)
     s = re.sub(r"^IPO\s+of\s+", "", s, flags=re.IGNORECASE)
-    s = re.sub(r"^(?:Settlement\s+Order\s+(?:in\s+the\s+matter\s+of|in\s+respect\s+of|of)\s+|Summary\s+Settlement\s+Order\s+(?:in\s+the\s+matter\s+of|in\s+respect\s+of|of)\s+)", "", s, flags=re.IGNORECASE)
-    s = re.sub(r"^(?:front[\s\-]+running\s+(?:in\s+the\s+matter\s+of\s+|by\s+)?|illiquid\s+stock\s+options\s+at\s+bse\s+against\s+|illiquid\s+stock\s+options\s+against\s+|unregistered\s+investment\s+advisory\s+(?:and\s+unregistered\s+portfolio\s+management\s+services\s+)?activities\s+by\s+|unregistered\s+investment\s+advisory\s+activities\s+by\s+|activities\s+by\s+|suspected\s+insider\s+trading\s+activity\s+of\s+certain\s+entities\s+in\s+the\s+scrip\s+of\s+|bse\s+against\s+)", "", s, flags=re.IGNORECASE)
-    s = re.sub(r"\s*\((?:Adjudication|Enquiry|Settlement|Application).*$", "", s, flags=re.IGNORECASE)
+    s = re.sub(
+        r"^(?:Settlement\s+Order\s+(?:in\s+the\s+matter\s+of|in\s+respect\s+of|of)\s+|Summary\s+Settlement\s+Order\s+(?:in\s+the\s+matter\s+of|in\s+respect\s+of|of)\s+)",
+        "",
+        s,
+        flags=re.IGNORECASE,
+    )
+    s = re.sub(
+        r"^(?:front[\s\-]+running\s+(?:in\s+the\s+matter\s+of\s+|by\s+)?|illiquid\s+stock\s+options\s+at\s+bse\s+against\s+|illiquid\s+stock\s+options\s+against\s+|unregistered\s+investment\s+advisory\s+(?:and\s+unregistered\s+portfolio\s+management\s+services\s+)?activities\s+by\s+|unregistered\s+investment\s+advisory\s+activities\s+by\s+|activities\s+by\s+|suspected\s+insider\s+trading\s+activity\s+of\s+certain\s+entities\s+in\s+the\s+scrip\s+of\s+|bse\s+against\s+)",
+        "",
+        s,
+        flags=re.IGNORECASE,
+    )
+    s = re.sub(
+        r"\s*\((?:Adjudication|Enquiry|Settlement|Application).*$", "", s, flags=re.IGNORECASE
+    )
     s = re.sub(r"\s+-\s+Proprietor.*$", "", s, flags=re.IGNORECASE)
     s = re.sub(r"\s+Proprietor.*$", "", s, flags=re.IGNORECASE)
     s = re.sub(r"\s+and\s+(?:others|its|noticees|promoters|Ors\.?)$", "", s, flags=re.IGNORECASE)
@@ -256,8 +311,31 @@ def extract_entities_from_text(title: str, body: str = "") -> list[ExtractedEnti
         if is_valid_entity_candidate(cleaned):
             norm = normalize_entity_name(cleaned)
             if norm and norm not in entities_map:
-                is_corp = any(k in cleaned.lower() for k in ["ltd", "llp", "corp", "pvt", "inc", "holding", "securities", "broker", "advisory", "capital", "enterprises", "technologies", "infra", "realty", "finvest"])
-                ent_type = "company" if is_corp else ("individual" if INDIVIDUAL_REGEX.search(cleaned) else "company")
+                is_corp = any(
+                    k in cleaned.lower()
+                    for k in [
+                        "ltd",
+                        "llp",
+                        "corp",
+                        "pvt",
+                        "inc",
+                        "holding",
+                        "securities",
+                        "broker",
+                        "advisory",
+                        "capital",
+                        "enterprises",
+                        "technologies",
+                        "infra",
+                        "realty",
+                        "finvest",
+                    ]
+                )
+                ent_type = (
+                    "company"
+                    if is_corp
+                    else ("individual" if INDIVIDUAL_REGEX.search(cleaned) else "company")
+                )
                 entities_map[norm] = ExtractedEntityItem(
                     name=cleaned,
                     normalized_name=norm,
@@ -297,10 +375,7 @@ def extract_entities_from_text(title: str, body: str = "") -> list[ExtractedEnti
     all_extracted = list(entities_map.values())
     filtered: list[ExtractedEntityItem] = []
     for item in all_extracted:
-        is_sub = any(
-            item.name != other.name and item.name in other.name
-            for other in all_extracted
-        )
+        is_sub = any(item.name != other.name and item.name in other.name for other in all_extracted)
         if not is_sub:
             filtered.append(item)
 
