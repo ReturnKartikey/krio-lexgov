@@ -222,8 +222,8 @@ export default function ApiExplorerPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8 min-h-[85vh] w-full">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-brivo-navy/10 pb-6">
-        <div className="space-y-2">
+      <div className="border-b border-brivo-navy/10 pb-6">
+        <div className="space-y-2 max-w-3xl">
           <MicroLabel number="N°05" label="DEVELOPER PLATFORM" />
           <h1 className="text-2xl sm:text-3xl font-light tracking-tight text-brivo-navy font-sans">
             Interactive <span className="font-serif italic font-normal">API Console</span>
@@ -231,12 +231,6 @@ export default function ApiExplorerPage() {
           <p className="text-xs text-brivo-slate">
             Test live endpoints directly against the regulatory engine, inspect real-time JSON responses, and generate ready-to-use cURL commands.
           </p>
-        </div>
-
-        {/* Engine Status Indicator */}
-        <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-mono text-emerald-800 shadow-xs">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span>REST v1 Engine Active</span>
         </div>
       </div>
 
