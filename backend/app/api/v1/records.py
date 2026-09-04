@@ -57,8 +57,8 @@ async def list_records(
     filters = []
 
     if isinstance(q, str) and q.strip():
-        search_term = q.strip()
-        tokens = [t for t in search_term.split() if len(t) > 1]
+        search_term = q.strip()[:500]
+        tokens = [t for t in search_term.split() if len(t) > 1][:10]
 
         # Base full-phrase match
         full_phrase_filter = or_(
@@ -87,17 +87,17 @@ async def list_records(
             filters.append(full_phrase_filter)
 
     if isinstance(state, str) and state.strip():
-        filters.append(Record.state.ilike(f"%{state.strip()}%"))
+        filters.append(Record.state.ilike(f"%{state.strip()[:100]}%"))
 
     if isinstance(record_type, str) and record_type.strip():
-        filters.append(Record.record_type.ilike(record_type.strip()))
+        filters.append(Record.record_type.ilike(record_type.strip()[:100]))
 
     if isinstance(status, str) and status.strip():
-        filters.append(Record.status.ilike(status.strip()))
+        filters.append(Record.status.ilike(status.strip()[:100]))
 
     if isinstance(entity, str) and entity.strip():
-        ent_term = entity.strip()
-        ent_tokens = [t for t in ent_term.split() if len(t) > 1]
+        ent_term = entity.strip()[:200]
+        ent_tokens = [t for t in ent_term.split() if len(t) > 1][:10]
         if len(ent_tokens) > 1:
             ent_token_filters = [
                 or_(

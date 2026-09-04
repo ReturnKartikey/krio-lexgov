@@ -38,7 +38,7 @@ async def list_entities(
     count_stmt = select(func.count(Entity.id))
 
     if isinstance(q, str) and q.strip():
-        term = q.strip().lower()
+        term = q.strip().lower()[:500]
         search_filter = or_(
             Entity.normalized_name.ilike(f"%{term}%"), Entity.name.ilike(f"%{term}%")
         )

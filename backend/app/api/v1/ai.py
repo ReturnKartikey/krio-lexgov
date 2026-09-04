@@ -82,7 +82,7 @@ async def synthesize_regulatory_intelligence(
     Synthesize regulatory enforcement intelligence, precedent patterns, and risk exposure
     across indexed SEBI adjudication orders and entities.
     """
-    query_str = (req.query or "").strip()
+    query_str = (req.query or "").strip()[:500]
 
     # 1. Flexible Multi-Token Query Matching
     matched_records = []
@@ -91,7 +91,42 @@ async def synthesize_regulatory_intelligence(
     if has_specific_query:
         # Normalize punctuation: replace hyphens, underscores with spaces
         normalized_q = re.sub(r"[-_/,.:;]+", " ", query_str).strip()
-        tokens = [t.lower() for t in normalized_q.split() if len(t) > 1]
+        stopwords = {
+            "a",
+            "an",
+            "the",
+            "and",
+            "or",
+            "of",
+            "in",
+            "on",
+            "at",
+            "to",
+            "for",
+            "with",
+            "all",
+            "any",
+            "by",
+            "from",
+            "is",
+            "are",
+            "was",
+            "were",
+            "be",
+            "been",
+            "this",
+            "that",
+            "these",
+            "those",
+            "it",
+            "its",
+            "into",
+        }
+        tokens = [
+            t.lower() for t in normalized_q.split() if len(t) > 2 and t.lower() not in stopwords
+        ][:10]
+        if not tokens:
+            tokens = [t.lower() for t in normalized_q.split() if len(t) > 1][:10]
 
         # Build token match filters
         token_filters = []
@@ -115,17 +150,6 @@ async def synthesize_regulatory_intelligence(
             )
             res_and = await db.execute(stmt_and)
             matched_records = res_and.scalars().all()
-
-            # Secondary search: if AND has 0 results, try matching ANY token (OR)
-            if not matched_records and len(token_filters) > 1:
-                stmt_or = (
-                    select(Record)
-                    .where(or_(*token_filters))
-                    .order_by(desc(Record.published_date))
-                    .limit(15)
-                )
-                res_or = await db.execute(stmt_or)
-                matched_records = res_or.scalars().all()
     else:
         # Default: Full cohort overview (most recent orders)
         stmt_all = select(Record).order_by(desc(Record.published_date)).limit(15)
@@ -133,13 +157,14 @@ async def synthesize_regulatory_intelligence(
         matched_records = res_all.scalars().all()
 
     # 2. Handle Zero Matches for a Specific Query
+    safe_q = re.sub(r"[^\w\s\.-]", "", query_str)[:80].strip() or "Query"
     if has_specific_query and not matched_records:
         return SynthesisResponse(
-            headline=f"Synthesis Report: No Enforcement Records Found for '{query_str}'",
+            headline=f"Synthesis Report: No Enforcement Records Found for '{safe_q}'",
             mode=req.mode,
             executive_summary=(
-                f"No direct adjudication orders or active sanction proceedings were found matching '{query_str}' "
-                f"within the currently indexed SEBI repository cohort (39 orders). "
+                f"No direct adjudication orders or active sanction proceedings were found matching '{safe_q}' "
+                f"within the currently indexed regulatory enforcement repository. "
                 f"Active indexed matters include 'Angel One', 'Madhav Stock Vision (Front Running)', "
                 f"'Stark Investments (Unregistered Advisory)', 'Debock Industries', and 'Indian Oil Corporation'."
             ),
@@ -152,7 +177,7 @@ async def synthesize_regulatory_intelligence(
             ],
             precedents=[],
             compliance_takeaways=[
-                f"No adverse regulatory orders recorded for '{query_str}' in the current surveillance period.",
+                f"No adverse regulatory orders recorded for '{safe_q}' in the current surveillance period.",
                 "Maintain periodic automated screening against newly published SEBI adjudication releases.",
                 "Execute broader semantic searches using individual keywords or related corporate directors.",
             ],
@@ -233,22 +258,22 @@ async def synthesize_regulatory_intelligence(
 
     if has_specific_query:
         if req.mode == "precedent_analysis":
-            headline = f"Targeted Precedent Synthesis: '{query_str}'"
+            headline = f"Targeted Precedent Synthesis: '{safe_q}'"
             summary = (
-                f"Analysis of {len(records)} regulatory proceedings relating to '{query_str}' indicates strict enforcement "
+                f"Analysis of {len(records)} regulatory proceedings relating to '{safe_q}' indicates strict enforcement "
                 f"under statutory SEBI guidelines. Adjudicating Officers established substantive evidentiary records with "
                 f"aggregate financial exposure totaling ₹{total_penalty:,.2f} across {len(all_entities)} noticees."
             )
         elif req.mode == "entity_exposure":
-            headline = f"Noticee Liability Synthesis: '{query_str}'"
+            headline = f"Noticee Liability Synthesis: '{safe_q}'"
             summary = (
-                f"Identified {len(all_entities)} legal entities/noticees across {len(records)} proceedings matching '{query_str}'. "
+                f"Identified {len(all_entities)} legal entities/noticees across {len(records)} proceedings matching '{safe_q}'. "
                 f"Adjudication history reflects total financial liability exposure of ₹{total_penalty:,.2f}."
             )
         else:
-            headline = f"Executive Intelligence Brief: '{query_str}'"
+            headline = f"Executive Intelligence Brief: '{safe_q}'"
             summary = (
-                f"Targeted regulatory synthesis for '{query_str}' across {len(records)} SEBI adjudication order(s). "
+                f"Targeted regulatory synthesis for '{safe_q}' across {len(records)} SEBI adjudication order(s). "
                 f"Identified ₹{total_penalty:,.2f} in cumulative monetary sanctions involving {len(all_entities)} primary respondents."
             )
     else:
