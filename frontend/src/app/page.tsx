@@ -30,7 +30,7 @@ import { IntelligenceModal } from "@/components/ai/IntelligenceModal";
 import { QuickLookModal } from "@/components/motion/QuickLookModal";
 import { MagneticButton } from "@/components/motion/MagneticButton";
 import { TiltCard } from "@/components/motion/TiltCard";
-import { getRecords, getTrends, getProcessingStats, getHealth, getDocsUrl } from "@/lib/api";
+import { getRecords, getTrends, getProcessingStats, getHealth } from "@/lib/api";
 import { formatINR, formatDate, truncateText } from "@/lib/utils";
 import { gsap, ScrollTrigger, SplitType, animateHeroHeadline, animateCounter, prefersReducedMotion } from "@/lib/motion";
 
@@ -661,15 +661,13 @@ export default function LandingPage() {
               <span>Live AI Briefing</span>
             </MagneticButton>
 
-            <a
-              href={getDocsUrl()}
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/api-explorer"
               className="px-6 py-3 rounded-full bg-brivo-navy hover:bg-brivo-navy/90 text-brivo-paper text-xs font-mono flex items-center gap-2 shadow-xs transition-all active:scale-95"
             >
-              <span>Swagger / OpenAPI UI</span>
-              <ArrowUpRight className="w-3.5 h-3.5 text-brivo-cyan" />
-            </a>
+              <TerminalSquare className="w-3.5 h-3.5 text-brivo-cyan" />
+              <span>Interactive API Console</span>
+            </Link>
           </div>
         </div>
       </section>

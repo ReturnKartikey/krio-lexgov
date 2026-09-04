@@ -78,8 +78,7 @@ export function getApiBaseUrl(): string {
 }
 
 export function getDocsUrl(): string {
-  const base = getApiBaseUrl();
-  return `${base}/docs`;
+  return "/api-explorer";
 }
 
 function getApiBase(): string {

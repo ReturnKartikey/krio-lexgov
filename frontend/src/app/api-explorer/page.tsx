@@ -6,14 +6,13 @@ import {
   Play,
   Copy,
   Check,
-  ExternalLink,
   Code2,
   Server,
   Zap,
 } from "lucide-react";
 import { MicroLabel } from "@/components/common/MicroLabel";
 import { JsonViewer } from "@/components/common/JsonViewer";
-import { getApiBaseUrl, getDocsUrl } from "@/lib/api";
+import { getApiBaseUrl } from "@/lib/api";
 
 interface ApiParam {
   key: string;
@@ -230,21 +229,14 @@ export default function ApiExplorerPage() {
             Interactive <span className="font-serif italic font-normal">API Console</span>
           </h1>
           <p className="text-xs text-brivo-slate">
-            Test live endpoints directly against the FastAPI backend, generate cURL commands, or explore the Swagger docs.
+            Test live endpoints directly against the regulatory engine, inspect real-time JSON responses, and generate ready-to-use cURL commands.
           </p>
         </div>
 
-        {/* OpenAPI Link */}
-        <div className="flex items-center gap-3">
-          <a
-            href={getDocsUrl()}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-4 py-2 rounded-full bg-white hover:bg-brivo-paper border border-brivo-navy/15 text-xs font-mono text-brivo-navy transition-colors flex items-center gap-1.5 shadow-sm"
-          >
-            <span>OpenAPI Swagger UI</span>
-            <ExternalLink className="w-3.5 h-3.5" />
-          </a>
+        {/* Engine Status Indicator */}
+        <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-mono text-emerald-800 shadow-xs">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span>REST v1 Engine Active</span>
         </div>
       </div>
 

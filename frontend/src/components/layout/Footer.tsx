@@ -5,7 +5,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
-import { getDocsUrl } from "@/lib/api";
 import { MadeBySignature } from "@/components/motion/MadeBySignature";
 
 const POLICY_ROUTES = ["/contact", "/cookie-policy", "/privacy-policy", "/terms"];
@@ -50,15 +49,13 @@ export function Footer() {
               <h4 className="font-mono text-xs text-brivo-paper uppercase tracking-wider">Specifications</h4>
               <ul className="space-y-2 text-xs font-mono">
                 <li>
-                  <a
-                    href={getDocsUrl()}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <Link
+                    href="/api-explorer"
                     className="hover:text-brivo-cyan transition-colors flex items-center gap-1"
                   >
-                    <span>OpenAPI 3.1 Spec</span>
+                    <span>Interactive API Console</span>
                     <ArrowUpRight className="w-3 h-3" />
-                  </a>
+                  </Link>
                 </li>
                 <li>
                   <span className="text-brivo-slate/60">SourceAdapter RFC-04</span>
