@@ -124,7 +124,7 @@ ${data.compliance_takeaways.join("\n")}
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 overflow-y-auto">
           {/* Backdrop with silky blur */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -142,11 +142,11 @@ ${data.compliance_takeaways.join("\n")}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.97, y: 8 }}
             transition={{ type: "spring", damping: 28, stiffness: 350 }}
-            className="relative w-full max-w-4xl bg-white border border-brivo-navy/15 rounded-2xl shadow-2xl overflow-hidden z-10 flex flex-col max-h-[90vh] my-auto"
+            className="relative w-full max-w-4xl bg-white border border-brivo-navy/15 rounded-2xl shadow-2xl overflow-hidden z-10 flex flex-col h-[94vh] sm:h-auto sm:max-h-[90vh] my-auto"
           >
             {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-brivo-navy/10 bg-brivo-paper flex items-center justify-between">
-              <div className="flex items-center gap-3">
+            <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-brivo-navy/10 bg-brivo-paper flex items-center justify-between gap-2 shrink-0">
+              <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
                 <div className="w-7 h-7 rounded-lg overflow-hidden shrink-0 flex items-center justify-center shadow-sm">
                   <Image
                     src="/icon_logo.png"
@@ -156,28 +156,29 @@ ${data.compliance_takeaways.join("\n")}
                     className="w-7 h-7 object-contain rounded-lg shrink-0"
                   />
                 </div>
-                <div className="space-y-0.5">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs font-semibold text-brivo-navy tracking-tight">
-                      KRIO // STATUTORY RISK SYNTHESIZER
+                <div className="space-y-0.5 min-w-0">
+                  <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                    <span className="font-mono text-xs font-semibold text-brivo-navy tracking-tight truncate">
+                      KRIO // STATUTORY SYNTHESIZER
                     </span>
-                    <span className="text-[0.6rem] font-mono px-1.5 py-0.2 rounded bg-brivo-mist text-brivo-navy border border-brivo-cyan/40">
+                    <span className="text-[0.58rem] sm:text-[0.6rem] font-mono px-1.5 py-0.2 rounded bg-brivo-mist text-brivo-navy border border-brivo-cyan/40 shrink-0">
                       LIVE NLP
                     </span>
                   </div>
-                  <p className="text-[0.7rem] text-brivo-slate">
+                  <p className="text-[0.65rem] sm:text-[0.7rem] text-brivo-slate truncate">
                     Cross-matter precedent extraction & liability analysis across SEBI orders
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                 <span className="hidden sm:inline-block font-mono text-[0.65rem] text-brivo-slate px-2 py-1 rounded bg-white border border-brivo-navy/10">
                   ESC to close
                 </span>
                 <button
                   onClick={onClose}
-                  className="p-1.5 rounded-full hover:bg-brivo-navy/10 text-brivo-slate hover:text-brivo-navy transition-colors"
+                  className="p-1.5 rounded-full hover:bg-brivo-navy/10 text-brivo-slate hover:text-brivo-navy transition-colors cursor-pointer"
+                  aria-label="Close modal"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -185,7 +186,7 @@ ${data.compliance_takeaways.join("\n")}
             </div>
 
             {/* Input & Mode Toolbar */}
-            <div className="p-6 border-b border-brivo-navy/10 bg-white space-y-4">
+            <div className="p-3.5 sm:p-6 border-b border-brivo-navy/10 bg-white space-y-3 sm:space-y-4 shrink-0">
               {/* Search Bar */}
               <form
                 onSubmit={(e) => {
@@ -194,81 +195,88 @@ ${data.compliance_takeaways.join("\n")}
                 }}
                 className="flex items-center gap-2"
               >
-                <div className="relative flex-1">
-                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-brivo-slate" />
+                <div className="relative flex-1 min-w-0">
+                  <Search className="absolute left-3 sm:left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-brivo-slate shrink-0" />
                   <input
                     type="text"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Focus query (e.g. 'Front-Running', 'Section 15HA', or leave empty)..."
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-brivo-paper border border-brivo-navy/15 focus:border-brivo-navy focus:ring-1 focus:ring-brivo-navy text-xs sm:text-sm text-brivo-navy placeholder:text-brivo-slate/60 outline-none transition-all font-sans"
+                    placeholder="Focus query (e.g. 'Front-Running', 'Section 15HA')..."
+                    className="w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-2.5 rounded-xl bg-brivo-paper border border-brivo-navy/15 focus:border-brivo-navy focus:ring-1 focus:ring-brivo-navy text-xs sm:text-sm text-brivo-navy placeholder:text-brivo-slate/60 outline-none transition-all font-sans"
                   />
                 </div>
                 <button
                   type="submit"
                   disabled={initialLoading}
-                  className="px-5 py-2.5 rounded-xl bg-brivo-navy hover:bg-brivo-navy/90 text-brivo-paper text-xs font-semibold tracking-wide transition-all shadow-sm flex items-center gap-1.5 shrink-0"
+                  className="px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-brivo-navy hover:bg-brivo-navy/90 text-brivo-paper text-xs font-semibold tracking-wide transition-all shadow-sm flex items-center gap-1.5 shrink-0 active:scale-95 cursor-pointer"
                 >
                   <Activity className={`w-3.5 h-3.5 ${initialLoading ? "animate-spin text-brivo-cyan" : "text-brivo-cyan"}`} />
-                  <span>{initialLoading ? "Analyzing..." : "Synthesize"}</span>
+                  <span className="hidden xs:inline sm:inline">{initialLoading ? "Analyzing..." : "Synthesize"}</span>
+                  <span className="inline xs:hidden sm:hidden">{initialLoading ? "..." : "Run"}</span>
                 </button>
               </form>
 
-              {/* Mode Pills (Smooth & Jitter-Free) */}
-              <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
-                <div className="flex items-center p-1 rounded-full bg-brivo-paper border border-brivo-navy/10">
-                  <button
-                    onClick={() => handleModeSwitch("risk_brief")}
-                    className="relative px-3.5 py-1 rounded-full text-xs font-mono font-medium transition-colors select-none"
-                  >
-                    {mode === "risk_brief" && (
-                      <motion.div
-                        layoutId="aiModePill"
-                        className="absolute inset-0 rounded-full bg-brivo-navy shadow-sm"
-                        transition={{ type: "spring", stiffness: 450, damping: 35 }}
-                      />
-                    )}
-                    <span className={`relative z-10 transition-colors ${mode === "risk_brief" ? "text-brivo-paper" : "text-brivo-slate hover:text-brivo-navy"}`}>
-                      Executive Risk Brief
-                    </span>
-                  </button>
+              {/* Mode Switcher & Example Chips */}
+              <div className="flex flex-col gap-2.5">
+                {/* Responsive Mode Switcher: full-width segmented control on mobile, pills on desktop */}
+                <div className="w-full overflow-x-auto no-scrollbar scrollbar-none pb-0.5">
+                  <div className="inline-flex items-center p-1 rounded-full bg-brivo-paper border border-brivo-navy/10 min-w-full sm:min-w-0 justify-between sm:justify-start">
+                    <button
+                      onClick={() => handleModeSwitch("risk_brief")}
+                      className="relative flex-1 sm:flex-initial px-2.5 sm:px-3.5 py-1 rounded-full text-[0.7rem] sm:text-xs font-mono font-medium transition-colors select-none whitespace-nowrap text-center cursor-pointer"
+                    >
+                      {mode === "risk_brief" && (
+                        <motion.div
+                          layoutId="aiModePill"
+                          className="absolute inset-0 rounded-full bg-brivo-navy shadow-sm"
+                          transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                        />
+                      )}
+                      <span className={`relative z-10 transition-colors ${mode === "risk_brief" ? "text-brivo-paper font-semibold" : "text-brivo-slate hover:text-brivo-navy"}`}>
+                        <span className="sm:hidden">Risk Brief</span>
+                        <span className="hidden sm:inline">Executive Risk Brief</span>
+                      </span>
+                    </button>
 
-                  <button
-                    onClick={() => handleModeSwitch("precedent_analysis")}
-                    className="relative px-3.5 py-1 rounded-full text-xs font-mono font-medium transition-colors select-none"
-                  >
-                    {mode === "precedent_analysis" && (
-                      <motion.div
-                        layoutId="aiModePill"
-                        className="absolute inset-0 rounded-full bg-brivo-navy shadow-sm"
-                        transition={{ type: "spring", stiffness: 450, damping: 35 }}
-                      />
-                    )}
-                    <span className={`relative z-10 transition-colors ${mode === "precedent_analysis" ? "text-brivo-paper" : "text-brivo-slate hover:text-brivo-navy"}`}>
-                      Precedent Analysis
-                    </span>
-                  </button>
+                    <button
+                      onClick={() => handleModeSwitch("precedent_analysis")}
+                      className="relative flex-1 sm:flex-initial px-2.5 sm:px-3.5 py-1 rounded-full text-[0.7rem] sm:text-xs font-mono font-medium transition-colors select-none whitespace-nowrap text-center cursor-pointer"
+                    >
+                      {mode === "precedent_analysis" && (
+                        <motion.div
+                          layoutId="aiModePill"
+                          className="absolute inset-0 rounded-full bg-brivo-navy shadow-sm"
+                          transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                        />
+                      )}
+                      <span className={`relative z-10 transition-colors ${mode === "precedent_analysis" ? "text-brivo-paper font-semibold" : "text-brivo-slate hover:text-brivo-navy"}`}>
+                        <span className="sm:hidden">Precedents</span>
+                        <span className="hidden sm:inline">Precedent Analysis</span>
+                      </span>
+                    </button>
 
-                  <button
-                    onClick={() => handleModeSwitch("entity_exposure")}
-                    className="relative px-3.5 py-1 rounded-full text-xs font-mono font-medium transition-colors select-none"
-                  >
-                    {mode === "entity_exposure" && (
-                      <motion.div
-                        layoutId="aiModePill"
-                        className="absolute inset-0 rounded-full bg-brivo-navy shadow-sm"
-                        transition={{ type: "spring", stiffness: 450, damping: 35 }}
-                      />
-                    )}
-                    <span className={`relative z-10 transition-colors ${mode === "entity_exposure" ? "text-brivo-paper" : "text-brivo-slate hover:text-brivo-navy"}`}>
-                      Noticee Liability Matrix
-                    </span>
-                  </button>
+                    <button
+                      onClick={() => handleModeSwitch("entity_exposure")}
+                      className="relative flex-1 sm:flex-initial px-2.5 sm:px-3.5 py-1 rounded-full text-[0.7rem] sm:text-xs font-mono font-medium transition-colors select-none whitespace-nowrap text-center cursor-pointer"
+                    >
+                      {mode === "entity_exposure" && (
+                        <motion.div
+                          layoutId="aiModePill"
+                          className="absolute inset-0 rounded-full bg-brivo-navy shadow-sm"
+                          transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                        />
+                      )}
+                      <span className={`relative z-10 transition-colors ${mode === "entity_exposure" ? "text-brivo-paper font-semibold" : "text-brivo-slate hover:text-brivo-navy"}`}>
+                        <span className="sm:hidden">Noticees</span>
+                        <span className="hidden sm:inline">Noticee Liability Matrix</span>
+                      </span>
+                    </button>
+                  </div>
                 </div>
 
-                {/* Example query chips */}
-                <div className="flex flex-wrap items-center gap-1.5 text-[0.68rem] font-mono text-brivo-slate pt-1">
-                  <span className="text-brivo-slate/80 font-medium">Try:</span>
+                {/* Example query chips in smooth single-row horizontal scroll strip */}
+                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scrollbar-none py-0.5 text-[0.68rem] font-mono text-brivo-slate">
+                  <span className="text-brivo-slate/80 font-medium shrink-0">Try:</span>
                   {[
                     { label: "Front Running", q: "Front Running" },
                     { label: "Angel One", q: "Angel One" },
@@ -283,7 +291,7 @@ ${data.compliance_takeaways.join("\n")}
                         setQuery(chip.q);
                         handleRunSynthesis(chip.q, mode, true);
                       }}
-                      className="px-2 py-0.5 rounded-md bg-brivo-paper hover:bg-white border border-brivo-navy/12 text-brivo-navy hover:text-brivo-navy font-mono text-[0.65rem] transition-all hover:border-brivo-navy/30 shadow-2xs active:scale-95"
+                      className="px-2 py-0.5 rounded-md bg-brivo-paper hover:bg-white border border-brivo-navy/12 text-brivo-navy hover:text-brivo-navy font-mono text-[0.65rem] transition-all hover:border-brivo-navy/30 shadow-2xs active:scale-95 shrink-0 whitespace-nowrap cursor-pointer"
                     >
                       {chip.label}
                     </button>
@@ -295,13 +303,13 @@ ${data.compliance_takeaways.join("\n")}
             {/* Results Content Area */}
             <div
               data-lenis-prevent="true"
-              className="p-6 overflow-y-auto space-y-6 flex-1 bg-editorial-grid max-h-[55vh]"
+              className="p-3.5 sm:p-6 overflow-y-auto space-y-4 sm:space-y-6 flex-1 bg-editorial-grid"
               style={{ overscrollBehavior: "contain" }}
             >
               {initialLoading ? (
-                <div className="py-16 flex flex-col items-center justify-center space-y-4">
+                <div className="py-12 sm:py-16 flex flex-col items-center justify-center space-y-4">
                   <div className="w-10 h-10 rounded-full border-2 border-brivo-navy/10 border-t-brivo-navy animate-spin" />
-                  <div className="space-y-1 text-center font-mono">
+                  <div className="space-y-1 text-center font-mono px-4">
                     <p className="text-xs font-semibold text-brivo-navy">
                       Scanning Public SEBI Adjudication Registry...
                     </p>
@@ -318,13 +326,13 @@ ${data.compliance_takeaways.join("\n")}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -6 }}
                     transition={{ duration: 0.2, ease: "easeOut" }}
-                    className="space-y-6"
+                    className="space-y-4 sm:space-y-6"
                   >
                     {/* Top Headline & Risk Badge */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-brivo-navy/10">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 pb-3 sm:pb-4 border-b border-brivo-navy/10">
                       <div className="space-y-1">
                         <MicroLabel number="N°01" label="SYNTHESIS REPORT" />
-                        <h2 className="text-xl sm:text-2xl font-light text-brivo-navy font-sans tracking-tight">
+                        <h2 className="text-base sm:text-xl lg:text-2xl font-light text-brivo-navy font-sans tracking-tight leading-snug">
                           {mode === "entity_exposure"
                             ? "Noticee & Promoter Cross-Matter Liability Synthesis"
                             : mode === "precedent_analysis"
@@ -334,61 +342,61 @@ ${data.compliance_takeaways.join("\n")}
                       </div>
 
                       <span
-                        className={`px-3 py-1 rounded-full font-mono text-[0.65rem] font-bold tracking-wider uppercase inline-flex items-center gap-1.5 self-start sm:self-center shadow-sm ${
+                        className={`px-2.5 sm:px-3 py-1 rounded-full font-mono text-[0.62rem] sm:text-[0.65rem] font-bold tracking-wider uppercase inline-flex items-center gap-1.5 self-start sm:self-center shadow-sm shrink-0 ${
                           data.risk_level === "HIGH"
                             ? "bg-rose-50 border border-rose-200 text-rose-700"
                             : "bg-emerald-50 border border-emerald-200 text-emerald-700"
                         }`}
                       >
                         <ShieldAlert className="w-3.5 h-3.5" />
-                        <span>{data.risk_level} ENFORCEMENT INTENSITY</span>
+                        <span>{data.risk_level} INTENSITY</span>
                       </span>
                     </div>
 
                     {/* Quantitative Exposure KPI Strip */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                      <div className="p-4 rounded-xl bg-white border border-brivo-navy/10 shadow-sm space-y-1">
-                        <span className="text-[0.65rem] font-mono text-brivo-slate uppercase block">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+                      <div className="p-3 sm:p-4 rounded-xl bg-white border border-brivo-navy/10 shadow-sm space-y-0.5 sm:space-y-1">
+                        <span className="text-[0.6rem] sm:text-[0.65rem] font-mono text-brivo-slate uppercase block truncate">
                           Sanction Exposure
                         </span>
-                        <span className="text-lg sm:text-xl font-bold font-mono text-brivo-navy block">
+                        <span className="text-sm sm:text-lg lg:text-xl font-bold font-mono text-brivo-navy block truncate" title={formatINR(data.total_penalty_exposure)}>
                           {formatINR(data.total_penalty_exposure)}
                         </span>
                       </div>
 
-                      <div className="p-4 rounded-xl bg-white border border-brivo-navy/10 shadow-sm space-y-1">
-                        <span className="text-[0.65rem] font-mono text-brivo-slate uppercase block">
+                      <div className="p-3 sm:p-4 rounded-xl bg-white border border-brivo-navy/10 shadow-sm space-y-0.5 sm:space-y-1">
+                        <span className="text-[0.6rem] sm:text-[0.65rem] font-mono text-brivo-slate uppercase block truncate">
                           Orders Synthesized
                         </span>
-                        <span className="text-lg sm:text-xl font-bold font-mono text-brivo-navy block">
-                          {data.order_count} Proceedings
+                        <span className="text-sm sm:text-lg lg:text-xl font-bold font-mono text-brivo-navy block truncate">
+                          {data.order_count} Orders
                         </span>
                       </div>
 
-                      <div className="p-4 rounded-xl bg-white border border-brivo-navy/10 shadow-sm space-y-1">
-                        <span className="text-[0.65rem] font-mono text-brivo-slate uppercase block">
+                      <div className="p-3 sm:p-4 rounded-xl bg-white border border-brivo-navy/10 shadow-sm space-y-0.5 sm:space-y-1">
+                        <span className="text-[0.6rem] sm:text-[0.65rem] font-mono text-brivo-slate uppercase block truncate">
                           Tracked Noticees
                         </span>
-                        <span className="text-lg sm:text-xl font-bold font-mono text-brivo-navy block">
+                        <span className="text-sm sm:text-lg lg:text-xl font-bold font-mono text-brivo-navy block truncate">
                           {data.entity_count} Entities
                         </span>
                       </div>
 
-                      <div className="p-4 rounded-xl bg-white border border-brivo-navy/10 shadow-sm space-y-1">
-                        <span className="text-[0.65rem] font-mono text-brivo-slate uppercase block">
+                      <div className="p-3 sm:p-4 rounded-xl bg-white border border-brivo-navy/10 shadow-sm space-y-0.5 sm:space-y-1">
+                        <span className="text-[0.6rem] sm:text-[0.65rem] font-mono text-brivo-slate uppercase block truncate">
                           Confidence Score
                         </span>
-                        <span className="text-lg sm:text-xl font-bold font-mono text-emerald-600 block">
-                          {(data.confidence_score * 100).toFixed(0)}% Audit Grade
+                        <span className="text-sm sm:text-lg lg:text-xl font-bold font-mono text-emerald-600 block truncate">
+                          {(data.confidence_score * 100).toFixed(0)}% Audit
                         </span>
                       </div>
                     </div>
 
                     {/* Mode Specific Views */}
                     {mode === "risk_brief" && (
-                      <div className="space-y-5">
+                      <div className="space-y-3.5 sm:space-y-5">
                         {/* Executive Briefing Card */}
-                        <div className="p-5 rounded-xl bg-white border border-brivo-navy/10 shadow-sm space-y-2">
+                        <div className="p-3.5 sm:p-5 rounded-xl bg-white border border-brivo-navy/10 shadow-sm space-y-2">
                           <h3 className="text-xs font-mono text-brivo-slate uppercase tracking-wider flex items-center gap-2">
                             <FileText className="w-3.5 h-3.5 text-brivo-navy" />
                             <span>Executive Legal Brief</span>
@@ -399,16 +407,16 @@ ${data.compliance_takeaways.join("\n")}
                         </div>
 
                         {/* Applicable Statutes */}
-                        <div className="p-5 rounded-xl bg-white border border-brivo-navy/10 shadow-sm space-y-3">
+                        <div className="p-3.5 sm:p-5 rounded-xl bg-white border border-brivo-navy/10 shadow-sm space-y-3">
                           <h3 className="text-xs font-mono text-brivo-slate uppercase tracking-wider flex items-center gap-2">
                             <Scale className="w-3.5 h-3.5 text-brivo-navy" />
-                            <span>Applicable Regulatory Provisions & Sections</span>
+                            <span>Applicable Regulatory Provisions</span>
                           </h3>
-                          <div className="flex flex-wrap gap-2">
+                          <div className="flex flex-wrap gap-1.5 sm:gap-2">
                             {data.applicable_statutes.map((statute, idx) => (
                               <span
                                 key={idx}
-                                className="px-2.5 py-1 rounded-md bg-brivo-paper border border-brivo-navy/10 text-xs font-mono text-brivo-navy"
+                                className="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md bg-brivo-paper border border-brivo-navy/10 text-[0.7rem] sm:text-xs font-mono text-brivo-navy"
                               >
                                 {statute}
                               </span>
@@ -417,7 +425,7 @@ ${data.compliance_takeaways.join("\n")}
                         </div>
 
                         {/* Practical Compliance Takeaways */}
-                        <div className="p-5 rounded-xl bg-white border border-brivo-navy/10 shadow-sm space-y-3">
+                        <div className="p-3.5 sm:p-5 rounded-xl bg-white border border-brivo-navy/10 shadow-sm space-y-3">
                           <h3 className="text-xs font-mono text-brivo-slate uppercase tracking-wider flex items-center gap-2">
                             <Zap className="w-3.5 h-3.5 text-brivo-cyan" />
                             <span>Key Evidentiary & Compliance Takeaways</span>
@@ -435,35 +443,35 @@ ${data.compliance_takeaways.join("\n")}
                     )}
 
                     {mode === "precedent_analysis" && (
-                      <div className="space-y-4">
+                      <div className="space-y-3.5 sm:space-y-4">
                         <div className="flex items-center justify-between">
                           <h3 className="text-xs font-mono text-brivo-slate uppercase tracking-wider flex items-center gap-2">
                             <Scale className="w-3.5 h-3.5 text-brivo-navy" />
-                            <span>Citing Precedent Matters & Case Holdings ({data.precedents.length})</span>
+                            <span>Citing Precedent Matters ({data.precedents.length})</span>
                           </h3>
                         </div>
 
-                        <div className="grid grid-cols-1 gap-3">
+                        <div className="grid grid-cols-1 gap-2.5 sm:gap-3">
                           {data.precedents.map((prec) => (
                             <div
                               key={prec.id}
-                              className="p-5 rounded-xl bg-white border border-brivo-navy/10 hover:border-brivo-navy/25 transition-all shadow-sm space-y-2"
+                              className="p-3.5 sm:p-5 rounded-xl bg-white border border-brivo-navy/10 hover:border-brivo-navy/25 transition-all shadow-sm space-y-2"
                             >
-                              <div className="flex flex-wrap items-center justify-between gap-2">
-                                <div className="flex items-center gap-2">
+                              <div className="flex flex-wrap items-center justify-between gap-1.5">
+                                <div className="flex items-center gap-1.5 sm:gap-2">
                                   <span className="font-mono text-[0.65rem] px-2 py-0.5 rounded bg-brivo-paper border border-brivo-navy/10 text-brivo-navy font-semibold">
                                     {prec.external_id}
                                   </span>
-                                  <span className="text-xs font-mono text-brivo-slate">
+                                  <span className="text-[0.7rem] sm:text-xs font-mono text-brivo-slate">
                                     {formatDate(prec.published_date)}
                                   </span>
                                 </div>
-                                <span className="font-mono text-xs font-semibold text-brivo-navy">
+                                <span className="font-mono text-[0.72rem] sm:text-xs font-semibold text-brivo-navy">
                                   {prec.amount ? formatINR(prec.amount) : "Non-Monetary"}
                                 </span>
                               </div>
 
-                              <h4 className="text-sm font-semibold text-brivo-navy">
+                              <h4 className="text-xs sm:text-sm font-semibold text-brivo-navy leading-snug">
                                 {prec.title}
                               </h4>
 
@@ -471,16 +479,16 @@ ${data.compliance_takeaways.join("\n")}
                                 {prec.key_finding}
                               </p>
 
-                              <div className="pt-2 flex items-center justify-between border-t border-brivo-navy/5">
-                                <span className="text-[0.65rem] font-mono text-brivo-slate">
-                                  Jurisdiction: {prec.jurisdiction}
+                              <div className="pt-2 flex items-center justify-between border-t border-brivo-navy/5 text-xs">
+                                <span className="text-[0.65rem] font-mono text-brivo-slate truncate max-w-[50%]">
+                                  {prec.jurisdiction}
                                 </span>
                                 <Link
                                   href={`/explorer/${prec.id}`}
                                   onClick={onClose}
-                                  className="text-xs font-mono text-brivo-navy hover:text-brivo-cyan flex items-center gap-1 transition-colors"
+                                  className="text-xs font-mono text-brivo-navy hover:text-brivo-cyan flex items-center gap-1 transition-colors shrink-0 py-1"
                                 >
-                                  <span>View Complete Holding</span>
+                                  <span>View Holding</span>
                                   <ChevronRight className="w-3.5 h-3.5" />
                                 </Link>
                               </div>
@@ -491,8 +499,8 @@ ${data.compliance_takeaways.join("\n")}
                     )}
 
                     {mode === "entity_exposure" && (
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between">
+                      <div className="space-y-3.5 sm:space-y-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                           <h3 className="text-xs font-mono text-brivo-slate uppercase tracking-wider flex items-center gap-2">
                             <Users className="w-3.5 h-3.5 text-brivo-navy" />
                             <span>Identified Noticees & Legal Entities</span>
@@ -502,7 +510,7 @@ ${data.compliance_takeaways.join("\n")}
                           </span>
                         </div>
 
-                        <div className="p-5 rounded-xl bg-white border border-brivo-navy/10 shadow-sm space-y-3">
+                        <div className="p-3.5 sm:p-5 rounded-xl bg-white border border-brivo-navy/10 shadow-sm space-y-3">
                           <p className="text-xs text-brivo-slate leading-relaxed">
                             Cross-matter linkage analysis across extracted respondents in this cohort. Clicking any noticee inspects historical sanction exposure.
                           </p>
@@ -512,10 +520,10 @@ ${data.compliance_takeaways.join("\n")}
                                 key={i}
                                 href={`/explorer?q=${encodeURIComponent(resp)}`}
                                 onClick={onClose}
-                                className="px-3 py-1 rounded-lg bg-brivo-paper hover:bg-brivo-mist border border-brivo-navy/10 text-xs font-mono text-brivo-navy transition-colors flex items-center gap-1"
+                                className="px-2.5 sm:px-3 py-1 rounded-lg bg-brivo-paper hover:bg-brivo-mist border border-brivo-navy/10 text-xs font-mono text-brivo-navy transition-colors flex items-center gap-1 max-w-full"
                               >
-                                <span>{resp}</span>
-                                <ChevronRight className="w-3 h-3 text-brivo-slate" />
+                                <span className="truncate">{resp}</span>
+                                <ChevronRight className="w-3 h-3 text-brivo-slate shrink-0" />
                               </Link>
                             ))}
                           </div>
@@ -528,15 +536,15 @@ ${data.compliance_takeaways.join("\n")}
             </div>
 
             {/* Modal Footer Bar */}
-            <div className="px-6 py-3.5 border-t border-brivo-navy/10 bg-brivo-paper flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-              <span className="font-mono text-[0.65rem] text-brivo-slate">
-                Generated from indexed public SEBI regulatory orders • SHA-256 Provenance Tracked
+            <div className="px-3.5 sm:px-6 py-2.5 sm:py-3.5 border-t border-brivo-navy/10 bg-brivo-paper flex flex-col sm:flex-row items-center justify-between gap-2.5 sm:gap-3 text-xs shrink-0">
+              <span className="font-mono text-[0.62rem] sm:text-[0.65rem] text-brivo-slate text-center sm:text-left">
+                Indexed from public SEBI orders • SHA-256 Provenance Tracked
               </span>
 
               <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
                 <button
                   onClick={handleCopyReport}
-                  className="px-3.5 py-1.5 rounded-full bg-white hover:bg-brivo-paper border border-brivo-navy/15 text-brivo-navy text-xs font-mono flex items-center gap-1.5 transition-colors shadow-sm"
+                  className="flex-1 sm:flex-initial justify-center px-3.5 py-1.5 rounded-full bg-white hover:bg-brivo-paper border border-brivo-navy/15 text-brivo-navy text-xs font-mono flex items-center gap-1.5 transition-colors shadow-sm active:scale-95 cursor-pointer"
                 >
                   {copied ? (
                     <>
@@ -553,7 +561,7 @@ ${data.compliance_takeaways.join("\n")}
 
                 <button
                   onClick={onClose}
-                  className="px-4 py-1.5 rounded-full bg-brivo-navy hover:bg-brivo-navy/90 text-brivo-paper text-xs font-mono font-medium transition-colors shadow-sm"
+                  className="flex-1 sm:flex-initial justify-center px-4 py-1.5 rounded-full bg-brivo-navy hover:bg-brivo-navy/90 text-brivo-paper text-xs font-mono font-medium transition-colors shadow-sm active:scale-95 cursor-pointer"
                 >
                   Done
                 </button>
