@@ -106,7 +106,7 @@ export default function JobsPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8 min-h-[85vh]">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-6 sm:space-y-8 min-h-[85vh]">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-brivo-navy/10 pb-6">
         <div className="space-y-2">
@@ -120,7 +120,7 @@ export default function JobsPage() {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <button
             onClick={() => handleTriggerSync(true)}
             disabled={isSyncing}
@@ -149,8 +149,8 @@ export default function JobsPage() {
         </div>
       )}
 
-      {/* Ingestion Runs Table */}
-      <div className="border border-brivo-navy/10 rounded-lg overflow-x-auto bg-white shadow-sm">
+      {/* Desktop Ingestion Runs Table */}
+      <div className="border border-brivo-navy/10 rounded-lg overflow-x-auto bg-white shadow-sm hidden md:block">
         <table className="w-full text-left text-xs min-w-[680px]">
           <thead className="bg-brivo-paper text-brivo-slate font-mono uppercase text-[0.65rem] tracking-wider border-b border-brivo-navy/10">
             <tr>
@@ -279,6 +279,103 @@ export default function JobsPage() {
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile Card List View */}
+      <div className="space-y-3 block md:hidden">
+        {loading ? (
+          <div className="p-8 rounded-xl bg-white border border-brivo-navy/10 text-center text-xs font-mono text-brivo-slate shadow-sm">
+            Loading ingestion history...
+          </div>
+        ) : jobs.length === 0 ? (
+          <div className="p-8 rounded-xl bg-white border border-brivo-navy/10 text-center text-xs font-mono text-brivo-slate shadow-sm">
+            No ingestion runs recorded yet. Tap &quot;Run Incremental Sync&quot; above.
+          </div>
+        ) : (
+          jobs.map((job) => {
+            const isExpanded = expandedJobId === job.id;
+            return (
+              <div
+                key={job.id}
+                className="p-4 rounded-xl bg-white border border-brivo-navy/10 shadow-sm space-y-3 text-xs"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-brivo-navy font-semibold text-xs">
+                      #{job.id.slice(0, 8)}
+                    </span>
+                    <span className="font-mono text-[0.65rem] px-2 py-0.5 rounded-full bg-brivo-paper border border-brivo-navy/10 text-brivo-navy font-medium">
+                      {formatTrigger(job.triggered_by)}
+                    </span>
+                  </div>
+                  {getStatusBadge(job.status)}
+                </div>
+
+                <div className="flex items-center justify-between text-[0.7rem] font-mono text-brivo-slate">
+                  <span>Started: {formatRelativeTime(job.started_at)}</span>
+                  <span>Duration: {job.duration_seconds !== null && job.duration_seconds !== undefined ? `${job.duration_seconds}s` : "—"}</span>
+                </div>
+
+                {/* Metrics 4-slot grid */}
+                <div className="grid grid-cols-4 gap-2 pt-1 font-mono text-center">
+                  <div className="p-2 rounded-lg bg-brivo-paper border border-brivo-navy/5">
+                    <div className="text-[0.6rem] text-brivo-slate uppercase">Seen</div>
+                    <div className="font-bold text-brivo-navy text-xs mt-0.5">{job.records_seen}</div>
+                  </div>
+                  <div className="p-2 rounded-lg bg-brivo-paper border border-brivo-navy/5">
+                    <div className="text-[0.6rem] text-brivo-slate uppercase">Added</div>
+                    <div className="font-bold text-emerald-700 text-xs mt-0.5">+{job.records_added}</div>
+                  </div>
+                  <div className="p-2 rounded-lg bg-brivo-paper border border-brivo-navy/5">
+                    <div className="text-[0.6rem] text-brivo-slate uppercase">Updated</div>
+                    <div className="font-bold text-brivo-navy text-xs mt-0.5">{job.records_updated}</div>
+                  </div>
+                  <div className="p-2 rounded-lg bg-brivo-paper border border-brivo-navy/5">
+                    <div className="text-[0.6rem] text-brivo-slate uppercase">Failed</div>
+                    <div className={`font-bold text-xs mt-0.5 ${job.records_failed > 0 ? "text-rose-700" : "text-brivo-slate/60"}`}>
+                      {job.records_failed}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Log toggle button */}
+                <div className="pt-2 border-t border-brivo-navy/5 flex items-center justify-between">
+                  <button
+                    onClick={() => setExpandedJobId(isExpanded ? null : job.id)}
+                    className="w-full flex items-center justify-between py-1 text-xs font-mono text-brivo-slate hover:text-brivo-navy cursor-pointer transition-colors"
+                  >
+                    <span>{isExpanded ? "Hide Execution Details" : "View Execution Log"}</span>
+                    {isExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+
+                {/* Mobile Expandable Log Detail */}
+                {isExpanded && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.25, ease: "easeOut" }}
+                    className="pt-2 space-y-2 overflow-hidden border-t border-brivo-navy/10"
+                  >
+                    <div className="text-[0.65rem] font-mono text-brivo-slate break-all">
+                      Full ID: {job.id}
+                    </div>
+                    {job.error_log ? (
+                      <div className="p-2.5 rounded bg-rose-50 border border-rose-200 text-rose-800 font-mono text-[0.7rem] whitespace-pre-wrap max-h-40 overflow-y-auto">
+                        {job.error_log}
+                      </div>
+                    ) : (
+                      <div className="p-2.5 rounded bg-brivo-paper border border-brivo-navy/10 text-brivo-slate font-mono text-[0.7rem]">
+                        Clean execution. No errors logged during pipeline run.
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </div>
+            );
+          })
+        )}
       </div>
     </div>
   );

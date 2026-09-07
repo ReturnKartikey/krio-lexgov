@@ -19,9 +19,9 @@ export function Footer() {
       {/* Editorial Scroll-Driven Signature Banner - Only on Legal & Policy routes */}
       {isPolicyPage && <MadeBySignature />}
 
-      <footer className="w-full bg-brivo-void border-t border-white/10 text-brivo-slate py-14 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto space-y-12">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
+      <footer className="w-full bg-brivo-void border-t border-white/10 text-brivo-slate py-10 sm:py-14 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto space-y-10 sm:space-y-12">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 sm:gap-10">
             {/* Col 1: Brand & Description */}
             <div className="md:col-span-2 space-y-4">
               <div className="flex items-center gap-2">
@@ -98,11 +98,11 @@ export function Footer() {
           </div>
 
           {/* Bottom bar */}
-          <div className="pt-6 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4 text-[0.7rem] text-brivo-slate font-mono">
+          <div className="pt-6 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4 text-[0.7rem] text-brivo-slate font-mono text-center sm:text-left">
             <p>© {new Date().getFullYear()} Krio Intelligence Ltd. Public Domain Regulatory Intelligence.</p>
-            <div className="flex items-center gap-4 text-brivo-slate/60">
+            <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2 sm:gap-4 text-brivo-slate/60">
               <span>Independent Public Domain Archive</span>
-              <span>•</span>
+              <span className="hidden sm:inline">•</span>
               <span>Not Affiliated with SEBI</span>
             </div>
           </div>

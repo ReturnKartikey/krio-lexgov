@@ -54,7 +54,7 @@ export default async function RecordDetailPage({ params }: PageProps) {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-6 sm:space-y-8">
       {/* Breadcrumbs & Navigation */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-brivo-navy/10 pb-4 gap-4">
         <Link
@@ -65,7 +65,7 @@ export default async function RecordDetailPage({ params }: PageProps) {
           <span>Back to Records Explorer</span>
         </Link>
 
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
           <ExportPdfButton record={record} variant="compact" />
           <span className="font-mono text-[0.65rem] px-2.5 py-1 rounded-md bg-brivo-paper border border-brivo-navy/15 text-brivo-navy font-semibold">
             {record.external_id}
@@ -79,21 +79,21 @@ export default async function RecordDetailPage({ params }: PageProps) {
       {/* Main Header */}
       <div className="space-y-3">
         <MicroLabel number="N°01" label="REGULATORY DOSSIER" />
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-light tracking-tight text-brivo-navy leading-tight font-sans">
+        <h1 className="text-xl sm:text-3xl lg:text-4xl font-light tracking-tight text-brivo-navy leading-tight font-sans">
           {record.title}
         </h1>
 
-        <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-brivo-slate pt-1">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs font-mono text-brivo-slate pt-1">
           <span className="flex items-center gap-1">
             <Calendar className="w-3.5 h-3.5 text-brivo-slate" />
             <span>Order Date: {formatDate(record.published_date)}</span>
           </span>
-          <span>•</span>
+          <span className="hidden sm:inline">•</span>
           <span className="flex items-center gap-1">
             <MapPin className="w-3.5 h-3.5 text-brivo-slate" />
             <span>{record.jurisdiction || "SEBI Head Office"}</span>
           </span>
-          <span>•</span>
+          <span className="hidden sm:inline">•</span>
           <span className="flex items-center gap-1">
             <Clock className="w-3.5 h-3.5 text-brivo-slate" />
             <span>Ingested: {formatDate(record.ingested_at)}</span>
@@ -106,7 +106,7 @@ export default async function RecordDetailPage({ params }: PageProps) {
         {/* Left 2 Cols: Findings & Summary */}
         <div className="md:col-span-2 space-y-6">
           {/* Order Summary */}
-          <div className="p-6 rounded-lg bg-white border border-brivo-navy/10 space-y-3 shadow-sm">
+          <div className="p-4 sm:p-6 rounded-xl sm:rounded-lg bg-white border border-brivo-navy/10 space-y-3 shadow-sm">
             <h2 className="text-xs font-mono text-brivo-slate uppercase tracking-wider flex items-center gap-2">
               <FileText className="w-4 h-4 text-brivo-navy" />
               <span>Order Summary & Findings</span>
@@ -117,7 +117,7 @@ export default async function RecordDetailPage({ params }: PageProps) {
           </div>
 
           {/* Extracted Entities */}
-          <div className="p-6 rounded-lg bg-white border border-brivo-navy/10 space-y-4 shadow-sm">
+          <div className="p-4 sm:p-6 rounded-xl sm:rounded-lg bg-white border border-brivo-navy/10 space-y-4 shadow-sm">
             <div className="flex items-center justify-between">
               <h2 className="text-xs font-mono text-brivo-slate uppercase tracking-wider flex items-center gap-2">
                 <Building2 className="w-4 h-4 text-brivo-navy" />
@@ -166,7 +166,7 @@ export default async function RecordDetailPage({ params }: PageProps) {
         {/* Right Col: Sanction Metrics & Provenance Card */}
         <div className="space-y-6">
           {/* Sanction / Penalty Card */}
-          <div className="p-6 rounded-lg bg-white border border-brivo-navy/10 space-y-4 shadow-sm">
+          <div className="p-4 sm:p-6 rounded-xl sm:rounded-lg bg-white border border-brivo-navy/10 space-y-4 shadow-sm">
             <h3 className="text-xs font-mono text-brivo-slate uppercase tracking-wider flex items-center gap-2">
               <Scale className="w-4 h-4 text-brivo-navy" />
               <span>Sanction Overview</span>
@@ -248,7 +248,7 @@ export default async function RecordDetailPage({ params }: PageProps) {
           </div>
 
           {/* Registry Source Card */}
-          <div className="p-6 rounded-lg bg-white border border-brivo-navy/10 space-y-3 shadow-sm">
+          <div className="p-4 sm:p-6 rounded-xl sm:rounded-lg bg-white border border-brivo-navy/10 space-y-3 shadow-sm">
             <h3 className="text-xs font-mono text-brivo-slate uppercase tracking-wider flex items-center gap-2">
               <ExternalLink className="w-3.5 h-3.5 text-brivo-cyan" />
               <span>Registry Source Link</span>

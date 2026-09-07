@@ -210,7 +210,7 @@ function ExplorerContent() {
         </div>
 
         {/* View Switcher & Result Count */}
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
           <span className="text-xs font-mono text-brivo-slate">
             Showing <strong className="text-brivo-navy"><RollingNumber value={meta.total} /></strong> results
           </span>
@@ -281,10 +281,10 @@ function ExplorerContent() {
             )}
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
             <button
               type="submit"
-              className="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl bg-brivo-navy hover:bg-brivo-navy/90 text-brivo-paper font-medium text-sm transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-95"
+              className="flex-1 sm:flex-initial px-4 sm:px-5 py-2.5 rounded-xl bg-brivo-navy hover:bg-brivo-navy/90 text-brivo-paper font-medium text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-95 min-h-[42px]"
             >
               <span>Search</span>
             </button>
@@ -293,24 +293,24 @@ function ExplorerContent() {
             <button
               type="button"
               onClick={() => setIsAiModalOpen(true)}
-              className="flex-1 sm:flex-initial px-3.5 sm:px-4 py-2.5 rounded-xl bg-white hover:bg-brivo-paper border border-brivo-navy/15 text-brivo-navy font-mono text-xs transition-all flex items-center justify-center gap-1.5 shadow-sm hover:border-brivo-cyan active:scale-95"
+              className="flex-1 sm:flex-initial px-3 sm:px-4 py-2.5 rounded-xl bg-white hover:bg-brivo-paper border border-brivo-navy/15 text-brivo-navy font-mono text-xs transition-all flex items-center justify-center gap-1.5 shadow-sm hover:border-brivo-cyan active:scale-95 min-h-[42px]"
               title="Synthesize risk for current query"
             >
-              <Sparkles className="w-3.5 h-3.5 text-brivo-cyan" />
-              <span>AI Risk Brief</span>
+              <Sparkles className="w-3.5 h-3.5 text-brivo-cyan shrink-0" />
+              <span>AI Brief</span>
             </button>
 
             <button
               type="button"
               onClick={() => setShowFilters(!showFilters)}
-              className={`px-3.5 py-2.5 rounded-xl border text-sm font-medium transition-colors flex items-center justify-center gap-2 shadow-sm ${
+              className={`px-3 sm:px-3.5 py-2.5 rounded-xl border text-xs sm:text-sm font-medium transition-colors flex items-center justify-center gap-1.5 sm:gap-2 shadow-sm min-h-[42px] ${
                 showFilters || selectedState || selectedEntity || selectedPenaltySlab || dateFrom || dateTo
                   ? "bg-brivo-navy text-brivo-paper border-brivo-navy"
                   : "bg-white border-brivo-navy/15 text-brivo-navy hover:bg-brivo-paper"
               }`}
             >
-              <SlidersHorizontal className="w-4 h-4" />
-              <span className="hidden sm:inline">Filters</span>
+              <SlidersHorizontal className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+              <span>Filters</span>
             </button>
           </div>
         </form>
@@ -536,11 +536,11 @@ function ExplorerContent() {
                 {records.map((record) => (
                   <div
                     key={record.id}
-                    className="p-6 rounded-2xl bg-white border border-brivo-navy/10 hover:border-brivo-navy/30 transition-all space-y-3 shadow-sm hover:shadow-md hover:-translate-y-0.5 group"
+                    className="p-4 sm:p-6 rounded-xl sm:rounded-2xl bg-white border border-brivo-navy/10 hover:border-brivo-navy/30 transition-all space-y-3 shadow-sm hover:shadow-md hover:-translate-y-0.5 group"
                   >
                     {/* Header Badges */}
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-2">
+                      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                         <span className="font-mono text-[0.65rem] px-2 py-0.5 rounded bg-brivo-paper border border-brivo-navy/15 text-brivo-navy font-semibold">
                           {record.external_id}
                         </span>
@@ -557,7 +557,7 @@ function ExplorerContent() {
                       </div>
 
                       {record.amount ? (
-                        <div className="text-right">
+                        <div className="text-left xs:text-right">
                           <span className="text-sm sm:text-base font-semibold font-mono text-brivo-navy">
                             {formatINR(record.amount)}
                           </span>
@@ -571,7 +571,7 @@ function ExplorerContent() {
                     <div className="space-y-1.5">
                       <Link
                         href={`/explorer/${record.id}`}
-                        className="text-base font-medium text-brivo-navy hover:text-brivo-cyan transition-colors leading-snug block"
+                        className="text-sm sm:text-base font-medium text-brivo-navy hover:text-brivo-cyan transition-colors leading-snug block"
                       >
                         <HighlightedText text={record.title} highlight={qParam} />
                       </Link>
@@ -582,32 +582,32 @@ function ExplorerContent() {
 
                     {/* Entities & Footer Actions */}
                     <div className="pt-3 border-t border-brivo-navy/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        <span className="text-[0.65rem] font-mono text-brivo-slate">Extracted Noticees:</span>
+                      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar max-w-full">
+                        <span className="text-[0.65rem] font-mono text-brivo-slate shrink-0">Noticees:</span>
                         {record.entity_names?.slice(0, 3).map((ent, idx) => (
                           <button
                             key={idx}
                             onClick={() => updateUrl({ entity: ent, page: 1 })}
-                            className="px-2 py-0.5 rounded bg-brivo-paper hover:bg-brivo-mist border border-brivo-navy/10 text-[0.65rem] text-brivo-navy transition-colors font-mono cursor-pointer"
+                            className="px-2 py-0.5 rounded bg-brivo-paper hover:bg-brivo-mist border border-brivo-navy/10 text-[0.65rem] text-brivo-navy transition-colors font-mono cursor-pointer shrink-0 whitespace-nowrap"
                           >
-                            {truncateText(ent, 25)}
+                            {truncateText(ent, 20)}
                           </button>
                         ))}
                         {record.entity_names && record.entity_names.length > 3 && (
-                          <span className="text-[0.65rem] font-mono text-brivo-slate">
-                            +{record.entity_names.length - 3} more
+                          <span className="text-[0.65rem] font-mono text-brivo-slate shrink-0">
+                            +{record.entity_names.length - 3}
                           </span>
                         )}
                       </div>
 
-                      <div className="flex items-center gap-2 shrink-0">
+                      <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 shrink-0 w-full sm:w-auto">
                         <button
                           type="button"
                           onClick={() => {
                             setQuickLookRecord(record);
                             setIsQuickLookOpen(true);
                           }}
-                          className="px-3 py-1 rounded-full bg-brivo-paper hover:bg-brivo-mist text-brivo-slate hover:text-brivo-navy text-xs font-mono border border-brivo-navy/10 transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-2xs"
+                          className="w-full sm:w-auto px-3 py-2 sm:py-1 rounded-lg sm:rounded-full bg-brivo-paper hover:bg-brivo-mist text-brivo-slate hover:text-brivo-navy text-xs font-mono border border-brivo-navy/10 transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 shadow-2xs min-h-[38px] sm:min-h-0"
                           title="Quick Look preview"
                         >
                           <Eye className="w-3.5 h-3.5 text-brivo-slate shrink-0" />
@@ -616,7 +616,7 @@ function ExplorerContent() {
 
                         <Link
                           href={`/explorer/${record.id}`}
-                          className="px-3.5 py-1 rounded-full bg-brivo-navy hover:bg-brivo-navy/90 text-brivo-paper text-xs font-mono font-medium flex items-center gap-1 transition-all shadow-sm active:scale-95"
+                          className="w-full sm:w-auto px-3.5 py-2 sm:py-1 rounded-lg sm:rounded-full bg-brivo-navy hover:bg-brivo-navy/90 text-brivo-paper text-xs font-mono font-medium flex items-center justify-center gap-1 transition-all shadow-sm active:scale-95 min-h-[38px] sm:min-h-0"
                         >
                           <span>Audit Dossier</span>
                           <ChevronRight className="w-3.5 h-3.5 text-brivo-cyan" />
@@ -634,74 +634,143 @@ function ExplorerContent() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                className="border border-brivo-navy/10 rounded-2xl overflow-x-auto bg-white shadow-sm"
+                className="space-y-3"
               >
-                <table className="w-full text-left text-xs min-w-[700px]">
-                  <thead className="bg-brivo-paper text-brivo-slate font-mono uppercase text-[0.65rem] tracking-wider border-b border-brivo-navy/10">
-                    <tr>
-                      <th className="px-5 py-3.5">Order ID</th>
-                      <th className="px-5 py-3.5">Published Date</th>
-                      <th className="px-5 py-3.5">Subject / Title</th>
-                      <th className="px-5 py-3.5">Jurisdiction</th>
-                      <th className="px-5 py-3.5 text-right">Penalty</th>
-                      <th className="px-5 py-3.5 text-right">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-brivo-navy/5">
-                    {records.map((r) => (
-                      <tr
-                        key={r.id}
-                        onClick={() => {
-                          setQuickLookRecord(r);
-                          setIsQuickLookOpen(true);
-                        }}
-                        className="hover:bg-brivo-paper/60 transition-all cursor-pointer group"
-                      >
-                        <td className="px-5 py-3.5 font-mono text-brivo-navy font-medium whitespace-nowrap">
-                          {r.external_id}
-                        </td>
-                        <td className="px-5 py-3.5 font-mono text-brivo-slate whitespace-nowrap">
-                          {formatDate(r.published_date)}
-                        </td>
-                        <td className="px-5 py-3.5 text-brivo-navy max-w-md">
-                          <span className="group-hover:text-brivo-cyan transition-colors font-medium line-clamp-1">
-                            {r.title}
+                {/* Mobile-Native Card-List View (Shown on Mobile screens < md) */}
+                <div className="block md:hidden space-y-3">
+                  {records.map((r) => (
+                    <div
+                      key={r.id}
+                      onClick={() => {
+                        setQuickLookRecord(r);
+                        setIsQuickLookOpen(true);
+                      }}
+                      className="p-4 rounded-xl bg-white border border-brivo-navy/10 hover:border-brivo-navy/25 transition-all space-y-2.5 shadow-xs active:scale-[0.99] cursor-pointer"
+                    >
+                      {/* Top Meta Strip */}
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1.5 font-mono text-[0.68rem]">
+                          <span className="px-2 py-0.5 rounded bg-brivo-paper border border-brivo-navy/15 text-brivo-navy font-semibold">
+                            {r.external_id}
                           </span>
-                        </td>
-                        <td className="px-5 py-3.5 font-mono text-brivo-slate whitespace-nowrap">
-                          {r.state || "Maharashtra"}
-                        </td>
-                        <td className="px-5 py-3.5 font-mono text-right text-brivo-navy font-semibold whitespace-nowrap">
+                          <span className="text-brivo-slate flex items-center gap-1">
+                            <Calendar className="w-3 h-3 text-brivo-slate/70" />
+                            <span>{formatDate(r.published_date)}</span>
+                          </span>
+                        </div>
+                        <span className={`font-mono text-xs font-semibold px-2 py-0.5 rounded ${r.amount ? "bg-emerald-50 text-emerald-800 border border-emerald-200" : "bg-brivo-paper text-brivo-slate border border-brivo-navy/10"}`}>
                           {r.amount ? formatINR(r.amount) : "Non-Monetary"}
-                        </td>
-                        <td className="px-5 py-3.5 text-right whitespace-nowrap">
-                          <div className="flex items-center justify-end gap-2">
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setQuickLookRecord(r);
-                                setIsQuickLookOpen(true);
-                              }}
-                              className="px-2 py-0.5 rounded bg-brivo-paper hover:bg-brivo-mist text-[0.65rem] font-mono text-brivo-slate hover:text-brivo-navy border border-brivo-navy/10 transition-colors cursor-pointer flex items-center gap-1"
-                              title="Quick Look preview"
-                            >
-                              <Eye className="w-3 h-3 text-brivo-slate shrink-0" />
-                              <span>Peek</span>
-                            </button>
-                            <Link
-                              href={`/explorer/${r.id}`}
-                              onClick={(e) => e.stopPropagation()}
-                              className="text-brivo-slate hover:text-brivo-navy font-mono text-[0.7rem] hover:underline"
-                            >
-                              Audit →
-                            </Link>
-                          </div>
-                        </td>
+                        </span>
+                      </div>
+
+                      {/* Title */}
+                      <div className="text-sm font-medium text-brivo-navy leading-snug line-clamp-2">
+                        {r.title}
+                      </div>
+
+                      {/* Bottom Info & Quick Actions */}
+                      <div className="pt-2 border-t border-brivo-navy/5 flex items-center justify-between gap-2 text-xs">
+                        <div className="flex items-center gap-1 text-brivo-slate font-mono text-[0.68rem]">
+                          <MapPin className="w-3 h-3 text-brivo-slate/60" />
+                          <span>{r.state || "Maharashtra"}</span>
+                        </div>
+
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setQuickLookRecord(r);
+                              setIsQuickLookOpen(true);
+                            }}
+                            className="px-2.5 py-1 rounded-md bg-brivo-paper hover:bg-brivo-mist text-[0.68rem] font-mono text-brivo-slate hover:text-brivo-navy border border-brivo-navy/10 flex items-center gap-1"
+                          >
+                            <Eye className="w-3 h-3" />
+                            <span>Peek</span>
+                          </button>
+                          <Link
+                            href={`/explorer/${r.id}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="px-3 py-1 rounded-md bg-brivo-navy text-brivo-paper text-[0.68rem] font-mono font-medium flex items-center gap-1"
+                          >
+                            <span>Audit</span>
+                            <ChevronRight className="w-3 h-3 text-brivo-cyan" />
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Desktop Full 6-Column Table (Preserved 100% on md: and above) */}
+                <div className="hidden md:block border border-brivo-navy/10 rounded-2xl overflow-x-auto bg-white shadow-sm">
+                  <table className="w-full text-left text-xs min-w-[700px]">
+                    <thead className="bg-brivo-paper text-brivo-slate font-mono uppercase text-[0.65rem] tracking-wider border-b border-brivo-navy/10">
+                      <tr>
+                        <th className="px-5 py-3.5">Order ID</th>
+                        <th className="px-5 py-3.5">Published Date</th>
+                        <th className="px-5 py-3.5">Subject / Title</th>
+                        <th className="px-5 py-3.5">Jurisdiction</th>
+                        <th className="px-5 py-3.5 text-right">Penalty</th>
+                        <th className="px-5 py-3.5 text-right">Action</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-brivo-navy/5">
+                      {records.map((r) => (
+                        <tr
+                          key={r.id}
+                          onClick={() => {
+                            setQuickLookRecord(r);
+                            setIsQuickLookOpen(true);
+                          }}
+                          className="hover:bg-brivo-paper/60 transition-all cursor-pointer group"
+                        >
+                          <td className="px-5 py-3.5 font-mono text-brivo-navy font-medium whitespace-nowrap">
+                            {r.external_id}
+                          </td>
+                          <td className="px-5 py-3.5 font-mono text-brivo-slate whitespace-nowrap">
+                            {formatDate(r.published_date)}
+                          </td>
+                          <td className="px-5 py-3.5 text-brivo-navy max-w-md">
+                            <span className="group-hover:text-brivo-cyan transition-colors font-medium line-clamp-1">
+                              {r.title}
+                            </span>
+                          </td>
+                          <td className="px-5 py-3.5 font-mono text-brivo-slate whitespace-nowrap">
+                            {r.state || "Maharashtra"}
+                          </td>
+                          <td className="px-5 py-3.5 font-mono text-right text-brivo-navy font-semibold whitespace-nowrap">
+                            {r.amount ? formatINR(r.amount) : "Non-Monetary"}
+                          </td>
+                          <td className="px-5 py-3.5 text-right whitespace-nowrap">
+                            <div className="flex items-center justify-end gap-2">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setQuickLookRecord(r);
+                                  setIsQuickLookOpen(true);
+                                }}
+                                className="px-2 py-0.5 rounded bg-brivo-paper hover:bg-brivo-mist text-[0.65rem] font-mono text-brivo-slate hover:text-brivo-navy border border-brivo-navy/10 transition-colors cursor-pointer flex items-center gap-1"
+                                title="Quick Look preview"
+                              >
+                                <Eye className="w-3 h-3 text-brivo-slate shrink-0" />
+                                <span>Peek</span>
+                              </button>
+                              <Link
+                                href={`/explorer/${r.id}`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="text-brivo-slate hover:text-brivo-navy font-mono text-[0.7rem] hover:underline"
+                              >
+                                Audit →
+                              </Link>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>

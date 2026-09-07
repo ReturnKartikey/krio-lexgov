@@ -47,7 +47,7 @@ export default async function EntityDetailPage({ params }: PageProps) {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-6 sm:space-y-8">
       {/* Back button */}
       <div className="flex items-center justify-between border-b border-brivo-navy/10 pb-4">
         <Link
@@ -71,40 +71,40 @@ export default async function EntityDetailPage({ params }: PageProps) {
           </span>
         </div>
 
-        <h1 className="text-3xl sm:text-4xl font-light tracking-tight text-brivo-navy flex items-center gap-3 font-sans">
+        <h1 className="text-2xl sm:text-4xl font-light tracking-tight text-brivo-navy flex items-center gap-3 font-sans break-words">
           {entity.entity_type === "individual" ? (
-            <User className="w-8 h-8 text-brivo-navy" />
+            <User className="w-7 h-7 sm:w-8 sm:h-8 text-brivo-navy shrink-0" />
           ) : (
-            <Building2 className="w-8 h-8 text-brivo-navy" />
+            <Building2 className="w-7 h-7 sm:w-8 sm:h-8 text-brivo-navy shrink-0" />
           )}
           <span>{entity.name}</span>
         </h1>
 
-        <p className="text-xs font-mono text-brivo-slate">
+        <p className="text-xs font-mono text-brivo-slate break-all">
           Normalized Identifier: <code className="text-brivo-navy bg-brivo-paper border border-brivo-navy/10 px-1.5 py-0.5 rounded">{entity.normalized_name}</code>
         </p>
       </div>
 
       {/* Metrics Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="p-5 rounded-lg bg-white border border-brivo-navy/10 space-y-1 shadow-sm">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4">
+        <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-lg bg-white border border-brivo-navy/10 space-y-1 shadow-sm">
           <span className="text-[0.65rem] font-mono text-brivo-slate uppercase">Total Orders</span>
-          <span className="text-xl font-bold font-mono text-brivo-navy block">{entity.record_count}</span>
+          <span className="text-lg sm:text-xl font-bold font-mono text-brivo-navy block">{entity.record_count}</span>
         </div>
 
-        <div className="p-5 rounded-lg bg-white border border-brivo-navy/10 space-y-1 shadow-sm">
+        <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-lg bg-white border border-brivo-navy/10 space-y-1 shadow-sm">
           <span className="text-[0.65rem] font-mono text-brivo-slate uppercase">Total Penalties</span>
-          <span className="text-xl font-bold font-mono text-brivo-navy block">{formatINR(entity.total_penalty_amount)}</span>
+          <span className="text-lg sm:text-xl font-bold font-mono text-brivo-navy block">{formatINR(entity.total_penalty_amount)}</span>
         </div>
 
-        <div className="p-5 rounded-lg bg-white border border-brivo-navy/10 space-y-1 shadow-sm">
+        <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-lg bg-white border border-brivo-navy/10 space-y-1 shadow-sm">
           <span className="text-[0.65rem] font-mono text-brivo-slate uppercase">First Recorded</span>
-          <span className="text-xs font-mono text-brivo-navy block">{formatDate(entity.first_seen)}</span>
+          <span className="text-xs font-mono text-brivo-navy block truncate">{formatDate(entity.first_seen)}</span>
         </div>
 
-        <div className="p-5 rounded-lg bg-white border border-brivo-navy/10 space-y-1 shadow-sm">
+        <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-lg bg-white border border-brivo-navy/10 space-y-1 shadow-sm">
           <span className="text-[0.65rem] font-mono text-brivo-slate uppercase">Last Activity</span>
-          <span className="text-xs font-mono text-brivo-navy block">{formatDate(entity.last_seen)}</span>
+          <span className="text-xs font-mono text-brivo-navy block truncate">{formatDate(entity.last_seen)}</span>
         </div>
       </div>
 
@@ -120,7 +120,7 @@ export default async function EntityDetailPage({ params }: PageProps) {
             <Link
               key={record.id}
               href={`/explorer/${record.id}`}
-              className="block p-5 rounded-lg bg-white border border-brivo-navy/10 hover:border-brivo-navy/30 transition-all group shadow-sm"
+              className="block p-4 sm:p-5 rounded-xl sm:rounded-lg bg-white border border-brivo-navy/10 hover:border-brivo-navy/30 transition-all group shadow-sm"
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="space-y-1.5 max-w-3xl">

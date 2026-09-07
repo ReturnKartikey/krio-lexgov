@@ -220,7 +220,7 @@ export default function ApiExplorerPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8 min-h-[85vh] w-full">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-6 sm:space-y-8 min-h-[85vh] w-full">
       {/* Header */}
       <div className="border-b border-brivo-navy/10 pb-6">
         <div className="space-y-2 max-w-3xl">
@@ -285,7 +285,7 @@ export default function ApiExplorerPage() {
         {/* Right Col: Interactive Request Builder & Response Viewer */}
         <div className="w-full min-w-0 flex-1 space-y-6">
           {/* Request Header Box - 100% Symmetrical Geometry */}
-          <div className="p-6 rounded-2xl bg-white border border-brivo-navy/10 space-y-5 shadow-sm w-full">
+          <div className="p-4 sm:p-6 rounded-2xl bg-white border border-brivo-navy/10 space-y-4 sm:space-y-5 shadow-sm w-full">
             {/* Top Bar: Method, Path, Description & Copy cURL */}
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 border-b border-brivo-navy/10 pb-4">
               <div className="space-y-1 min-w-0 flex-1">
@@ -353,7 +353,7 @@ export default function ApiExplorerPage() {
               <button
                 onClick={handleExecute}
                 disabled={loading}
-                className="h-10 px-6 rounded-full bg-brivo-navy hover:bg-brivo-navy/90 text-brivo-paper text-xs font-semibold font-mono tracking-wide transition-all shadow-sm disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer active:scale-95 shrink-0"
+                className="h-10 px-6 rounded-full bg-brivo-navy hover:bg-brivo-navy/90 text-brivo-paper text-xs font-semibold font-mono tracking-wide transition-all shadow-sm disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer active:scale-95 shrink-0 w-full sm:w-auto"
               >
                 <Play className={`w-3.5 h-3.5 ${loading ? "animate-spin text-brivo-cyan" : "text-brivo-cyan"}`} />
                 <span>{loading ? "Executing..." : "Execute Request"}</span>

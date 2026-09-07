@@ -23,6 +23,8 @@ import {
   MapPin,
   CheckCircle2,
   Zap,
+  Eye,
+  ChevronRight,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { MicroLabel } from "@/components/common/MicroLabel";
@@ -225,7 +227,7 @@ export default function LandingPage() {
 
           <h1
             ref={heroHeadlineRef}
-            className="text-4xl sm:text-6xl lg:text-7xl font-light tracking-[-0.035em] text-brivo-navy leading-[1.06] font-sans"
+            className="text-3xl sm:text-5xl lg:text-7xl font-light tracking-[-0.035em] text-brivo-navy leading-[1.08] sm:leading-[1.06] font-sans"
           >
             <span className="block hero-line">Precedent you can</span>
             <span className="block hero-line font-serif italic font-normal editorial-interactive-italic text-brivo-navy">
@@ -468,17 +470,19 @@ export default function LandingPage() {
           {recentRecords.slice(0, 3).map((record, index) => (
             <div
               key={record.id}
-              className="scroll-reveal-item p-7 sm:p-8 rounded-2xl bg-white border border-brivo-navy/10 hover:border-brivo-navy/30 transition-all duration-300 hover:-translate-y-1 shadow-xs hover:shadow-md grid grid-cols-1 lg:grid-cols-12 gap-8 items-start"
+              className="scroll-reveal-item p-4 sm:p-8 rounded-xl sm:rounded-2xl bg-white border border-brivo-navy/10 hover:border-brivo-navy/30 transition-all duration-300 hover:-translate-y-1 shadow-xs hover:shadow-md grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 items-start"
             >
               {/* Left Big Number */}
-              <div className="lg:col-span-3 space-y-2">
-                <span className="font-mono text-[0.68rem] text-brivo-slate uppercase tracking-widest block">
-                  CASE STUDY // {record.state || "MAHARASHTRA"}
-                </span>
-                <span className="font-light text-5xl sm:text-6xl lg:text-7xl font-sans text-brivo-navy/80 block">
-                  {`0${index + 1}`}
-                </span>
-                <span className="font-mono text-[0.72rem] text-brivo-cyan font-semibold block">
+              <div className="lg:col-span-3 space-y-1 sm:space-y-2 flex flex-row lg:flex-col items-baseline lg:items-start justify-between lg:justify-start gap-2">
+                <div>
+                  <span className="font-mono text-[0.65rem] sm:text-[0.68rem] text-brivo-slate uppercase tracking-widest block">
+                    CASE STUDY // {record.state || "MAHARASHTRA"}
+                  </span>
+                  <span className="font-light text-4xl sm:text-6xl lg:text-7xl font-sans text-brivo-navy/80 block">
+                    {`0${index + 1}`}
+                  </span>
+                </div>
+                <span className="font-mono text-[0.68rem] sm:text-[0.72rem] text-brivo-cyan font-semibold block">
                   {record.external_id}
                 </span>
               </div>
@@ -566,8 +570,71 @@ export default function LandingPage() {
           </Link>
         </div>
 
-        {/* Directory Table Layout */}
-        <div className="dispatch-table-container border border-brivo-navy/10 rounded-2xl overflow-x-auto bg-white shadow-xs">
+        {/* Mobile-Native Dispatch Cards (Shown on Mobile < md) */}
+        <div className="block md:hidden space-y-3">
+          {recentRecords.map((r) => (
+            <div
+              key={r.id}
+              onClick={() => {
+                setQuickLookRecord(r);
+                setIsQuickLookOpen(true);
+              }}
+              className="p-4 rounded-xl bg-white border border-brivo-navy/10 hover:border-brivo-navy/25 transition-all space-y-2.5 shadow-xs active:scale-[0.99] cursor-pointer"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5 font-mono text-[0.68rem]">
+                  <span className="px-2 py-0.5 rounded bg-brivo-paper border border-brivo-navy/15 text-brivo-navy font-semibold">
+                    {r.external_id}
+                  </span>
+                  <span className="text-brivo-slate flex items-center gap-1">
+                    <Calendar className="w-3 h-3 text-brivo-slate/70" />
+                    <span>{formatDate(r.published_date)}</span>
+                  </span>
+                </div>
+                <span className={`font-mono text-xs font-semibold px-2 py-0.5 rounded ${r.amount ? "bg-emerald-50 text-emerald-800 border border-emerald-200" : "bg-brivo-paper text-brivo-slate border border-brivo-navy/10"}`}>
+                  {r.amount ? formatINR(r.amount) : "Non-Monetary"}
+                </span>
+              </div>
+
+              <div className="text-sm font-medium text-brivo-navy leading-snug line-clamp-2">
+                {r.title}
+              </div>
+
+              <div className="pt-2 border-t border-brivo-navy/5 flex items-center justify-between gap-2 text-xs">
+                <div className="flex items-center gap-1 text-brivo-slate font-mono text-[0.68rem]">
+                  <MapPin className="w-3 h-3 text-brivo-slate/60" />
+                  <span>{r.state || "Maharashtra"}</span>
+                </div>
+
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setQuickLookRecord(r);
+                      setIsQuickLookOpen(true);
+                    }}
+                    className="px-2.5 py-1 rounded-md bg-brivo-paper hover:bg-brivo-mist text-[0.68rem] font-mono text-brivo-slate hover:text-brivo-navy border border-brivo-navy/10 flex items-center gap-1"
+                  >
+                    <Eye className="w-3 h-3" />
+                    <span>Peek</span>
+                  </button>
+                  <Link
+                    href={`/explorer/${r.id}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="px-3 py-1 rounded-md bg-brivo-navy text-brivo-paper text-[0.68rem] font-mono font-medium flex items-center gap-1"
+                  >
+                    <span>Audit</span>
+                    <ChevronRight className="w-3 h-3 text-brivo-cyan" />
+                  </Link>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop Directory Table Layout (Preserved 100% on md: and above) */}
+        <div className="hidden md:block dispatch-table-container border border-brivo-navy/10 rounded-2xl overflow-x-auto bg-white shadow-xs">
           <table className="w-full text-left text-xs min-w-[680px]">
             <thead className="bg-brivo-paper text-brivo-slate font-mono uppercase text-[0.68rem] tracking-wider border-b border-brivo-navy/10">
               <tr>

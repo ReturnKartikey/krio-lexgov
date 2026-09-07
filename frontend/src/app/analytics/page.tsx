@@ -111,7 +111,7 @@ export default function AnalyticsPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-6 sm:space-y-10">
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-brivo-navy/10 pb-6">
         <div className="space-y-2">
@@ -175,9 +175,9 @@ export default function AnalyticsPage() {
 
       {/* 1. ROLLING TREND CARDS */}
       {trends && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-6">
           {/* Card 1: Orders Trend */}
-          <div className="p-6 rounded-lg bg-white border border-brivo-navy/10 space-y-2 shadow-sm">
+          <div className="p-4 sm:p-6 rounded-xl sm:rounded-lg bg-white border border-brivo-navy/10 space-y-2 shadow-sm">
             <div className="flex items-center justify-between text-xs font-mono text-brivo-slate">
               <span>Orders Published</span>
               <Scale className="w-4 h-4 text-brivo-slate" />
@@ -185,7 +185,7 @@ export default function AnalyticsPage() {
             <div className="flex items-baseline gap-3">
               <RollingNumber
                 value={trends.total_orders_trend.current_value}
-                className="text-3xl font-bold font-mono text-brivo-navy"
+                className="text-2xl sm:text-3xl font-bold font-mono text-brivo-navy"
               />
               <span
                 className={`text-xs font-mono flex items-center gap-0.5 ${
@@ -206,7 +206,7 @@ export default function AnalyticsPage() {
           </div>
 
           {/* Card 2: Penalties Trend */}
-          <div className="p-6 rounded-lg bg-white border border-brivo-navy/10 space-y-2 shadow-sm">
+          <div className="p-4 sm:p-6 rounded-xl sm:rounded-lg bg-white border border-brivo-navy/10 space-y-2 shadow-sm">
             <div className="flex items-center justify-between text-xs font-mono text-brivo-slate">
               <span>Aggregate Penalties (INR)</span>
               <Hash className="w-4 h-4 text-brivo-slate" />
@@ -217,7 +217,7 @@ export default function AnalyticsPage() {
                   <RollingNumber
                     value={trends.total_penalties_trend.current_value}
                     formatAsINR
-                    className="text-2xl font-bold font-mono text-brivo-navy"
+                    className="text-xl sm:text-2xl font-bold font-mono text-brivo-navy"
                   />
                   <span
                     className={`text-xs font-mono flex items-center gap-0.5 ${
@@ -234,7 +234,7 @@ export default function AnalyticsPage() {
                 </>
               ) : (
                 <>
-                  <span className="text-xl font-bold font-mono text-brivo-navy">
+                  <span className="text-lg sm:text-xl font-bold font-mono text-brivo-navy">
                     Non-Monetary
                   </span>
                   <span className="text-xs font-mono text-brivo-slate">
@@ -251,7 +251,7 @@ export default function AnalyticsPage() {
           </div>
 
           {/* Card 3: Entities Tracked */}
-          <div className="p-6 rounded-lg bg-white border border-brivo-navy/10 space-y-2 shadow-sm">
+          <div className="p-4 sm:p-6 rounded-xl sm:rounded-lg bg-white border border-brivo-navy/10 space-y-2 shadow-sm">
             <div className="flex items-center justify-between text-xs font-mono text-brivo-slate">
               <span>Active Tracked Noticees</span>
               <Building2 className="w-4 h-4 text-brivo-slate" />
@@ -259,7 +259,7 @@ export default function AnalyticsPage() {
             <div className="flex items-baseline gap-3">
               <RollingNumber
                 value={trends.active_entities_trend.current_value}
-                className="text-3xl font-bold font-mono text-brivo-navy"
+                className="text-2xl sm:text-3xl font-bold font-mono text-brivo-navy"
               />
               <span className="text-xs font-mono text-emerald-600 flex items-center gap-0.5">
                 <TrendingUp className="w-3.5 h-3.5" />
@@ -274,7 +274,7 @@ export default function AnalyticsPage() {
       )}
 
       {/* 2. DAILY RECORDS TIME-SERIES CHART */}
-      <div className="p-6 rounded-lg bg-white border border-brivo-navy/10 space-y-4 shadow-sm">
+      <div className="p-4 sm:p-6 rounded-xl sm:rounded-lg bg-white border border-brivo-navy/10 space-y-4 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="space-y-1">
             <h2 className="text-sm font-semibold text-brivo-navy flex items-center gap-2">
@@ -286,7 +286,7 @@ export default function AnalyticsPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-1.5 font-mono text-[0.65rem]">
+          <div className="flex items-center gap-1.5 font-mono text-[0.65rem] self-start sm:self-auto">
             <button
               onClick={() => setDaysWindow(30)}
               className={`px-2.5 py-1 rounded ${daysWindow === 30 ? "bg-brivo-navy text-brivo-paper font-semibold" : "bg-brivo-paper text-brivo-slate hover:text-brivo-navy border border-brivo-navy/10"}`}
@@ -344,9 +344,9 @@ export default function AnalyticsPage() {
       </div>
 
       {/* 3. TWO-COLUMN: TOP NOTICEES & GEOGRAPHIC DISTRIBUTION */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Top Noticees Bar Chart */}
-        <div className="p-6 rounded-lg bg-white border border-brivo-navy/10 space-y-4 shadow-sm">
+        <div className="p-4 sm:p-6 rounded-xl sm:rounded-lg bg-white border border-brivo-navy/10 space-y-4 shadow-sm">
           <div className="space-y-1">
             <h2 className="text-sm font-semibold text-brivo-navy flex items-center gap-2">
               <Building2 className="w-4 h-4 text-brivo-navy" />
@@ -393,7 +393,7 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Geographic Distribution */}
-        <div className="p-6 rounded-lg bg-white border border-brivo-navy/10 space-y-4 shadow-sm">
+        <div className="p-4 sm:p-6 rounded-xl sm:rounded-lg bg-white border border-brivo-navy/10 space-y-4 shadow-sm">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="space-y-1">
               <h2 className="text-sm font-semibold text-brivo-navy flex items-center gap-2">
@@ -495,9 +495,9 @@ export default function AnalyticsPage() {
       </div>
 
       {/* 4. PROCESSING STATS & DUPLICATE DETECTION */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Processing Stats */}
-        <div className="p-6 rounded-lg bg-white border border-brivo-navy/10 space-y-4 shadow-sm">
+        <div className="p-4 sm:p-6 rounded-xl sm:rounded-lg bg-white border border-brivo-navy/10 space-y-4 shadow-sm">
           <div className="space-y-1">
             <h2 className="text-sm font-semibold text-brivo-navy flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-emerald-600" />
@@ -531,8 +531,8 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Semantically Similar Orders Detection */}
-        <div className="lg:col-span-2 p-6 rounded-lg bg-white border border-brivo-navy/10 space-y-4 shadow-sm">
-          <div className="flex items-center justify-between">
+        <div className="lg:col-span-2 p-4 sm:p-6 rounded-xl sm:rounded-lg bg-white border border-brivo-navy/10 space-y-4 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div className="space-y-1">
               <h2 className="text-sm font-semibold text-brivo-navy flex items-center gap-2">
                 <Layers className="w-4 h-4 text-brivo-navy" />
@@ -542,14 +542,14 @@ export default function AnalyticsPage() {
                 Distinct regulatory proceedings exhibiting high semantic similarity in legal language, noticee clusters, and document structure.
               </p>
             </div>
-            <span className="text-[0.65rem] font-mono px-2 py-0.5 rounded bg-brivo-paper border border-brivo-navy/15 text-brivo-slate">
+            <span className="text-[0.65rem] font-mono px-2 py-0.5 rounded bg-brivo-paper border border-brivo-navy/15 text-brivo-slate self-start sm:self-auto shrink-0">
               {duplicates.length > 0 ? `${duplicates.length} Related Pairs` : "Threshold: ≥60%"}
             </span>
           </div>
 
           <div className="space-y-3 pt-2">
             {duplicates.length === 0 ? (
-              <div className="p-6 rounded-lg bg-brivo-paper/40 border border-dashed border-brivo-navy/15 text-center space-y-1.5">
+              <div className="p-4 sm:p-6 rounded-lg bg-brivo-paper/40 border border-dashed border-brivo-navy/15 text-center space-y-1.5">
                 <div className="text-xs font-mono font-medium text-brivo-navy">
                   No cross-matter semantic clusters detected above similarity threshold (≥0.60).
                 </div>
