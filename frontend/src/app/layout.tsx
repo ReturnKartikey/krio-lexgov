@@ -24,12 +24,31 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://krio-rust.vercel.app"),
   title: {
-    default: "KRIO",
+    default: "KRIO : Regulatory Intelligence Platform",
     template: "%s | KRIO",
   },
   description:
     "Audit-grade regulatory intelligence platform normalizing, searching, and analyzing enforcement orders from the Securities and Exchange Board of India (SEBI).",
+  keywords: [
+    "KRIO",
+    "Regulatory Intelligence Platform",
+    "SEBI Orders",
+    "SEBI Adjudication",
+    "Compliance Monitoring India",
+    "RegTech",
+    "Financial Regulations India",
+  ],
+  openGraph: {
+    title: "KRIO : Regulatory Intelligence Platform",
+    description:
+      "Audit-grade regulatory intelligence platform normalizing, searching, and analyzing enforcement orders from SEBI.",
+    url: "https://krio-rust.vercel.app",
+    siteName: "KRIO",
+    locale: "en_IN",
+    type: "website",
+  },
   icons: {
     icon: [
       { url: "/icon_logo.png", type: "image/png" },
