@@ -220,7 +220,7 @@ export default function ApiExplorerPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-6 sm:space-y-8 min-h-[85vh] w-full">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 sm:pt-6 pb-10 sm:pb-16 space-y-6 sm:space-y-8 min-h-[85vh] w-full">
       {/* Header */}
       <div className="border-b border-brivo-navy/10 pb-6">
         <div className="space-y-2 max-w-3xl">

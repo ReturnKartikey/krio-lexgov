@@ -157,14 +157,9 @@ ${data.compliance_takeaways.join("\n")}
                   />
                 </div>
                 <div className="space-y-0.5 min-w-0">
-                  <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                    <span className="font-mono text-xs font-semibold text-brivo-navy tracking-tight truncate">
-                      KRIO // STATUTORY SYNTHESIZER
-                    </span>
-                    <span className="text-[0.58rem] sm:text-[0.6rem] font-mono px-1.5 py-0.2 rounded bg-brivo-mist text-brivo-navy border border-brivo-cyan/40 shrink-0">
-                      LIVE NLP
-                    </span>
-                  </div>
+                  <span className="font-mono text-xs font-semibold text-brivo-navy tracking-tight truncate block">
+                    KRIO // STATUTORY RISK SYNTHESIZER
+                  </span>
                   <p className="text-[0.65rem] sm:text-[0.7rem] text-brivo-slate truncate">
                     Cross-matter precedent extraction & liability analysis across SEBI orders
                   </p>
@@ -274,8 +269,8 @@ ${data.compliance_takeaways.join("\n")}
                   </div>
                 </div>
 
-                {/* Example query chips in smooth single-row horizontal scroll strip */}
-                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scrollbar-none py-0.5 text-[0.68rem] font-mono text-brivo-slate">
+                {/* Example query chips (Clean wrap without horizontal scroll) */}
+                <div className="flex flex-wrap items-center gap-1.5 text-[0.68rem] font-mono text-brivo-slate pt-0.5">
                   <span className="text-brivo-slate/80 font-medium shrink-0">Try:</span>
                   {[
                     { label: "Front Running", q: "Front Running" },
@@ -291,7 +286,7 @@ ${data.compliance_takeaways.join("\n")}
                         setQuery(chip.q);
                         handleRunSynthesis(chip.q, mode, true);
                       }}
-                      className="px-2 py-0.5 rounded-md bg-brivo-paper hover:bg-white border border-brivo-navy/12 text-brivo-navy hover:text-brivo-navy font-mono text-[0.65rem] transition-all hover:border-brivo-navy/30 shadow-2xs active:scale-95 shrink-0 whitespace-nowrap cursor-pointer"
+                      className="px-2 py-0.5 rounded-md bg-brivo-paper hover:bg-white border border-brivo-navy/12 text-brivo-navy hover:text-brivo-navy font-mono text-[0.65rem] transition-all hover:border-brivo-navy/30 shadow-2xs active:scale-95 cursor-pointer"
                     >
                       {chip.label}
                     </button>

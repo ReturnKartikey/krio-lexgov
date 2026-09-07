@@ -218,6 +218,15 @@ html.lenis, html.lenis body {
   background: var(--brivo-cyan);
 }
 
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+}
+.no-scrollbar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
 /* Subtle glow effects */
 .glow-accent {
   box-shadow: 0 0 40px -8px rgba(0, 194, 209, 0.25);
