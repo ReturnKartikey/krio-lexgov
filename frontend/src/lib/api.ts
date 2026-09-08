@@ -62,19 +62,10 @@ export function getApiBaseUrl(): string {
   if (process.env.NEXT_PUBLIC_API_BASE_URL) {
     return process.env.NEXT_PUBLIC_API_BASE_URL.replace(/\/$/, "");
   }
-  if (typeof window !== "undefined") {
-    if (
-      !window.location.hostname.includes("localhost") &&
-      !window.location.hostname.includes("127.0.0.1")
-    ) {
-      return "https://krio-lexgov-api.onrender.com";
-    }
+  if (process.env.INTERNAL_API_URL || process.env.API_URL) {
+    return (process.env.INTERNAL_API_URL || process.env.API_URL)!.replace(/\/$/, "");
   }
-  return (
-    process.env.INTERNAL_API_URL ||
-    process.env.API_URL ||
-    "http://127.0.0.1:8005"
-  ).replace(/\/$/, "");
+  return "https://krio-lexgov-api.onrender.com";
 }
 
 export function getDocsUrl(): string {

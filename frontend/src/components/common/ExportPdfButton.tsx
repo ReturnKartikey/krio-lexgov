@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Download, FileText, Check, Loader2 } from "lucide-react";
 import { RecordDetailItem } from "@/lib/types";
 import { generateExecutivePdfMemo } from "@/lib/pdfExport";
+import { toast } from "@/lib/toast";
 
 interface ExportPdfButtonProps {
   record: RecordDetailItem;
@@ -25,9 +26,11 @@ export function ExportPdfButton({
       setIsExporting(true);
       generateExecutivePdfMemo(record);
       setDownloaded(true);
+      toast.success("Executive Briefing Exported", `PDF compliance memo generated for ${record.external_id}`);
       setTimeout(() => setDownloaded(false), 2500);
     } catch (err) {
       console.error("Failed to generate PDF memo:", err);
+      toast.error("Export Failed", "Unable to generate PDF compliance briefing");
     } finally {
       setIsExporting(false);
     }

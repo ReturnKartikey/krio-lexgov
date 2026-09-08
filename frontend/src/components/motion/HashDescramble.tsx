@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { Check, ShieldCheck, RefreshCw, Copy } from "lucide-react";
+import { toast } from "@/lib/toast";
 
 interface HashDescrambleProps {
   hash: string;
@@ -28,32 +29,31 @@ export function HashDescramble({
     setIsScrambling(true);
     setIsVerified(false);
 
-    const length = hash.length;
     let iteration = 0;
-    const totalIterations = 24;
+    const maxIterations = 18;
+    const interval = 35;
 
-    const interval = setInterval(() => {
-      setDisplayText(() => {
-        return hash
+    const timer = setInterval(() => {
+      setDisplayText((prev) =>
+        prev
           .split("")
           .map((char, index) => {
-            if (index < (iteration / totalIterations) * length) {
-              return char;
+            if (index < (iteration / maxIterations) * hash.length) {
+              return hash[index];
             }
             return HEX_CHARS[Math.floor(Math.random() * HEX_CHARS.length)];
           })
-          .join("");
-      });
+          .join("")
+      );
 
-      iteration += 1;
-
-      if (iteration > totalIterations) {
-        clearInterval(interval);
+      iteration++;
+      if (iteration >= maxIterations) {
+        clearInterval(timer);
         setDisplayText(hash);
         setIsScrambling(false);
         setIsVerified(true);
       }
-    }, 25);
+    }, interval);
   }, [hash, isScrambling]);
 
   useEffect(() => {
@@ -69,6 +69,7 @@ export function HashDescramble({
     e.stopPropagation();
     navigator.clipboard.writeText(hash);
     setCopied(true);
+    toast.info("SHA-256 Hash Copied", "Cryptographic fingerprint copied to clipboard");
     setTimeout(() => setCopied(false), 1800);
   };
 

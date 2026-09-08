@@ -27,6 +27,8 @@ import { HighlightedText } from "@/components/common/HighlightedText";
 import { CustomSelect, SelectOption } from "@/components/common/CustomSelect";
 import { IntelligenceModal } from "@/components/ai/IntelligenceModal";
 import { QuickLookModal } from "@/components/motion/QuickLookModal";
+import { OrderCardSkeleton, TableRowSkeleton, MobileTableRowSkeleton } from "@/components/common/Skeleton";
+import { toast } from "@/lib/toast";
 import { getRecords } from "@/lib/api";
 import { RecordListItem, PaginationMeta } from "@/lib/types";
 import { formatINR, formatDate, truncateText, formatCleanSummary } from "@/lib/utils";
@@ -193,6 +195,7 @@ function ExplorerContent() {
     setSortOrder("desc");
     setPageSize(10);
     router.push("/explorer");
+    toast.info("Filters Cleared", "Showing all indexed enforcement records");
   };
 
   return (
@@ -499,10 +502,34 @@ function ExplorerContent() {
 
       {/* Results Section with smooth non-collapsing state */}
       {initialLoading ? (
-        <div className="py-20 flex flex-col items-center justify-center space-y-3 font-mono text-xs text-brivo-slate">
-          <div className="w-8 h-8 rounded-full border-2 border-brivo-navy/10 border-t-brivo-navy animate-spin" />
-          <span>Searching normalized regulatory index...</span>
-        </div>
+        viewMode === "cards" ? (
+          <div className="space-y-4">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <OrderCardSkeleton key={i} />
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <MobileTableRowSkeleton count={4} />
+            <div className="hidden md:block border border-brivo-navy/10 rounded-2xl overflow-x-auto bg-white shadow-sm">
+              <table className="w-full text-left text-xs min-w-[700px]">
+                <thead className="bg-brivo-paper text-brivo-slate font-mono uppercase text-[0.65rem] tracking-wider border-b border-brivo-navy/10">
+                  <tr>
+                    <th className="px-5 py-3.5">Order ID</th>
+                    <th className="px-5 py-3.5">Published Date</th>
+                    <th className="px-5 py-3.5">Subject / Title</th>
+                    <th className="px-5 py-3.5">Jurisdiction</th>
+                    <th className="px-5 py-3.5 text-right">Penalty</th>
+                    <th className="px-5 py-3.5 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-brivo-navy/5">
+                  <TableRowSkeleton count={6} />
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )
       ) : records.length === 0 ? (
         <div className="p-12 rounded-2xl bg-white border border-brivo-navy/10 text-center space-y-3 shadow-sm">
           <div className="text-brivo-slate font-mono text-sm">
@@ -536,11 +563,11 @@ function ExplorerContent() {
                 {records.map((record) => (
                   <div
                     key={record.id}
-                    className="p-4 sm:p-6 rounded-xl sm:rounded-2xl bg-white border border-brivo-navy/10 hover:border-brivo-navy/30 transition-all space-y-3 shadow-sm hover:shadow-md hover:-translate-y-0.5 group"
+                    className="p-4 sm:p-6 rounded-xl sm:rounded-2xl bg-white border border-brivo-navy/10 hover:border-brivo-navy/30 transition-all space-y-3.5 shadow-sm hover:shadow-md hover:-translate-y-0.5 group"
                   >
-                    {/* Header Badges */}
-                    <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-2">
-                      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                    {/* Header: Upper Tags (Left) & Penalty Amount (Right) perfectly centered */}
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 min-w-0">
                         <span className="font-mono text-[0.65rem] px-2 py-0.5 rounded bg-brivo-paper border border-brivo-navy/15 text-brivo-navy font-semibold">
                           {record.external_id}
                         </span>
@@ -556,15 +583,15 @@ function ExplorerContent() {
                         </span>
                       </div>
 
-                      {record.amount ? (
-                        <div className="text-left xs:text-right">
+                      <div className="shrink-0 text-right">
+                        {record.amount ? (
                           <span className="text-sm sm:text-base font-semibold font-mono text-brivo-navy">
                             {formatINR(record.amount)}
                           </span>
-                        </div>
-                      ) : (
-                        <span className="text-xs font-mono text-brivo-slate">Non-Monetary Sanction</span>
-                      )}
+                        ) : (
+                          <span className="text-xs font-mono text-brivo-slate">Non-Monetary Sanction</span>
+                        )}
+                      </div>
                     </div>
 
                     {/* Title & Summary */}
@@ -581,7 +608,7 @@ function ExplorerContent() {
                     </div>
 
                     {/* Entities & Footer Actions */}
-                    <div className="pt-3 border-t border-brivo-navy/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="pt-3.5 border-t border-brivo-navy/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar max-w-full">
                         <span className="text-[0.65rem] font-mono text-brivo-slate shrink-0">Noticees:</span>
                         {record.entity_names?.slice(0, 3).map((ent, idx) => (

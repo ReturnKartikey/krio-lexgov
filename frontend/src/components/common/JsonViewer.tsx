@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Copy, Check, ChevronDown, ChevronRight } from "lucide-react";
+import { toast } from "@/lib/toast";
 
 interface JsonViewerProps {
   data: any;
@@ -19,6 +20,7 @@ export function JsonViewer({ data, title = "Raw JSON Metadata", defaultExpanded 
     e.stopPropagation();
     navigator.clipboard.writeText(jsonStr);
     setCopied(true);
+    toast.info("JSON Copied", `${title} copied to clipboard`);
     setTimeout(() => setCopied(false), 2000);
   };
 

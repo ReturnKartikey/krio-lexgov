@@ -23,6 +23,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { MicroLabel } from "@/components/common/MicroLabel";
+import { AnalyticsChartsSkeleton } from "@/components/common/Skeleton";
 import { motion } from "framer-motion";
 import {
   getTrends,
@@ -173,8 +174,13 @@ export default function AnalyticsPage() {
         </div>
       </div>
 
-      {/* 1. ROLLING TREND CARDS */}
-      {trends && (
+      {/* Analytics Body / Shimmer Loading State */}
+      {loading ? (
+        <AnalyticsChartsSkeleton />
+      ) : (
+        <>
+          {/* 1. ROLLING TREND CARDS */}
+          {trends && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-6">
           {/* Card 1: Orders Trend */}
           <div className="p-4 sm:p-6 rounded-xl sm:rounded-lg bg-white border border-brivo-navy/10 space-y-2 shadow-sm">
@@ -592,6 +598,8 @@ export default function AnalyticsPage() {
           </div>
         </div>
       </div>
+      </>
+    )}
     </div>
   );
 }

@@ -21,6 +21,8 @@ import {
   Users,
 } from "lucide-react";
 import { MicroLabel } from "@/components/common/MicroLabel";
+import { AIPaneSkeleton } from "@/components/common/Skeleton";
+import { toast } from "@/lib/toast";
 import { synthesizeIntelligence } from "@/lib/api";
 import { SynthesisResponse } from "@/lib/types";
 import { formatINR, formatDate } from "@/lib/utils";
@@ -118,6 +120,7 @@ ${data.compliance_takeaways.join("\n")}
 `;
     navigator.clipboard.writeText(text);
     setCopied(true);
+    toast.info("Briefing Copied", "Executive AI synthesis copied to clipboard");
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -302,16 +305,12 @@ ${data.compliance_takeaways.join("\n")}
               style={{ overscrollBehavior: "contain" }}
             >
               {initialLoading ? (
-                <div className="py-12 sm:py-16 flex flex-col items-center justify-center space-y-4">
-                  <div className="w-10 h-10 rounded-full border-2 border-brivo-navy/10 border-t-brivo-navy animate-spin" />
-                  <div className="space-y-1 text-center font-mono px-4">
-                    <p className="text-xs font-semibold text-brivo-navy">
-                      Scanning Public SEBI Adjudication Registry...
-                    </p>
-                    <p className="text-[0.7rem] text-brivo-slate">
-                      Synthesizing statutory penalties, noticees, and Section 15HA precedents
-                    </p>
+                <div className="space-y-4 py-2">
+                  <div className="flex items-center gap-2 text-xs font-mono text-brivo-slate border-b border-brivo-navy/10 pb-3">
+                    <div className="w-2 h-2 rounded-full bg-brivo-cyan animate-pulse shrink-0" />
+                    <span>Synthesizing statutory penalties, noticees, and Section 15HA precedents...</span>
                   </div>
+                  <AIPaneSkeleton />
                 </div>
               ) : data ? (
                 <AnimatePresence mode="wait">

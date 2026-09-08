@@ -13,6 +13,7 @@ import {
 import { MicroLabel } from "@/components/common/MicroLabel";
 import { JsonViewer } from "@/components/common/JsonViewer";
 import { getApiBaseUrl } from "@/lib/api";
+import { toast } from "@/lib/toast";
 
 interface ApiParam {
   key: string;
@@ -216,6 +217,7 @@ export default function ApiExplorerPage() {
   const handleCopyCurl = () => {
     navigator.clipboard.writeText(generateCurl());
     setCopiedCurl(true);
+    toast.info("cURL Command Copied", "Terminal command copied to clipboard");
     setTimeout(() => setCopiedCurl(false), 2000);
   };
 

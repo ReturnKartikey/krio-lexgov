@@ -17,6 +17,8 @@ import {
 import { MicroLabel } from "@/components/common/MicroLabel";
 import { MagneticButton } from "@/components/motion/MagneticButton";
 import { motion, AnimatePresence } from "framer-motion";
+import { JobsTableSkeleton, MobileTableRowSkeleton } from "@/components/common/Skeleton";
+import { toast } from "@/lib/toast";
 import { getJobs, triggerSyncJob } from "@/lib/api";
 import { IngestionRunItem } from "@/lib/types";
 import { formatDate, formatRelativeTime } from "@/lib/utils";
@@ -26,7 +28,6 @@ export default function JobsPage() {
   const [loading, setLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
   const [expandedJobId, setExpandedJobId] = useState<string | null>(null);
-  const [syncStatus, setSyncStatus] = useState<string | null>(null);
 
   const fetchJobsList = async () => {
     try {
@@ -46,17 +47,17 @@ export default function JobsPage() {
 
   const handleTriggerSync = async (incremental: boolean = true) => {
     setIsSyncing(true);
-    setSyncStatus("Triggering ETL synchronization pipeline...");
+    toast.info("Ingestion Triggered", incremental ? "Running incremental crawler pipeline..." : "Running full re-sync pipeline...");
     try {
       const res = await triggerSyncJob({
         adapter_key: "sebi_adjudication_orders",
         limit: 10,
         incremental,
       });
-      setSyncStatus(`Sync initiated: Job Run ID ${res.run_id}`);
+      toast.success("Sync Initiated", `Pipeline active (Job Run ID: ${res.run_id.slice(0, 8)})`);
       await fetchJobsList();
     } catch (err: any) {
-      setSyncStatus(`Sync failed: ${err.message || "Unknown error"}`);
+      toast.error("Sync Failed", err.message || "Unable to trigger ETL pipeline");
     } finally {
       setIsSyncing(false);
     }
@@ -140,15 +141,6 @@ export default function JobsPage() {
         </div>
       </div>
 
-      {syncStatus && (
-        <div className="p-3 rounded-lg bg-white border border-brivo-navy/15 text-xs font-mono text-brivo-navy flex items-center justify-between animate-fade-in shadow-sm">
-          <span>{syncStatus}</span>
-          <button onClick={() => setSyncStatus(null)} className="text-brivo-slate hover:text-brivo-navy cursor-pointer">
-            Dismiss
-          </button>
-        </div>
-      )}
-
       {/* Desktop Ingestion Runs Table */}
       <div className="border border-brivo-navy/10 rounded-lg overflow-x-auto bg-white shadow-sm hidden md:block">
         <table className="w-full text-left text-xs min-w-[680px]">
@@ -168,11 +160,7 @@ export default function JobsPage() {
           </thead>
           <tbody className="divide-y divide-brivo-navy/5">
             {loading ? (
-              <tr>
-                <td colSpan={10} className="px-4 py-8 text-center text-brivo-slate font-mono">
-                  Loading ingestion history...
-                </td>
-              </tr>
+              <JobsTableSkeleton count={5} />
             ) : jobs.length === 0 ? (
               <tr>
                 <td colSpan={10} className="px-4 py-8 text-center text-brivo-slate font-mono">
@@ -284,9 +272,7 @@ export default function JobsPage() {
       {/* Mobile Card List View */}
       <div className="space-y-3 block md:hidden">
         {loading ? (
-          <div className="p-8 rounded-xl bg-white border border-brivo-navy/10 text-center text-xs font-mono text-brivo-slate shadow-sm">
-            Loading ingestion history...
-          </div>
+          <MobileTableRowSkeleton count={4} />
         ) : jobs.length === 0 ? (
           <div className="p-8 rounded-xl bg-white border border-brivo-navy/10 text-center text-xs font-mono text-brivo-slate shadow-sm">
             No ingestion runs recorded yet. Tap &quot;Run Incremental Sync&quot; above.
