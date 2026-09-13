@@ -19,6 +19,8 @@ import {
   Check,
   Zap,
   Users,
+  Download,
+  Loader2,
 } from "lucide-react";
 import { MicroLabel } from "@/components/common/MicroLabel";
 import { AIPaneSkeleton } from "@/components/common/Skeleton";
@@ -26,6 +28,7 @@ import { toast } from "@/lib/toast";
 import { synthesizeIntelligence } from "@/lib/api";
 import { SynthesisResponse } from "@/lib/types";
 import { formatINR, formatDate } from "@/lib/utils";
+import { generateSynthesisPdfReport } from "@/lib/pdfExport";
 
 interface IntelligenceModalProps {
   isOpen: boolean;
@@ -44,6 +47,8 @@ export function IntelligenceModal({
   const [isUpdatingMode, setIsUpdatingMode] = useState(false);
   const [data, setData] = useState<SynthesisResponse | null>(null);
   const [copied, setCopied] = useState(false);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
+  const [pdfDownloaded, setPdfDownloaded] = useState(false);
 
   // Initial load or query change
   useEffect(() => {
@@ -78,9 +83,10 @@ export function IntelligenceModal({
       setIsUpdatingMode(true);
     }
 
+    const targetQuery = qText !== undefined ? qText : query;
+    const targetMode = mType || mode;
+
     try {
-      const targetQuery = qText !== undefined ? qText : query;
-      const targetMode = mType || mode;
       const res = await synthesizeIntelligence({
         query: targetQuery,
         mode: targetMode,
@@ -88,6 +94,7 @@ export function IntelligenceModal({
       setData(res);
     } catch (err) {
       console.error("Synthesis failed:", err);
+      toast.error("Synthesis Error", "Failed to retrieve statutory risk analysis");
     } finally {
       setInitialLoading(false);
       setIsUpdatingMode(false);
@@ -122,6 +129,22 @@ ${data.compliance_takeaways.join("\n")}
     setCopied(true);
     toast.info("Briefing Copied", "Executive AI synthesis copied to clipboard");
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleExportPdf = async () => {
+    if (!data) return;
+    try {
+      setIsExportingPdf(true);
+      await generateSynthesisPdfReport(data, query, mode);
+      setPdfDownloaded(true);
+      toast.success("PDF Exported", "Downloaded executive compliance briefing");
+      setTimeout(() => setPdfDownloaded(false), 2500);
+    } catch (err) {
+      console.error("Failed to generate PDF memo:", err);
+      toast.error("Export Failed", "Unable to generate executive synthesis PDF");
+    } finally {
+      setIsExportingPdf(false);
+    }
   };
 
   return (
@@ -304,7 +327,7 @@ ${data.compliance_takeaways.join("\n")}
               className="p-3.5 sm:p-6 overflow-y-auto space-y-4 sm:space-y-6 flex-1 bg-brivo-paper/50"
               style={{ overscrollBehavior: "contain" }}
             >
-              {initialLoading ? (
+              {initialLoading || isUpdatingMode ? (
                 <div className="space-y-4 py-2">
                   <div className="flex items-center gap-2 text-xs font-mono text-brivo-slate border-b border-brivo-navy/10 pb-3">
                     <div className="w-2 h-2 rounded-full bg-brivo-cyan animate-pulse shrink-0" />
@@ -535,7 +558,32 @@ ${data.compliance_takeaways.join("\n")}
                 Indexed from public SEBI orders • SHA-256 Provenance Tracked
               </span>
 
-              <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+              <div className="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
+                {/* Export Executive PDF Memo */}
+                <button
+                  onClick={handleExportPdf}
+                  disabled={isExportingPdf || !data}
+                  className="flex-1 sm:flex-initial justify-center px-3.5 py-1.5 rounded-full bg-white hover:bg-brivo-paper border border-brivo-navy/15 hover:border-brivo-cyan/50 text-brivo-navy text-xs font-mono flex items-center gap-1.5 transition-all shadow-xs active:scale-95 cursor-pointer disabled:opacity-50"
+                  title="Export executive synthesis as PDF"
+                >
+                  {isExportingPdf ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-brivo-cyan" />
+                      <span>Generating PDF...</span>
+                    </>
+                  ) : pdfDownloaded ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-emerald-600" />
+                      <span className="text-emerald-700">Exported</span>
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-3.5 h-3.5 text-brivo-cyan" />
+                      <span>Export PDF</span>
+                    </>
+                  )}
+                </button>
+
                 <button
                   onClick={handleCopyReport}
                   className="flex-1 sm:flex-initial justify-center px-3.5 py-1.5 rounded-full bg-white hover:bg-brivo-paper border border-brivo-navy/15 text-brivo-navy text-xs font-mono flex items-center gap-1.5 transition-colors shadow-sm active:scale-95 cursor-pointer"

@@ -394,10 +394,7 @@ export default function LandingPage() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <TiltCard className="scroll-reveal-item p-6 sm:p-7 rounded-2xl bg-white border border-brivo-navy/10 space-y-4 hover:border-brivo-navy/30 transition-all duration-300 shadow-xs hover:shadow-md flex flex-col justify-between h-full">
-            <span className="font-mono text-[0.68rem] text-brivo-slate uppercase tracking-widest block">
-              N°01 // AUDIT
-            </span>
+          <TiltCard className="scroll-reveal-item p-6 sm:p-7 rounded-2xl bg-white border border-brivo-navy/10 space-y-2.5 hover:border-brivo-navy/30 transition-all duration-300 shadow-xs hover:shadow-md flex flex-col h-full">
             <h3 className="text-base sm:text-lg font-semibold text-brivo-navy tracking-tight">
               Traceable Provenance
             </h3>
@@ -406,10 +403,7 @@ export default function LandingPage() {
             </p>
           </TiltCard>
 
-          <TiltCard className="scroll-reveal-item p-6 sm:p-7 rounded-2xl bg-white border border-brivo-navy/10 space-y-4 hover:border-brivo-navy/30 transition-all duration-300 shadow-xs hover:shadow-md flex flex-col justify-between h-full">
-            <span className="font-mono text-[0.68rem] text-brivo-slate uppercase tracking-widest block">
-              N°02 // PLUGGABLE
-            </span>
+          <TiltCard className="scroll-reveal-item p-6 sm:p-7 rounded-2xl bg-white border border-brivo-navy/10 space-y-2.5 hover:border-brivo-navy/30 transition-all duration-300 shadow-xs hover:shadow-md flex flex-col h-full">
             <h3 className="text-base sm:text-lg font-semibold text-brivo-navy tracking-tight">
               Source Adapter ETL
             </h3>
@@ -418,10 +412,7 @@ export default function LandingPage() {
             </p>
           </TiltCard>
 
-          <TiltCard className="scroll-reveal-item p-6 sm:p-7 rounded-2xl bg-white border border-brivo-navy/10 space-y-4 hover:border-brivo-navy/30 transition-all duration-300 shadow-xs hover:shadow-md flex flex-col justify-between h-full">
-            <span className="font-mono text-[0.68rem] text-brivo-slate uppercase tracking-widest block">
-              N°03 // CLUSTERING
-            </span>
+          <TiltCard className="scroll-reveal-item p-6 sm:p-7 rounded-2xl bg-white border border-brivo-navy/10 space-y-2.5 hover:border-brivo-navy/30 transition-all duration-300 shadow-xs hover:shadow-md flex flex-col h-full">
             <h3 className="text-base sm:text-lg font-semibold text-brivo-navy tracking-tight">
               Near-Duplicate Detection
             </h3>
@@ -430,10 +421,7 @@ export default function LandingPage() {
             </p>
           </TiltCard>
 
-          <TiltCard className="scroll-reveal-item p-6 sm:p-7 rounded-2xl bg-white border border-brivo-navy/10 space-y-4 hover:border-brivo-navy/30 transition-all duration-300 shadow-xs hover:shadow-md flex flex-col justify-between h-full">
-            <span className="font-mono text-[0.68rem] text-brivo-slate uppercase tracking-widest block">
-              N°04 // COMPLIANT
-            </span>
+          <TiltCard className="scroll-reveal-item p-6 sm:p-7 rounded-2xl bg-white border border-brivo-navy/10 space-y-2.5 hover:border-brivo-navy/30 transition-all duration-300 shadow-xs hover:shadow-md flex flex-col h-full">
             <h3 className="text-base sm:text-lg font-semibold text-brivo-navy tracking-tight">
               Polite Ingestion Crawler
             </h3>
