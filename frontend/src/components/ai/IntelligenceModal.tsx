@@ -301,7 +301,7 @@ ${data.compliance_takeaways.join("\n")}
             {/* Results Content Area */}
             <div
               data-lenis-prevent="true"
-              className="p-3.5 sm:p-6 overflow-y-auto space-y-4 sm:space-y-6 flex-1 bg-editorial-grid"
+              className="p-3.5 sm:p-6 overflow-y-auto space-y-4 sm:space-y-6 flex-1 bg-brivo-paper/50"
               style={{ overscrollBehavior: "contain" }}
             >
               {initialLoading ? (

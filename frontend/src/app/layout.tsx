@@ -70,7 +70,7 @@ export default function RootLayout({
       <body className="min-h-screen flex flex-col bg-brivo-paper text-brivo-navy antialiased selection:bg-brivo-mist selection:text-brivo-navy">
         <SmoothScrollProvider>
           <Navbar />
-          <main className="flex-1 w-full bg-editorial-grid">{children}</main>
+          <main className="flex-1 w-full">{children}</main>
           <Footer />
           <ToastContainer />
         </SmoothScrollProvider>

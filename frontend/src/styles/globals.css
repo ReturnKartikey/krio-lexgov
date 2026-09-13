@@ -108,13 +108,7 @@ html.lenis, html.lenis body {
   pointer-events: none;
 }
 
-/* Subtle editorial graph paper background */
-.bg-editorial-grid {
-  background-size: 48px 48px;
-  background-image: 
-    linear-gradient(to right, rgba(26, 35, 51, 0.035) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(26, 35, 51, 0.035) 1px, transparent 1px);
-}
+
 
 /* Hairline border styling */
 .border-hairline {
