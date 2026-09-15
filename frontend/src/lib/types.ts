@@ -107,7 +107,7 @@ export interface IngestionRunItem {
   source_id: string;
   started_at: string;
   finished_at?: string;
-  status: "queued" | "running" | "success" | "partial" | "failed";
+  status: "queued" | "running" | "success" | "partial" | "failed" | "timed_out" | "interrupted" | (string & {});
   records_seen: number;
   records_added: number;
   records_updated: number;

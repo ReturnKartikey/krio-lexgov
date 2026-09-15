@@ -96,6 +96,14 @@ export default function JobsPage() {
             <span>PARTIAL</span>
           </span>
         );
+      case "timed_out":
+      case "interrupted":
+        return (
+          <span className="inline-flex items-center gap-1 font-mono text-[0.65rem] px-2 py-0.5 rounded bg-amber-50 border border-amber-200 text-amber-700 font-medium">
+            <Clock className="w-3 h-3 text-amber-600" />
+            <span>TIMED OUT</span>
+          </span>
+        );
       default:
         return (
           <span className="inline-flex items-center gap-1 font-mono text-[0.65rem] px-2 py-0.5 rounded bg-rose-50 border border-rose-200 text-rose-700 font-medium">
@@ -249,7 +257,13 @@ export default function JobsPage() {
                               <span>Finished: {job.finished_at ? formatDate(job.finished_at) : "In Progress"}</span>
                             </div>
                             {job.error_log ? (
-                              <div className="p-3 rounded bg-white border border-rose-200 text-rose-800 font-mono text-[0.75rem] whitespace-pre-wrap max-h-48 overflow-y-auto shadow-sm">
+                              <div
+                                className={`p-3 rounded font-mono text-[0.75rem] whitespace-pre-wrap max-h-48 overflow-y-auto shadow-sm border ${
+                                  job.status === "timed_out" || job.status === "interrupted"
+                                    ? "bg-amber-50/50 border-amber-200 text-amber-900"
+                                    : "bg-white border-rose-200 text-rose-800"
+                                }`}
+                              >
                                 {job.error_log}
                               </div>
                             ) : (

@@ -49,3 +49,44 @@ async def test_health_endpoint(client):
     assert data["status"] in ("healthy", "degraded")
     assert data["database"] == "healthy"
     assert data["total_records"] > 0
+
+
+@pytest.mark.asyncio
+async def test_stuck_job_auto_timeout(client, db_session):
+    import uuid
+    from datetime import UTC, datetime, timedelta
+
+    from sqlalchemy import select
+
+    from app.db.models import IngestionRun, Source
+
+    # Retrieve seeded source
+    src_res = await db_session.execute(select(Source))
+    src = src_res.scalars().first()
+    assert src is not None
+
+    # Create an old orphaned job stuck in 'running' from 2 hours ago
+    old_job = IngestionRun(
+        id=uuid.uuid4(),
+        source_id=src.id,
+        started_at=datetime.now(UTC) - timedelta(hours=2),
+        status="running",
+        triggered_by="initial_bootstrap",
+        records_seen=75,
+        records_updated=40,
+    )
+    db_session.add(old_job)
+    await db_session.commit()
+
+    # Calling list /api/jobs triggers the auto-timeout cleanup
+    resp = await client.get("/api/jobs")
+    assert resp.status_code == 200
+
+    # Verify the job status is automatically updated to timed_out
+    detail_resp = await client.get(f"/api/jobs/{old_job.id}")
+    assert detail_resp.status_code == 200
+    detail = detail_resp.json()
+    assert detail["status"] == "timed_out"
+    assert detail["duration_seconds"] == 3600.0
+    assert "timeout" in detail["error_log"].lower()
+

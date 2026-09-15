@@ -1,6 +1,6 @@
 import math
 import uuid
-from datetime import date
+from datetime import UTC, date, datetime, timedelta
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
 from sqlalchemy import delete, desc, func, select, update
@@ -31,6 +31,29 @@ async def list_jobs(
     db: AsyncSession = Depends(get_db),
 ):
     """List historical and active registry crawler ingestion runs."""
+    # Auto-resolve orphaned crawler runs that exceeded the 1-hour timeout or died on restart
+    try:
+        one_hour_ago = datetime.now(UTC) - timedelta(hours=1)
+        stuck_stmt = select(IngestionRun).where(
+            IngestionRun.status == "running",
+            IngestionRun.started_at < one_hour_ago,
+        )
+        stuck_res = await db.execute(stuck_stmt)
+        stuck_runs = stuck_res.scalars().all()
+        if stuck_runs:
+            for r in stuck_runs:
+                r.status = "timed_out"
+                r.duration_seconds = 3600.00
+                r.finished_at = r.started_at + timedelta(hours=1)
+                r.error_log = (
+                    "Execution interrupted: Ingestion run exceeded 1-hour timeout threshold "
+                    "or worker process was terminated by a server restart."
+                )
+            await db.commit()
+    except Exception:
+        # Non-blocking: continue serving list if cleanup encounters concurrency lock
+        pass
+
     stmt = select(IngestionRun)
     count_stmt = select(func.count(IngestionRun.id))
 
