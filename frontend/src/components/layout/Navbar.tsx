@@ -24,6 +24,13 @@ export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
+  const tabRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+  const [indicator, setIndicator] = useState<{ x: number; width: number; visible: boolean }>({
+    x: 4,
+    width: 100,
+    visible: false,
+  });
+
   const navLinks = [
     { href: "/explorer", label: "Explorer", icon: Search },
     { href: "/analytics", label: "Analytics", icon: BarChart3 },
@@ -32,6 +39,32 @@ export function Navbar() {
   ];
 
   const activeIndex = navLinks.findIndex((link) => pathname.startsWith(link.href));
+
+  // Measure strictly local relative offset within the nav container (horizontal only)
+  const updatePillPosition = useCallback(() => {
+    if (activeIndex !== -1 && tabRefs.current[activeIndex]) {
+      const el = tabRefs.current[activeIndex]!;
+      setIndicator({
+        x: el.offsetLeft,
+        width: el.offsetWidth,
+        visible: true,
+      });
+    } else {
+      setIndicator((prev) => ({ ...prev, visible: false }));
+    }
+  }, [activeIndex]);
+
+  // Update on route change and resize
+  useEffect(() => {
+    updatePillPosition();
+    const raf = requestAnimationFrame(updatePillPosition);
+    return () => cancelAnimationFrame(raf);
+  }, [updatePillPosition, pathname]);
+
+  useEffect(() => {
+    window.addEventListener("resize", updatePillPosition);
+    return () => window.removeEventListener("resize", updatePillPosition);
+  }, [updatePillPosition]);
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -117,34 +150,46 @@ export function Navbar() {
           {/* Center Navigation - Desktop Symmetrical Segmented Track */}
           <div className="shrink-0 hidden md:flex items-center justify-center">
             <nav className="relative flex items-center gap-1 shrink-0 h-10 select-none">
+              {/* Strictly Horizontal-Only Spring-Gliding Active Pill */}
+              <motion.div
+                className="absolute inset-y-1 rounded-full bg-brivo-navy shadow-xs z-0 pointer-events-none"
+                initial={false}
+                animate={{
+                  x: indicator.x,
+                  width: indicator.width,
+                  opacity: indicator.visible ? 1 : 0,
+                }}
+                transition={{
+                  x: { type: "spring", stiffness: 480, damping: 38 },
+                  width: { type: "spring", stiffness: 480, damping: 38 },
+                  opacity: { duration: 0.15, ease: "easeOut" },
+                }}
+              />
+
               {navLinks.map((link, index) => {
                 const Icon = link.icon;
                 const isActive = activeIndex === index;
                 return (
                   <Link
                     key={link.href}
+                    ref={(el) => {
+                      tabRefs.current[index] = el;
+                    }}
                     href={link.href}
                     onMouseEnter={() => prefetchTab(link.href)}
                     onFocus={() => prefetchTab(link.href)}
-                    className={`relative h-8 px-3.5 lg:px-4 rounded-full text-xs lg:text-sm font-medium font-sans flex items-center justify-center gap-1.5 lg:gap-2 select-none cursor-pointer whitespace-nowrap shrink-0 transition-colors duration-200 outline-none focus:outline-none focus-visible:outline-none ${
+                    className={`relative h-8 px-3.5 lg:px-4 rounded-full text-xs lg:text-sm font-medium font-sans flex items-center justify-center gap-1.5 lg:gap-2 select-none cursor-pointer whitespace-nowrap shrink-0 transition-colors duration-200 z-10 outline-none focus:outline-none focus-visible:outline-none ${
                       isActive
                         ? "text-brivo-paper font-semibold"
                         : "text-brivo-navy/80 hover:text-brivo-navy"
                     }`}
                   >
-                    {isActive && (
-                      <motion.div
-                        layoutId="navbarActivePill"
-                        className="absolute inset-0 rounded-full bg-brivo-navy shadow-xs z-0"
-                        transition={{ type: "spring", stiffness: 450, damping: 35 }}
-                      />
-                    )}
                     <Icon
-                      className={`relative z-10 w-3.5 h-3.5 lg:w-4 lg:h-4 shrink-0 transition-colors duration-200 ${
+                      className={`w-3.5 h-3.5 lg:w-4 lg:h-4 shrink-0 transition-colors duration-200 ${
                         isActive ? "text-brivo-cyan" : "text-brivo-slate"
                       }`}
                     />
-                    <span className="relative z-10 whitespace-nowrap">
+                    <span className="whitespace-nowrap">
                       {link.label}
                     </span>
                   </Link>
