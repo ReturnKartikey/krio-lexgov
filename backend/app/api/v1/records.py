@@ -274,3 +274,41 @@ async def get_record_detail(
         raw_document=raw_doc_simple,
         entities=entities_list,
     )
+
+
+@router.get("/{record_id}/preview", response_model=EnvelopeResponse[RecordListItem])
+async def get_record_preview(
+    record_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Fast lightweight endpoint returning normalized enforcement record details
+    tailored for Quick Look instant modal previews.
+    """
+    stmt = select(Record).where(Record.id == record_id)
+    result = await db.execute(stmt)
+    record = result.scalar_one_or_none()
+
+    if not record:
+        raise HTTPException(status_code=404, detail="Record not found")
+
+    return EnvelopeResponse(
+        data=RecordListItem(
+            id=record.id,
+            source_id=record.source_id,
+            external_id=record.external_id,
+            record_type=record.record_type,
+            title=record.title,
+            summary=record.summary,
+            entity_names=record.entity_names,
+            jurisdiction=record.jurisdiction,
+            state=record.state,
+            city=record.city,
+            amount=float(record.amount) if record.amount is not None else None,
+            status=record.status,
+            published_date=record.published_date,
+            source_url=record.source_url,
+            ingested_at=record.ingested_at,
+        )
+    )
+

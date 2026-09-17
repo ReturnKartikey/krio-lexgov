@@ -43,3 +43,21 @@ async def test_get_record_detail(client):
     assert "raw_metadata" in detail
     assert "source_url" in detail
     assert isinstance(detail["entities"], list)
+
+
+@pytest.mark.asyncio
+async def test_get_record_preview(client):
+    list_resp = await client.get("/api/records?page_size=1")
+    rec_id = list_resp.json()["data"][0]["id"]
+
+    preview_resp = await client.get(f"/api/records/{rec_id}/preview")
+    assert preview_resp.status_code == 200
+    preview = preview_resp.json()
+    assert "data" in preview
+    data = preview["data"]
+    assert data["id"] == rec_id
+    assert "title" in data
+    assert "summary" in data
+    assert "external_id" in data
+    assert "entity_names" in data
+

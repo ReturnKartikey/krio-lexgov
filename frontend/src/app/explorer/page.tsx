@@ -118,10 +118,90 @@ function ExplorerContent() {
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const [quickLookRecord, setQuickLookRecord] = useState<RecordListItem | null>(null);
   const [isQuickLookOpen, setIsQuickLookOpen] = useState(false);
+  const [focusedIndex, setFocusedIndex] = useState<number>(0);
 
   useEffect(() => {
     document.title = "Explorer | KRIO.LEXGOV";
   }, []);
+
+  // Quick Look cycling handlers
+  const handleNextRecord = useCallback(() => {
+    if (records.length === 0) return;
+    setFocusedIndex((prev) => {
+      const next = Math.min(prev + 1, records.length - 1);
+      setQuickLookRecord(records[next]);
+      return next;
+    });
+  }, [records]);
+
+  const handlePreviousRecord = useCallback(() => {
+    if (records.length === 0) return;
+    setFocusedIndex((prev) => {
+      const next = Math.max(prev - 1, 0);
+      setQuickLookRecord(records[next]);
+      return next;
+    });
+  }, [records]);
+
+  // Global silent keyboard navigation: Spacebar preview and Arrow key row navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (isAiModalOpen) return;
+
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.tagName === "SELECT" ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+
+      if (records.length === 0) return;
+
+      if (e.code === "Space") {
+        e.preventDefault();
+        if (isQuickLookOpen) {
+          setIsQuickLookOpen(false);
+        } else {
+          const targetRecord = records[focusedIndex] || records[0];
+          if (targetRecord) {
+            setQuickLookRecord(targetRecord);
+            setIsQuickLookOpen(true);
+          }
+        }
+        return;
+      }
+
+      if (!isQuickLookOpen) {
+        if (e.key === "ArrowDown" || e.key === "j" || e.key === "J") {
+          e.preventDefault();
+          setFocusedIndex((prev) => Math.min(prev + 1, records.length - 1));
+          return;
+        }
+
+        if (e.key === "ArrowUp" || e.key === "k" || e.key === "K") {
+          e.preventDefault();
+          setFocusedIndex((prev) => Math.max(prev - 1, 0));
+          return;
+        }
+
+        if (e.key === "Enter") {
+          const targetRecord = records[focusedIndex];
+          if (targetRecord) {
+            e.preventDefault();
+            router.push(`/explorer/${targetRecord.id}`);
+          }
+          return;
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isQuickLookOpen, isAiModalOpen, records, focusedIndex, router]);
 
   // Sync state with URL params
   const updateUrl = useCallback(
@@ -560,10 +640,15 @@ function ExplorerContent() {
                 transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
                 className="space-y-4"
               >
-                {records.map((record) => (
+                {records.map((record, index) => (
                   <div
                     key={record.id}
-                    className="p-4 sm:p-6 rounded-xl sm:rounded-2xl bg-white border border-brivo-navy/10 hover:border-brivo-navy/30 transition-all space-y-3.5 shadow-sm hover:shadow-md hover:-translate-y-0.5 group"
+                    onMouseEnter={() => setFocusedIndex(index)}
+                    className={`p-4 sm:p-6 rounded-xl sm:rounded-2xl bg-white border transition-all space-y-3.5 shadow-sm hover:shadow-md hover:-translate-y-0.5 group ${
+                      focusedIndex === index
+                        ? "border-brivo-navy/30 ring-1 ring-brivo-navy/15"
+                        : "border-brivo-navy/10 hover:border-brivo-navy/30"
+                    }`}
                   >
                     {/* Header: Upper Tags (Left) & Penalty Amount (Right) perfectly centered */}
                     <div className="flex items-center justify-between gap-3">
@@ -631,6 +716,7 @@ function ExplorerContent() {
                         <button
                           type="button"
                           onClick={() => {
+                            setFocusedIndex(index);
                             setQuickLookRecord(record);
                             setIsQuickLookOpen(true);
                           }}
@@ -665,14 +751,19 @@ function ExplorerContent() {
               >
                 {/* Mobile-Native Card-List View (Shown on Mobile screens < md) */}
                 <div className="block md:hidden space-y-3">
-                  {records.map((r) => (
+                  {records.map((r, index) => (
                     <div
                       key={r.id}
                       onClick={() => {
+                        setFocusedIndex(index);
                         setQuickLookRecord(r);
                         setIsQuickLookOpen(true);
                       }}
-                      className="p-4 rounded-xl bg-white border border-brivo-navy/10 hover:border-brivo-navy/25 transition-all space-y-2.5 shadow-xs active:scale-[0.99] cursor-pointer"
+                      className={`p-4 rounded-xl bg-white border transition-all space-y-2.5 shadow-xs active:scale-[0.99] cursor-pointer ${
+                        focusedIndex === index
+                          ? "border-brivo-navy/30 ring-1 ring-brivo-navy/15"
+                          : "border-brivo-navy/10 hover:border-brivo-navy/25"
+                      }`}
                     >
                       {/* Top Meta Strip */}
                       <div className="flex items-center justify-between gap-2">
@@ -707,6 +798,7 @@ function ExplorerContent() {
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
+                              setFocusedIndex(index);
                               setQuickLookRecord(r);
                               setIsQuickLookOpen(true);
                             }}
@@ -743,14 +835,20 @@ function ExplorerContent() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-brivo-navy/5">
-                      {records.map((r) => (
+                      {records.map((r, index) => (
                         <tr
                           key={r.id}
+                          onMouseEnter={() => setFocusedIndex(index)}
                           onClick={() => {
+                            setFocusedIndex(index);
                             setQuickLookRecord(r);
                             setIsQuickLookOpen(true);
                           }}
-                          className="hover:bg-brivo-paper/60 transition-all cursor-pointer group"
+                          className={`transition-all cursor-pointer group ${
+                            focusedIndex === index
+                              ? "bg-brivo-paper/80"
+                              : "hover:bg-brivo-paper/60"
+                          }`}
                         >
                           <td className="px-5 py-3.5 font-mono text-brivo-navy font-medium whitespace-nowrap">
                             {r.external_id}
@@ -775,6 +873,7 @@ function ExplorerContent() {
                                 type="button"
                                 onClick={(e) => {
                                   e.stopPropagation();
+                                  setFocusedIndex(index);
                                   setQuickLookRecord(r);
                                   setIsQuickLookOpen(true);
                                 }}
@@ -845,6 +944,8 @@ function ExplorerContent() {
         record={quickLookRecord}
         isOpen={isQuickLookOpen}
         onClose={() => setIsQuickLookOpen(false)}
+        onNext={handleNextRecord}
+        onPrevious={handlePreviousRecord}
       />
     </div>
   );

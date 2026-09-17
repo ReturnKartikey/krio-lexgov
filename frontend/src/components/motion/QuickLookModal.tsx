@@ -23,9 +23,17 @@ interface QuickLookModalProps {
   record: RecordListItem | null;
   isOpen: boolean;
   onClose: () => void;
+  onNext?: () => void;
+  onPrevious?: () => void;
 }
 
-export function QuickLookModal({ record, isOpen, onClose }: QuickLookModalProps) {
+export function QuickLookModal({
+  record,
+  isOpen,
+  onClose,
+  onNext,
+  onPrevious,
+}: QuickLookModalProps) {
   const router = useRouter();
 
   useEffect(() => {
@@ -35,17 +43,29 @@ export function QuickLookModal({ record, isOpen, onClose }: QuickLookModalProps)
       if (e.key === "Escape" || e.code === "Space") {
         e.preventDefault();
         onClose();
+        return;
       }
       if (e.key === "Enter" && record) {
         e.preventDefault();
         onClose();
         router.push(`/explorer/${record.id}`);
+        return;
+      }
+      if (e.key === "ArrowDown" || e.key === "ArrowRight" || e.key === "j" || e.key === "J") {
+        e.preventDefault();
+        onNext?.();
+        return;
+      }
+      if (e.key === "ArrowUp" || e.key === "ArrowLeft" || e.key === "k" || e.key === "K") {
+        e.preventDefault();
+        onPrevious?.();
+        return;
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, record, onClose, router]);
+  }, [isOpen, record, onClose, onNext, onPrevious, router]);
 
   if (!record) return null;
 
