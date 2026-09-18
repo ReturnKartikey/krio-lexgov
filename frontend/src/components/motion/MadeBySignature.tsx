@@ -44,25 +44,20 @@ export function MadeBySignature() {
       const clampedProgress = Math.min(1, Math.max(0, progress));
 
       // Responsive padding from viewport boundary
-      const padding = Math.max(24, Math.min(64, containerWidth * 0.04));
+      const padding = Math.max(20, Math.min(64, containerWidth * 0.04));
 
-      if (textWidth > containerWidth - 2 * padding) {
-        // Text is wider than viewport:
-        // Progress 0: Left aligned with padding -> "MADE WITH" is 100% visible inside screen
-        // Progress 1: Right aligned with padding -> "...BY KARTIKEY" completes 100% inside screen
-        const startX = padding;
-        const endX = containerWidth - padding - textWidth;
-        const currentX = startX + (endX - startX) * clampedProgress;
-        setTranslateX(currentX);
-      } else {
+      if (textWidth <= containerWidth - 2 * padding) {
         // Text fits comfortably inside viewport:
-        // Center-aligned with smooth, dynamic parallax drift
+        // Center-aligned with smooth, dynamic parallax drift that NEVER clips any letters
         const centerOffset = (containerWidth - textWidth) / 2;
-        const maxDrift = Math.max(30, Math.min(120, (containerWidth - textWidth - 2 * padding) / 2));
+        const maxDrift = Math.max(0, Math.min(40, centerOffset - padding));
         const startX = centerOffset + maxDrift;
         const endX = centerOffset - maxDrift;
         const currentX = startX + (endX - startX) * clampedProgress;
         setTranslateX(currentX);
+      } else {
+        // If viewport is extremely narrow, strictly pin to safe left padding so "M" is NEVER clipped
+        setTranslateX(padding);
       }
 
       // Responsive opacity that shines as user enters the section
@@ -115,7 +110,7 @@ export function MadeBySignature() {
         }}
         className="whitespace-nowrap cursor-default group will-change-transform flex items-center"
       >
-        <span className="font-sans font-black text-4xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl tracking-tighter uppercase text-brivo-navy/[0.10] transition-colors duration-500 group-hover:text-brivo-navy/[0.22]">
+        <span className="font-sans font-black text-[clamp(1.5rem,4.5vw,5.5rem)] tracking-tighter uppercase text-brivo-navy/[0.10] transition-colors duration-500 group-hover:text-brivo-navy/[0.22]">
           Made with{" "}
           <span className="inline-block text-pink-500 drop-shadow-[0_0_24px_rgba(244,114,182,0.6)] transform group-hover:scale-125 transition-transform duration-300 mx-1.5 sm:mx-3 animate-pulse">
             🩷
