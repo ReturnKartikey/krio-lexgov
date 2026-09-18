@@ -108,6 +108,9 @@ class ETLPipeline:
             )
             ingestion_run.records_seen = len(refs)
 
+            touched_entity_ids: set[uuid.UUID] = set()
+            entity_cache: dict[str, uuid.UUID] = {}
+
             for ref in refs:
                 try:
                     # 5. Fetch Phase
@@ -189,11 +192,17 @@ class ETLPipeline:
                         if not ent_item.normalized_name:
                             continue
 
-                        stmt_ent = select(Entity).where(
-                            Entity.normalized_name == ent_item.normalized_name
-                        )
-                        res_ent = await db.execute(stmt_ent)
-                        existing_ent = res_ent.scalar_one_or_none()
+                        cached_ent_id = entity_cache.get(ent_item.normalized_name)
+                        existing_ent = None
+                        if cached_ent_id:
+                            existing_ent = await db.get(Entity, cached_ent_id)
+
+                        if not existing_ent:
+                            stmt_ent = select(Entity).where(
+                                Entity.normalized_name == ent_item.normalized_name
+                            )
+                            res_ent = await db.execute(stmt_ent)
+                            existing_ent = res_ent.scalar_one_or_none()
 
                         if existing_ent:
                             existing_ent.last_seen = datetime.now(UTC)
@@ -212,6 +221,9 @@ class ETLPipeline:
                             db.add(entity_obj)
                             await db.flush()
 
+                        entity_cache[ent_item.normalized_name] = entity_obj.id
+                        touched_entity_ids.add(entity_obj.id)
+
                         # Link record <-> entity
                         stmt_link = select(RecordEntity).where(
                             RecordEntity.record_id == record_obj.id,
@@ -228,21 +240,6 @@ class ETLPipeline:
                             db.add(link)
                             await db.flush()
 
-                        # Deterministically recalculate stats for this entity from linked records
-                        stmt_stats = (
-                            select(
-                                func.count(func.distinct(RecordEntity.record_id)),
-                                func.coalesce(func.sum(Record.amount), 0.0),
-                            )
-                            .select_from(RecordEntity)
-                            .join(Record, RecordEntity.record_id == Record.id)
-                            .where(RecordEntity.entity_id == entity_obj.id)
-                        )
-                        stats_res = await db.execute(stmt_stats)
-                        cnt, total_pen = stats_res.one()
-                        entity_obj.record_count = cnt
-                        entity_obj.total_penalty_amount = float(total_pen or 0.0)
-
                     await db.commit()
 
                 except Exception as rec_err:
@@ -251,6 +248,34 @@ class ETLPipeline:
                     err_msg = f"Error processing record {getattr(ref, 'external_id', 'unknown')}: {rec_err}"
                     logger.error(err_msg, exc_info=True)
                     errors.append(err_msg)
+
+            # 9. Batch recalculate stats for all touched entities in this run in a single aggregation
+            if touched_entity_ids:
+                try:
+                    stats_stmt = (
+                        select(
+                            RecordEntity.entity_id,
+                            func.count(func.distinct(RecordEntity.record_id)),
+                            func.coalesce(func.sum(Record.amount), 0.0),
+                        )
+                        .select_from(RecordEntity)
+                        .join(Record, RecordEntity.record_id == Record.id)
+                        .where(RecordEntity.entity_id.in_(touched_entity_ids))
+                        .group_by(RecordEntity.entity_id)
+                    )
+                    stats_res = await db.execute(stats_stmt)
+                    stats_map = {row[0]: (row[1], float(row[2] or 0.0)) for row in stats_res.all()}
+
+                    ent_stmt = select(Entity).where(Entity.id.in_(touched_entity_ids))
+                    ent_res = await db.execute(ent_stmt)
+                    for ent in ent_res.scalars().all():
+                        cnt, total_pen = stats_map.get(ent.id, (0, 0.0))
+                        ent.record_count = cnt
+                        ent.total_penalty_amount = total_pen
+
+                    await db.commit()
+                except Exception as batch_err:
+                    logger.warning(f"Error in batch entity stats recalculation: {batch_err}")
 
             # Update crawl state
             crawl_state.last_cursor = next_cursor

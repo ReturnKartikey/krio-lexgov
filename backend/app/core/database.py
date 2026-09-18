@@ -22,13 +22,17 @@ if "sqlite" not in raw_db_url:
     clean_query = urllib.parse.urlencode(clean_qs, doseq=True)
     db_url = urllib.parse.urlunparse(parsed._replace(query=clean_query))
 
-    connect_args = {}
+    connect_args = {
+        "command_timeout": 30,
+    }
     if "sslmode=require" in raw_db_url or "ssl=require" in raw_db_url or "neon.tech" in raw_db_url:
         connect_args["ssl"] = "require"
 
     engine_kwargs.update(
         {
             "pool_pre_ping": True,
+            "pool_recycle": 1800,
+            "pool_timeout": 30,
             "pool_size": settings.DB_POOL_SIZE,
             "max_overflow": settings.DB_MAX_OVERFLOW,
             "connect_args": connect_args,

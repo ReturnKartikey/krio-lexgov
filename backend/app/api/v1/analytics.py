@@ -1,3 +1,4 @@
+from collections import defaultdict
 from datetime import date, timedelta
 
 from fastapi import APIRouter, Depends, Query
@@ -181,6 +182,7 @@ async def get_entity_frequency(
 @router.get("/geo-distribution", response_model=list[GeoDistributionItem])
 async def get_geo_distribution(db: AsyncSession = Depends(get_db)):
     """Aggregate regulatory enforcement distribution across Indian states and jurisdictions."""
+    # 1. Query state summary counts and penalties
     stmt = (
         select(
             Record.state,
@@ -194,29 +196,37 @@ async def get_geo_distribution(db: AsyncSession = Depends(get_db)):
     result = await db.execute(stmt)
     rows = result.all()
 
-    geo_items = []
-    for r in rows:
-        state_name = r[0]
-        # Query distinct cities in this state
-        cities_stmt = (
-            select(Record.city)
-            .where(and_(Record.state == state_name, Record.city.isnot(None)))
-            .distinct()
-            .limit(5)
-        )
-        c_res = await db.execute(cities_stmt)
-        cities = [c[0] for c in c_res.all() if c[0]]
+    if not rows:
+        return []
 
-        geo_items.append(
-            GeoDistributionItem(
-                state=state_name,
-                record_count=r[1],
-                total_penalty=float(r[2]),
-                top_cities=cities,
-            )
+    # 2. Single query to aggregate distinct top cities across all states ordered by case count
+    cities_stmt = (
+        select(
+            Record.state,
+            Record.city,
+            func.count(Record.id).label("city_count"),
         )
+        .where(and_(Record.state.isnot(None), Record.city.isnot(None)))
+        .group_by(Record.state, Record.city)
+        .order_by(Record.state, desc("city_count"))
+    )
+    c_res = await db.execute(cities_stmt)
+    city_rows = c_res.all()
 
-    return geo_items
+    cities_by_state: dict[str, list[str]] = defaultdict(list)
+    for state, city, _ in city_rows:
+        if state and city and len(cities_by_state[state]) < 5:
+            cities_by_state[state].append(city)
+
+    return [
+        GeoDistributionItem(
+            state=r[0],
+            record_count=r[1],
+            total_penalty=float(r[2]),
+            top_cities=cities_by_state.get(r[0], []),
+        )
+        for r in rows
+    ]
 
 
 @router.get("/processing-stats", response_model=ProcessingStatsResponse)

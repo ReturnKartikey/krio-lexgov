@@ -19,9 +19,13 @@ async def test_etl_pipeline_run(db_session):
     rec_count = (await db_session.execute(select(func.count(Record.id)))).scalar_one()
     assert rec_count > 0
 
-    # Verify entities extracted
+    # Verify entities extracted and batch statistics populated
     ent_count = (await db_session.execute(select(func.count(Entity.id)))).scalar_one()
     assert ent_count > 0
+    ent_with_records = (
+        await db_session.execute(select(Entity).where(Entity.record_count >= 1))
+    ).scalars().all()
+    assert len(ent_with_records) > 0
 
 
 def test_near_duplicate_detection():
