@@ -110,7 +110,7 @@ export function MadeBySignature() {
         }}
         className="whitespace-nowrap cursor-default group will-change-transform flex items-center"
       >
-        <span className="font-sans font-black text-[clamp(1.5rem,4.5vw,5.5rem)] tracking-tighter uppercase text-brivo-navy/[0.10] transition-colors duration-500 group-hover:text-brivo-navy/[0.22]">
+        <span className="font-sans font-black text-[clamp(1.35rem,5.2vw,6.5rem)] tracking-tighter uppercase text-brivo-navy/[0.10] transition-colors duration-500 group-hover:text-brivo-navy/[0.22]">
           Made with{" "}
           <span className="inline-block text-pink-500 drop-shadow-[0_0_24px_rgba(244,114,182,0.6)] transform group-hover:scale-125 transition-transform duration-300 mx-1.5 sm:mx-3 animate-pulse">
             🩷
