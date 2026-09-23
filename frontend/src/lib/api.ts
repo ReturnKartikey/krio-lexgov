@@ -21,7 +21,7 @@ interface CacheEntry<T> {
   ttl: number;
 }
 
-const memoryCache = new Map<string, CacheEntry<any>>();
+const memoryCache = new Map<string, CacheEntry<unknown>>();
 
 export function getCached<T>(key: string): T | null {
   const entry = memoryCache.get(key);
@@ -79,7 +79,7 @@ function getApiBase(): string {
   return getApiBaseUrl();
 }
 
-const inflightRequests = new Map<string, Promise<any>>();
+const inflightRequests = new Map<string, Promise<unknown>>();
 
 async function fetchJson<T>(
   endpoint: string,
@@ -120,7 +120,7 @@ async function fetchJson<T>(
         setCached(url, data, ttlMs);
       }
       return data;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(`Fetch failed for ${url}:`, err);
       throw err;
     } finally {
