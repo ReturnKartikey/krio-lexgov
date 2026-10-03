@@ -154,10 +154,10 @@ export function Navbar() {
             borderRadius: isScrolled ? "9999px" : "0px",
             paddingLeft: isScrolled ? "18px" : "32px",
             paddingRight: isScrolled ? "18px" : "32px",
-            backgroundColor: isScrolled ? "rgba(255, 255, 255, 0.54)" : "rgba(255, 255, 255, 0)",
-            borderColor: isScrolled ? "rgba(255, 255, 255, 0.70)" : "rgba(255, 255, 255, 0)",
+            backgroundColor: isScrolled ? "rgba(255, 255, 255, 0.38)" : "rgba(255, 255, 255, 0)",
+            borderColor: isScrolled ? "rgba(255, 255, 255, 0.55)" : "rgba(255, 255, 255, 0)",
             boxShadow: isScrolled
-              ? "0 22px 50px -8px rgba(9, 13, 22, 0.12), 0 8px 18px -4px rgba(9, 13, 22, 0.04), inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 1px 0 rgba(9, 13, 22, 0.05), inset 1px 0 1px 0 rgba(255, 255, 255, 0.35), inset -1px 0 1px 0 rgba(255, 255, 255, 0.35)"
+              ? "0 20px 48px -10px rgba(9, 13, 22, 0.10), 0 8px 16px -4px rgba(9, 13, 22, 0.04), inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.85), inset 0 -1px 1px 0 rgba(9, 13, 22, 0.04), inset 1px 0 1px 0 rgba(255, 255, 255, 0.3), inset -1px 0 1px 0 rgba(255, 255, 255, 0.3)"
               : "0 0 0 rgba(0, 0, 0, 0)",
           }}
           transition={
@@ -166,8 +166,8 @@ export function Navbar() {
               : { duration: 0 }
           }
           style={{
-            backdropFilter: isScrolled ? "blur(32px) saturate(210%) brightness(103%)" : "blur(0px) saturate(100%)",
-            WebkitBackdropFilter: isScrolled ? "blur(32px) saturate(210%) brightness(103%)" : "blur(0px) saturate(100%)",
+            backdropFilter: isScrolled ? "blur(26px) saturate(200%) brightness(102%)" : "blur(0px) saturate(100%)",
+            WebkitBackdropFilter: isScrolled ? "blur(26px) saturate(200%) brightness(102%)" : "blur(0px) saturate(100%)",
             borderWidth: 1,
             borderStyle: "solid",
             transform: "translateZ(0)",
@@ -306,7 +306,7 @@ export function Navbar() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -8, scale: 0.98 }}
               transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-              className="pointer-events-auto md:hidden w-[calc(100%-1.5rem)] max-w-sm mt-2 p-3 rounded-2xl bg-white/80 backdrop-blur-3xl backdrop-saturate-[210%] border border-white/90 shadow-[0_24px_50px_rgba(9,13,22,0.15),inset_0_1.5px_1px_rgba(255,255,255,0.95),inset_0_-1px_1px_rgba(9,13,22,0.04)] space-y-1.5 z-40"
+              className="pointer-events-auto md:hidden w-[calc(100%-1.5rem)] max-w-sm mt-2 p-3 rounded-2xl bg-white/70 backdrop-blur-3xl backdrop-saturate-[210%] border border-white/75 shadow-[0_24px_50px_rgba(9,13,22,0.15),inset_0_1.5px_1px_rgba(255,255,255,0.90),inset_0_-1px_1px_rgba(9,13,22,0.04)] space-y-1.5 z-40"
             >
               <div className="text-[0.65rem] font-mono text-brivo-slate uppercase px-3 py-1 tracking-wider border-b border-black/[0.06] pb-1.5 flex items-center justify-between">
                 <span>Navigation Modules</span>
