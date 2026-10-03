@@ -1,237 +1,231 @@
-# KRIO // LexGov
+<p align="center">
+  <img src="logo.png" alt="Krio LexGov" height="48" />
+</p>
 
-<p align="left">
-  <a href="https://krio-lexgov-api.onrender.com"><img src="https://img.shields.io/badge/Status-Live_Production-059669?style=flat-square&logo=render&logoColor=white" alt="Status" /></a>
-  <a href="https://krio-rust.vercel.app"><img src="https://img.shields.io/badge/Web_App-Vercel-000000?style=flat-square&logo=vercel&logoColor=white" alt="Web App" /></a>
-  <a href="https://krio-lexgov-api.onrender.com/docs"><img src="https://img.shields.io/badge/FastAPI-0.111.0-009688?style=flat-square&logo=fastapi&logoColor=white" alt="FastAPI" /></a>
-  <a href="https://krio-rust.vercel.app"><img src="https://img.shields.io/badge/Next.js-14.2.5-000000?style=flat-square&logo=nextdotjs&logoColor=white" alt="Next.js" /></a>
-  <a href="https://krio-lexgov-api.onrender.com"><img src="https://img.shields.io/badge/PostgreSQL-16_(pg__trgm)-4169E1?style=flat-square&logo=postgresql&logoColor=white" alt="PostgreSQL" /></a>
+<h1 align="center">KRIO · LexGov</h1>
+
+<p align="center">
+  <strong>Regulatory Intelligence & Legal Enforcement Platform</strong><br />
+  <sub>Crawl · Normalize · Index · Synthesize — public enforcement orders from Indian regulatory bodies</sub>
+</p>
+
+<p align="center">
+  <a href="https://krio-rust.vercel.app"><img src="https://img.shields.io/badge/Live_App-krio--rust.vercel.app-000000?style=flat-square&logo=vercel&logoColor=white" alt="Live App" /></a>
+  <a href="https://krio-lexgov-api.onrender.com/docs"><img src="https://img.shields.io/badge/API_Docs-Swagger-009688?style=flat-square&logo=fastapi&logoColor=white" alt="API Docs" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square" alt="License" /></a>
 </p>
 
-> **Autonomous Regulatory Intelligence & Legal Enforcement Platform**  
-> Systematically crawling, normalizing, indexing, and synthesizing public enforcement orders, settlement rulings, and adjudication proceedings from Indian regulatory bodies (**SEBI**).
+<p align="center">
+  <a href="https://krio-rust.vercel.app"><img src="docs/screenshots/hero-landing.png" alt="Krio LexGov — Landing Page" width="100%" /></a>
+</p>
 
 ---
 
-## 🌐 Live Production Deployments
+## What is Krio LexGov?
 
-* **Web Application:** **[krio-rust.vercel.app](https://krio-rust.vercel.app)**
-* **Interactive Explorer:** **[krio-rust.vercel.app/explorer](https://krio-rust.vercel.app/explorer)**
-* **Market Analytics:** **[krio-rust.vercel.app/analytics](https://krio-rust.vercel.app/analytics)**
-* **Ingestion Audit Console:** **[krio-rust.vercel.app/jobs](https://krio-rust.vercel.app/jobs)**
-* **Live FastAPI OpenAPI (Swagger):** **[krio-lexgov-api.onrender.com/docs](https://krio-lexgov-api.onrender.com/docs)**
-* **ReDoc Specification:** **[krio-lexgov-api.onrender.com/redoc](https://krio-lexgov-api.onrender.com/redoc)**
+Krio LexGov is an autonomous regulatory intelligence platform that systematically crawls, normalizes, indexes, and synthesizes public enforcement orders, settlement rulings, and adjudication proceedings published by the **Securities and Exchange Board of India (SEBI)**.
+
+Every record carries **audit-grade provenance** — SHA-256 content hashes, verified source URLs, and full-text precision — so legal teams, compliance officers, and researchers can cite with confidence.
 
 ---
 
-## 1. Key Capabilities & Highlights
+## Screenshots
 
-| Capability | Technical Implementation | Description |
-| :--- | :--- | :--- |
-| **Multi-Category Ingestion** | `httpx` + `BeautifulSoup4` + `pypdf` | Automated multi-category scraping across Adjudication Orders (`smid=6`), Chairperson/WTM Orders (`smid=2`), and Settlement Orders (`smid=3`). |
-| **Immutable Cryptographic Provenance** | SHA-256 Hashing | Raw PDF and HTML document payloads are hashed upon retrieval to guarantee tamper-proof audit trails. |
-| **High-Precision Entity & Sanction Extraction** | Domain NLP & Regex Engine | Extracts corporate noticees, individual respondents, violation statutes (PFUTP, LODR, PIT, CIS), and monetary penalty slabs (thousands, lakhs, crores, non-monetary). |
-| **Sub-Millisecond Search & Trigrams** | PostgreSQL 16 `tsvector` + `pg_trgm` | Full-text lexical search with GIN index acceleration and typo tolerance across millions of legal terms. |
-| **Executive PDF Memo Generator** | Client-Side `jsPDF` | Generates audit-grade legal briefing memos with verified provenance blocks, formatted INR currencies, and clickable registry links. |
-| **AI Risk Synthesis & Copilot** | Google Gemini 1.5 Flash / Pro | On-demand LLM intelligence drawer synthesizing complex multi-page regulatory orders into executive legal risk briefs. |
-| **Quick Look / Peek Modal** | Framer Motion Spring Physics | Keyboard-accessible (`Space`, `Esc`, `Enter`) macOS Finder-style modal for instant order previews. |
-| **Responsible Registry Crawling** | Token Bucket Rate Limiting | Complies with `robots.txt`, enforces 1.0 req/sec rate limits, and uses transparent bot identification. |
+<table>
+  <tr>
+    <td width="50%">
+      <img src="docs/screenshots/explorer-archive.png" alt="Explorer — Order Archive" width="100%" />
+      <p align="center"><sub><strong>Explorer</strong> — Full-text search across 127+ enforcement orders with AI Brief and filtering</sub></p>
+    </td>
+    <td width="50%">
+      <img src="docs/screenshots/analytics-dashboard.png" alt="Analytics Dashboard" width="100%" />
+      <p align="center"><sub><strong>Analytics</strong> — Enforcement trends, penalty aggregation, and entity tracking over time</sub></p>
+    </td>
+  </tr>
+</table>
 
 ---
 
-## 2. System Architecture
+## Key Capabilities
+
+| Capability | Description |
+| :--- | :--- |
+| **Multi-Category Ingestion** | Automated scraping across Adjudication Orders, Chairperson/WTM Orders, and Settlement Orders via `httpx`, `BeautifulSoup4`, and `pypdf`. |
+| **Cryptographic Provenance** | Raw PDF and HTML payloads are SHA-256 hashed upon retrieval for tamper-proof audit trails. |
+| **Entity & Sanction Extraction** | Domain NLP extracts corporate noticees, individual respondents, violation statutes (PFUTP, LODR, PIT, CIS), and monetary penalty slabs. |
+| **Sub-Millisecond Search** | PostgreSQL 16 `tsvector` + `pg_trgm` GIN indexes enable full-text lexical search with typo tolerance. |
+| **AI Risk Synthesis** | Google Gemini integration synthesizes multi-page orders into structured legal risk briefs on demand. |
+| **Executive PDF Memos** | Client-side `jsPDF` generates audit-grade briefing memos with verified provenance blocks and formatted INR currencies. |
+| **Quick Look Modal** | Keyboard-driven (`Space`, `Esc`, `Enter`) macOS Finder-style modal for instant order previews. |
+| **Responsible Crawling** | Token bucket rate limiting, `robots.txt` compliance, and transparent bot identification. |
+
+---
+
+## Tech Stack
+
+### Backend
+
+- **Runtime:** Python 3.12+
+- **Framework:** FastAPI — async endpoints, Pydantic v2 validation
+- **Database:** PostgreSQL 16, SQLAlchemy 2.0 (asyncpg), Alembic migrations
+- **Search:** Full-Text Search (`tsvector`), `pg_trgm` trigram index
+- **Scheduler:** APScheduler — async background crawling
+- **Scraping:** `httpx` (HTTP/2), `BeautifulSoup4`, `pypdf`
+- **AI:** Google Gemini API (`google-generativeai`)
+
+### Frontend
+
+- **Framework:** Next.js 14 — App Router, Server Components, Dynamic SSR
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS, custom design tokens, Lucide icons
+- **Motion:** Framer Motion, Lenis smooth scroll, GSAP
+- **Charts:** Recharts — area, bar, radar, and timeline visualizations
+- **Export:** `jsPDF` for regulatory PDF memos
+
+---
+
+## Architecture
 
 ```mermaid
 flowchart TD
-    subgraph Registry["Official Indian Regulatory Portals"]
-        SEBI_AO["SEBI Adjudication Orders<br/>(smid=6)"]
-        SEBI_WTM["SEBI Chairperson / WTM Orders<br/>(smid=2)"]
-        SEBI_SETTLE["SEBI Settlement Orders<br/>(smid=3)"]
-        FUTURE_REG["Planned Portals<br/>(SAT, CCI, MCA-21, RERA)"]
+    subgraph Registry["SEBI Regulatory Portal"]
+        AO["Adjudication Orders"]
+        WTM["Chairperson / WTM Orders"]
+        SETTLE["Settlement Orders"]
     end
 
-    subgraph Adapters["Source Ingestion Adapter Layer"]
-        BASE_ADAPT["SourceAdapter (Base Interface)"]
-        SEBI_ADAPT["SEBIOrdersAdapter<br/>• Token Bucket Rate Limiter (1.0 req/s)<br/>• robots.txt Validator<br/>• Multi-category Discovery"]
-        BASE_ADAPT --> SEBI_ADAPT
+    subgraph Ingestion["Ingestion Layer"]
+        ADAPTER["SEBI Adapter<br/>Rate Limiter · robots.txt"]
+        ETL["ETL Pipeline<br/>Discover → Fetch → Extract → Normalize → Upsert"]
     end
 
-    subgraph ETL["ETL & Normalization Engine"]
-        DISCOVER["1. Discovery (Multi-Category Scraping)"]
-        FETCH["2. Fetch & Raw SHA-256 Digest"]
-        EXTRACT["3. NLP Entity & Penalty Extractor"]
-        NORMALIZE["4. Deduplication & Clean Summarization"]
-        UPSERT["5. Transactional PostgreSQL Upsert"]
+    subgraph Storage["PostgreSQL 16"]
+        RECORDS[("records<br/>GIN tsvector · pg_trgm · SHA-256")]
+        ENTITIES[("entities<br/>Risk Exposure · Cross-Links")]
+        JOBS[("ingestion_runs<br/>Audit Trails")]
     end
 
-    subgraph Database["PostgreSQL 16 Storage & Indexing"]
-        DB_RECORDS[("records<br/>• GIN tsvector Search Index<br/>• pg_trgm Trigram Index<br/>• SHA-256 Raw Hashes")]
-        DB_ENTITIES[("entities & noticees<br/>• Risk Exposure Aggregations<br/>• Cross-Entity Linkages")]
-        DB_JOBS[("ingestion_runs<br/>• Audit Trails & Timestamps")]
+    subgraph API["FastAPI Backend"]
+        R_API["/api/records"]
+        E_API["/api/entities"]
+        A_API["/api/analytics"]
+        J_API["/api/jobs"]
+        AI_API["/api/ai/synthesize"]
     end
 
-    subgraph Backend["FastAPI REST & AI Synthesis Layer"]
-        API_RECORDS["/api/records (FTS, Slabs, Sorting)"]
-        API_ENTITIES["/api/entities (Profiles & Risk Exposure)"]
-        API_ANALYTICS["/api/analytics (Trends & Duplicates)"]
-        API_JOBS["/api/jobs (Sync Trigger & Audit)"]
-        API_AI["/api/ai/synthesize (Gemini AI Copilot)"]
+    subgraph UI["Next.js 14 Frontend"]
+        EXPLORER["/explorer"]
+        DOSSIER["/explorer/[id]"]
+        ANALYTICS["/analytics"]
+        JOBS_UI["/jobs"]
     end
 
-    subgraph Frontend["Next.js 14 Frontend Application"]
-        UI_EXPLORER["/explorer (Card & Table View + Peek Modal)"]
-        UI_DOSSIER["/explorer/[id] (Full Provenance Dossier)"]
-        UI_ANALYTICS["/analytics (Recharts Breakdown & Radar)"]
-        UI_JOBS["/jobs (ETL Pipeline Monitor)"]
-        UI_CONSOLE["/api-explorer (Interactive API Client)"]
-        UI_PDF["Executive PDF Briefing Generator"]
-    end
-
-    SEBI_AO --> SEBI_ADAPT
-    SEBI_WTM --> SEBI_ADAPT
-    SEBI_SETTLE --> SEBI_ADAPT
-    FUTURE_REG -.-> BASE_ADAPT
-
-    SEBI_ADAPT --> DISCOVER --> FETCH --> EXTRACT --> NORMALIZE --> UPSERT
-    UPSERT --> DB_RECORDS
-    UPSERT --> DB_ENTITIES
-    UPSERT --> DB_JOBS
-
-    DB_RECORDS <--> Backend
-    DB_ENTITIES <--> Backend
-    DB_JOBS <--> Backend
-
-    Backend <--> Frontend
-    UI_DOSSIER --> UI_PDF
+    Registry --> ADAPTER --> ETL --> Storage
+    Storage <--> API <--> UI
 ```
 
 ---
 
-## 3. Technology Stack
-
-### Backend
-* **Language & Runtime:** Python 3.12 / 3.13
-* **Web Framework:** FastAPI (async endpoints, Pydantic v2 validation)
-* **Database & ORM:** PostgreSQL 16, SQLAlchemy 2.0 (asyncpg), Alembic migrations
-* **Search & Indexing:** PostgreSQL Full-Text Search (`tsvector`), `pg_trgm` GIN extensions
-* **Scheduler:** APScheduler (async background crawling jobs)
-* **Scraping & Ingestion:** `httpx` (HTTP/2 async client), `BeautifulSoup4`, `pypdf`
-* **AI Integration:** Google Gemini AI API (`google-generativeai`)
-* **Linting & Quality:** Ruff, Pytest, Pytest-Asyncio, Coverage.py
-
-### Frontend
-* **Framework:** Next.js 14 (App Router, Server Components & Dynamic SSR)
-* **Language:** TypeScript
-* **Styling:** Tailwind CSS, Lucide React, Custom Dark/Light Obsidian Palette
-* **Motion & Interactions:** Framer Motion, Lenis Smooth Scroll
-* **Data Visualization:** Recharts (Area charts, Bar graphs, Radar maps)
-* **Export Utilities:** `jsPDF` for verified regulatory PDF memos
-
----
-
-## 4. API Endpoints Reference
+## API Reference
 
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| `GET` | `/api/records` | Query enforcement records with full-text search, penalty slabs (`0`, `thousands`, `lakhs`, `crores`), date ranges, state/jurisdiction, and sorting. |
-| `GET` | `/api/records/{id}` | Retrieve complete regulatory dossier with extracted entities, regulations, raw metadata, and SHA-256 hash. |
-| `GET` | `/api/entities` | List tracked corporate noticees and individuals with order count and penalty exposure. |
-| `GET` | `/api/entities/{id}` | Get detailed entity dossier with risk exposure score and chronological order timeline. |
-| `GET` | `/api/analytics/overview` | Fetch aggregate statistics (total penalties, order count, unique entities, top noticees). |
-| `GET` | `/api/analytics/trends` | Monthly volume and penalty enforcement velocity. |
-| `GET` | `/api/analytics/duplicates` | Identify near-duplicate and companion orders using multi-factor fuzzy similarity. |
-| `GET` | `/api/jobs` | View crawler run history, execution status, and audit metrics. |
-| `POST` | `/api/jobs/sync` | Trigger an on-demand registry crawl (incremental or full sync). |
-| `POST` | `/api/ai/synthesize` | Generate structured AI risk analysis and legal findings brief via Gemini. |
+| `GET` | `/api/records` | Search with full-text queries, penalty slabs, date ranges, jurisdiction, and sorting |
+| `GET` | `/api/records/{id}` | Full regulatory dossier with entities, regulations, metadata, and SHA-256 hash |
+| `GET` | `/api/entities` | List tracked noticees with order count and penalty exposure |
+| `GET` | `/api/entities/{id}` | Detailed entity dossier with risk score and chronological timeline |
+| `GET` | `/api/analytics/overview` | Aggregate stats — total penalties, order count, unique entities |
+| `GET` | `/api/analytics/trends` | Monthly enforcement volume and penalty velocity |
+| `GET` | `/api/analytics/duplicates` | Near-duplicate detection via multi-factor fuzzy similarity |
+| `GET` | `/api/jobs` | Crawler run history, execution status, audit metrics |
+| `POST` | `/api/jobs/sync` | Trigger on-demand registry crawl (incremental or full) |
+| `POST` | `/api/ai/synthesize` | Generate AI risk analysis and legal findings brief via Gemini |
+
+> **Interactive docs:** [krio-lexgov-api.onrender.com/docs](https://krio-lexgov-api.onrender.com/docs)
 
 ---
 
-## 5. Local Quickstart
+## Quickstart
 
 ### Prerequisites
-* Python 3.12+
-* Node.js 18+ and npm
-* PostgreSQL 16+ (or Docker)
 
-### Option A: Docker Compose (All-in-One)
+- Python 3.12+
+- Node.js 18+ and npm
+- PostgreSQL 16+ (or Docker)
+
+### Docker Compose
+
 ```bash
-# Clone the repository
 git clone https://github.com/ReturnKartikey/krio-lexgov.git
 cd krio-lexgov
-
-# Configure environment
 cp .env.example .env
-
-# Run stack
 docker compose up --build
 ```
-* Web Dashboard: `http://localhost:3000`
-* FastAPI Backend: `http://localhost:8000`
-* Swagger API Docs: `http://localhost:8000/docs`
 
----
+| Service | URL |
+| :--- | :--- |
+| Web App | `http://localhost:3000` |
+| API | `http://localhost:8000` |
+| Swagger | `http://localhost:8000/docs` |
 
-### Option B: Native Setup
+### Manual Setup
 
-#### 1. Backend Setup
 ```bash
+# Backend
 cd backend
-
-# Create and activate virtual environment
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
+source venv/bin/activate        # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-
-# Run migrations
 alembic upgrade head
-
-# Start development server
 uvicorn app.main:app --reload --port 8000
-```
 
-#### 2. Frontend Setup
-```bash
+# Frontend (in a separate terminal)
 cd frontend
-
-# Install dependencies
 npm install
-
-# Start Next.js development server
 npm run dev
 ```
-Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-## 6. Testing & CI Verification
+## Testing & CI
 
 ```bash
-# Backend tests & code coverage
+# Backend — tests, coverage, and linting
 pytest backend/tests -v --cov=backend/app --cov-report=term-missing
-
-# Backend linting with Ruff
 ruff check backend/app --config backend/pyproject.toml
 
-# Frontend build & type check
+# Frontend — type check and production build
 cd frontend
+npx tsc --noEmit
 npm run build
 ```
 
----
-
-## 7. Compliance, Security & Provenance
-
-* **100% Public Provenance:** Indexes exclusively public, officially published regulatory filings from `sebi.gov.in`.
-* **Zero Broken Links:** All records maintain verified HTTP 200 URLs directly back to the government registry.
-* **Cryptographic Immutability:** SHA-256 digests ensure raw documents can be independently verified against original SEBI publications.
-* **Polite Crawling:** Adheres to `robots.txt` policies, implements rate limiting, and identifies crawler agents cleanly.
+CI runs automatically on every pull request via GitHub Actions — lint, type check, test, and Docker image build must all pass before merge.
 
 ---
 
-## 8. License
+## Live Deployments
 
-Distributed under the **MIT License**. See `LICENSE` for details.
+| Surface | URL |
+| :--- | :--- |
+| **Web Application** | [krio-rust.vercel.app](https://krio-rust.vercel.app) |
+| **Explorer** | [krio-rust.vercel.app/explorer](https://krio-rust.vercel.app/explorer) |
+| **Analytics** | [krio-rust.vercel.app/analytics](https://krio-rust.vercel.app/analytics) |
+| **Ingestion Jobs** | [krio-rust.vercel.app/jobs](https://krio-rust.vercel.app/jobs) |
+| **Swagger (OpenAPI)** | [krio-lexgov-api.onrender.com/docs](https://krio-lexgov-api.onrender.com/docs) |
+| **ReDoc** | [krio-lexgov-api.onrender.com/redoc](https://krio-lexgov-api.onrender.com/redoc) |
 
+---
+
+## Compliance & Provenance
+
+- **100% Public Data** — Indexes exclusively official, publicly published regulatory filings from `sebi.gov.in`.
+- **Verified Source Links** — Every record maintains an HTTP 200 URL directly back to the SEBI portal.
+- **Cryptographic Integrity** — SHA-256 digests allow independent verification against original publications.
+- **Polite Crawling** — Adheres to `robots.txt`, enforces rate limiting, and transparently identifies the crawler.
+
+---
+
+## License
+
+Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for details.
