@@ -19,13 +19,16 @@ import { MagneticButton } from "@/components/motion/MagneticButton";
 import { motion, AnimatePresence } from "framer-motion";
 import { JobsTableSkeleton, MobileTableRowSkeleton } from "@/components/common/Skeleton";
 import { toast } from "@/lib/toast";
-import { getJobs, triggerSyncJob } from "@/lib/api";
+import { getJobs, triggerSyncJob, getCached } from "@/lib/api";
 import { IngestionRunItem } from "@/lib/types";
 import { formatDate, formatRelativeTime } from "@/lib/utils";
 
 export default function JobsPage() {
-  const [jobs, setJobs] = useState<IngestionRunItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const initialJobs = getCached<{ data: IngestionRunItem[] }>("/api/jobs?page_size=20")?.data
+    || getCached<{ data: IngestionRunItem[] }>("/api/jobs")?.data;
+
+  const [jobs, setJobs] = useState<IngestionRunItem[]>(() => initialJobs || []);
+  const [loading, setLoading] = useState(() => !initialJobs || initialJobs.length === 0);
   const [isSyncing, setIsSyncing] = useState(false);
   const [expandedJobId, setExpandedJobId] = useState<string | null>(null);
 

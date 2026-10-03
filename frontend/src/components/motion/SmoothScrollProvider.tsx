@@ -1,57 +1,36 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import { usePathname } from "next/navigation";
-import Lenis from "lenis";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { prefersReducedMotion } from "@/lib/motion";
 
+/**
+ * Native 1:1 Instant Response Scroll Provider (Bloomberg Forensic Engine)
+ *
+ * Relies on the browser's hardware 1:1 scroll engine with zero virtual scroll interception.
+ * - Zero input latency on mouse wheel clicks and steps.
+ * - Windows Precision and macOS Trackpads use their native physical momentum.
+ * - Tables, dockets, and filters feel hyper-snappy, forensic, and clinical.
+ * - GSAP ScrollTrigger and layout observers sync directly with hardware compositor frames.
+ */
 export function SmoothScrollProvider({ children }: { children: React.ReactNode }) {
-  const lenisRef = useRef<Lenis | null>(null);
   const pathname = usePathname();
 
   useEffect(() => {
-    if (prefersReducedMotion()) return;
-
+    // Register GSAP ScrollTrigger with the browser's native 1:1 hardware scroll engine
     gsap.registerPlugin(ScrollTrigger);
 
-    const lenis = new Lenis({
-      duration: 1.15,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Silky Apple/Linear exponential ease-out
-      wheelMultiplier: 1.05,
-      touchMultiplier: 1.2,
-      smoothWheel: true,
-      syncTouch: false,
-      infinite: false,
-    });
-
-    lenisRef.current = lenis;
-
-    // Synchronize Lenis with ScrollTrigger
-    lenis.on("scroll", ScrollTrigger.update);
-
-    const tickerCallback = (time: number) => {
-      lenis.raf(time * 1000);
-    };
-
-    gsap.ticker.add(tickerCallback);
-    gsap.ticker.lagSmoothing(0);
-
-    return () => {
-      gsap.ticker.remove(tickerCallback);
-      lenis.destroy();
-      lenisRef.current = null;
-    };
+    // Initial trigger geometry synchronization
+    ScrollTrigger.refresh();
   }, []);
 
-  // Guarantee clean, consistent top landing on route change
+  // Guarantee clean, instant 1:1 top landing and trigger refresh on route change
   useEffect(() => {
-    if (lenisRef.current) {
-      lenisRef.current.scrollTo(0, { immediate: true });
-    }
     window.scrollTo(0, 0);
+    ScrollTrigger.refresh();
   }, [pathname]);
 
   return <>{children}</>;
 }
+

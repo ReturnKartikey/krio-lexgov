@@ -32,6 +32,7 @@ import {
   getGeoDistribution,
   getDuplicates,
   getProcessingStats,
+  getCached,
 } from "@/lib/api";
 import {
   TrendsResponse,
@@ -46,24 +47,39 @@ import { RollingNumber } from "@/components/ui/RollingNumber";
 
 export default function AnalyticsPage() {
   const [interval, setInterval] = useState<"week" | "month">("month");
+  const [hasUserToggledInterval, setHasUserToggledInterval] = useState(false);
   const [daysWindow, setDaysWindow] = useState<number>(90);
 
-  const [trends, setTrends] = useState<TrendsResponse | null>(null);
-  const [dailyData, setDailyData] = useState<DailyCount[]>([]);
-  const [topEntities, setTopEntities] = useState<EntityFrequencyItem[]>([]);
-  const [geoData, setGeoData] = useState<GeoDistributionItem[]>([]);
-  const [duplicates, setDuplicates] = useState<DuplicateItemResponse[]>([]);
-  const [processingStats, setProcessingStats] = useState<ProcessingStatsResponse | null>(null);
+  // Instant SWR Cache Hydration
+  const cachedTrends = getCached<TrendsResponse>(`/api/analytics/trends?interval=${interval}`);
+  const cachedDaily = getCached<DailyCount[]>(`/api/analytics/records-per-day?days=${daysWindow}`);
+  const cachedEntities = getCached<EntityFrequencyItem[]>("/api/analytics/entity-frequency?top=10");
+  const cachedGeo = getCached<GeoDistributionItem[]>("/api/analytics/geo-distribution");
+  const cachedDups = getCached<DuplicateItemResponse[]>("/api/analytics/duplicates?threshold=0.6");
+  const cachedStats = getCached<ProcessingStatsResponse>("/api/analytics/processing-stats");
+
+  const hasCachedData = Boolean(cachedTrends && cachedDaily);
+
+  const [trends, setTrends] = useState<TrendsResponse | null>(() => cachedTrends);
+  const [dailyData, setDailyData] = useState<DailyCount[]>(() => cachedDaily || []);
+  const [topEntities, setTopEntities] = useState<EntityFrequencyItem[]>(() => cachedEntities || []);
+  const [geoData, setGeoData] = useState<GeoDistributionItem[]>(() => cachedGeo || []);
+  const [duplicates, setDuplicates] = useState<DuplicateItemResponse[]>(() => cachedDups || []);
+  const [processingStats, setProcessingStats] = useState<ProcessingStatsResponse | null>(() => cachedStats);
   const [geoScope, setGeoScope] = useState<"head_office" | "regional">("head_office");
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(() => !hasCachedData);
 
   useEffect(() => {
     document.title = "Analytics & Trends | KRIO.LEXGOV";
   }, []);
 
   useEffect(() => {
+    let isCurrent = true;
     async function fetchAllAnalytics() {
-      setLoading(true);
+      // Only show skeleton if we have no cached data to display
+      if (!trends || dailyData.length === 0) {
+        setLoading(true);
+      }
       try {
         const [
           trendsRes,
@@ -81,20 +97,27 @@ export default function AnalyticsPage() {
           getProcessingStats(),
         ]);
 
-        setTrends(trendsRes);
-        setDailyData(dailyRes);
-        setTopEntities(entitiesRes);
-        setGeoData(geoRes);
-        setDuplicates(dupRes);
-        setProcessingStats(statsRes);
+        if (isCurrent) {
+          setTrends(trendsRes);
+          setDailyData(dailyRes);
+          setTopEntities(entitiesRes);
+          setGeoData(geoRes);
+          setDuplicates(dupRes);
+          setProcessingStats(statsRes);
+        }
       } catch (err) {
         console.error("Failed to load analytics data:", err);
       } finally {
-        setLoading(false);
+        if (isCurrent) {
+          setLoading(false);
+        }
       }
     }
 
     fetchAllAnalytics();
+    return () => {
+      isCurrent = false;
+    };
   }, [interval, daysWindow]);
 
   const CustomDailyTooltip = ({ active, payload, label }: any) => {
@@ -129,15 +152,22 @@ export default function AnalyticsPage() {
         <div className="flex items-center gap-2">
           <div className="flex items-center p-1 rounded-full bg-white border border-brivo-navy/15 shadow-sm">
             <button
-              onClick={() => setInterval("week")}
-              className="relative px-3.5 py-1 rounded-full text-xs font-mono font-medium transition-colors select-none"
+              onClick={() => {
+                setHasUserToggledInterval(true);
+                setInterval("week");
+              }}
+              className="relative px-3.5 py-1 rounded-full text-xs font-mono font-medium transition-colors select-none cursor-pointer"
             >
               {interval === "week" && (
-                <motion.div
-                  layoutId="analyticsIntervalPill"
-                  className="absolute inset-0 rounded-full bg-brivo-navy shadow-sm"
-                  transition={{ type: "spring", stiffness: 450, damping: 35 }}
-                />
+                hasUserToggledInterval ? (
+                  <motion.div
+                    layoutId="analyticsIntervalPill"
+                    className="absolute inset-0 rounded-full bg-brivo-navy shadow-sm"
+                    transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                  />
+                ) : (
+                  <div className="absolute inset-0 rounded-full bg-brivo-navy shadow-sm" />
+                )
               )}
               <span
                 className={`relative z-10 transition-colors ${
@@ -150,15 +180,22 @@ export default function AnalyticsPage() {
               </span>
             </button>
             <button
-              onClick={() => setInterval("month")}
-              className="relative px-3.5 py-1 rounded-full text-xs font-mono font-medium transition-colors select-none"
+              onClick={() => {
+                setHasUserToggledInterval(true);
+                setInterval("month");
+              }}
+              className="relative px-3.5 py-1 rounded-full text-xs font-mono font-medium transition-colors select-none cursor-pointer"
             >
               {interval === "month" && (
-                <motion.div
-                  layoutId="analyticsIntervalPill"
-                  className="absolute inset-0 rounded-full bg-brivo-navy shadow-sm"
-                  transition={{ type: "spring", stiffness: 450, damping: 35 }}
-                />
+                hasUserToggledInterval ? (
+                  <motion.div
+                    layoutId="analyticsIntervalPill"
+                    className="absolute inset-0 rounded-full bg-brivo-navy shadow-sm"
+                    transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                  />
+                ) : (
+                  <div className="absolute inset-0 rounded-full bg-brivo-navy shadow-sm" />
+                )
               )}
               <span
                 className={`relative z-10 transition-colors ${
@@ -239,14 +276,9 @@ export default function AnalyticsPage() {
                   </span>
                 </>
               ) : (
-                <>
-                  <span className="text-lg sm:text-xl font-bold font-mono text-brivo-navy">
-                    Non-Monetary
-                  </span>
-                  <span className="text-xs font-mono text-brivo-slate">
-                    Directional Orders Active
-                  </span>
-                </>
+                <span className="text-lg sm:text-xl font-bold font-mono text-brivo-navy">
+                  Non-Monetary
+                </span>
               )}
             </div>
             <p className="text-[0.65rem] font-mono text-brivo-slate">
@@ -319,19 +351,19 @@ export default function AnalyticsPage() {
             <AreaChart data={dailyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="orderGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#00c2d1" stopOpacity={0.4} />
-                  <stop offset="95%" stopColor="#00c2d1" stopOpacity={0.0} />
+                  <stop offset="5%" stopColor="#2563eb" stopOpacity={0.25} />
+                  <stop offset="95%" stopColor="#2563eb" stopOpacity={0.0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(26,35,51,0.06)" />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(24,24,27,0.06)" />
               <XAxis
                 dataKey="date"
                 tickFormatter={(val) => formatDate(val)}
-                stroke="#98a2b3"
+                stroke="#71717a"
                 tick={{ fontSize: 10, fontFamily: "monospace" }}
               />
               <YAxis
-                stroke="#98a2b3"
+                stroke="#71717a"
                 tick={{ fontSize: 10, fontFamily: "monospace" }}
                 allowDecimals={false}
               />
@@ -339,7 +371,7 @@ export default function AnalyticsPage() {
               <Area
                 type="monotone"
                 dataKey="count"
-                stroke="#00c2d1"
+                stroke="#2563eb"
                 strokeWidth={2}
                 fillOpacity={1}
                 fill="url(#orderGrad)"

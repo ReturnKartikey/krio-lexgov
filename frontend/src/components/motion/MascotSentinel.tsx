@@ -190,28 +190,28 @@ export function MascotSentinel() {
             <g ref={leftWingRef}>
               <path
                 d="M20 34 C12 40 10 54 22 62 C24 54 22 42 22 34 Z"
-                fill="#1a2333"
+                fill="#090d16"
                 stroke="rgba(255,255,255,0.2)"
                 strokeWidth="1.2"
               />
-              <path d="M14 44 C18 48 20 54 22 58" stroke="#00c2d1" strokeWidth="1.2" strokeLinecap="round" />
+              <path d="M14 44 C18 48 20 54 22 58" stroke="#2563eb" strokeWidth="1.2" strokeLinecap="round" />
             </g>
 
             {/* Right Articulated Wing (Waving) */}
             <g ref={rightWingRef}>
               <path
                 d="M68 34 C76 40 78 54 66 62 C64 54 66 42 66 34 Z"
-                fill="#1a2333"
+                fill="#090d16"
                 stroke="rgba(255,255,255,0.2)"
                 strokeWidth="1.2"
               />
-              <path d="M74 44 C70 48 68 54 66 58" stroke="#00c2d1" strokeWidth="1.2" strokeLinecap="round" />
+              <path d="M74 44 C70 48 68 54 66 58" stroke="#2563eb" strokeWidth="1.2" strokeLinecap="round" />
             </g>
 
             {/* Main Torso Shield / Armor */}
             <path
               d="M44 10 L66 22 V48 C66 64 44 78 44 78 C44 78 22 64 22 48 V22 L44 10Z"
-              fill="#1a2333"
+              fill="#090d16"
               stroke="rgba(255,255,255,0.2)"
               strokeWidth="2"
             />
@@ -219,44 +219,44 @@ export function MascotSentinel() {
             {/* Geometric Crown / Ear Crests */}
             <path
               d="M34 14 L44 8 L54 14"
-              stroke="#00c2d1"
+              stroke="#2563eb"
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
-            <polygon points="44,5 41,11 47,11" fill="#00c2d1" />
+            <polygon points="44,5 41,11 47,11" fill="#2563eb" />
 
             {/* Left Eye Aperture */}
-            <circle cx="34" cy="36" r="8" fill="#faf8fc" />
-            <circle ref={pupilLeftRef} cx="34" cy="36" r="3.8" fill="#0b1020" />
-            <circle cx="35.5" cy="34.5" r="1.2" fill="#00c2d1" />
+            <circle cx="34" cy="36" r="8" fill="#f8fafc" />
+            <circle ref={pupilLeftRef} cx="34" cy="36" r="3.8" fill="#030712" />
+            <circle cx="35.5" cy="34.5" r="1.2" fill="#2563eb" />
 
             {/* Right Eye Aperture */}
-            <circle cx="54" cy="36" r="8" fill="#faf8fc" />
-            <circle ref={pupilRightRef} cx="54" cy="36" r="3.8" fill="#0b1020" />
-            <circle cx="55.5" cy="34.5" r="1.2" fill="#00c2d1" />
+            <circle cx="54" cy="36" r="8" fill="#f8fafc" />
+            <circle ref={pupilRightRef} cx="54" cy="36" r="3.8" fill="#030712" />
+            <circle cx="55.5" cy="34.5" r="1.2" fill="#2563eb" />
 
-            {/* Cyan Monocle on Left Eye */}
+            {/* Cobalt Monocle on Left Eye */}
             <g ref={monocleRef}>
               <circle
                 cx="34"
                 cy="36"
                 r="9.5"
-                stroke="#00c2d1"
+                stroke="#2563eb"
                 strokeWidth="1.8"
                 fill="none"
               />
-              <path d="M43.5 36 L47 36" stroke="#00c2d1" strokeWidth="1.5" />
+              <path d="M43.5 36 L47 36" stroke="#2563eb" strokeWidth="1.5" />
             </g>
 
             {/* Beak / Prism */}
-            <polygon points="44,42 40,48 48,48" fill="#00c2d1" />
+            <polygon points="44,42 40,48 48,48" fill="#2563eb" />
           </g>
 
           <defs>
             <linearGradient id="scanGradient" x1="34" y1="36" x2="34" y2="68" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#00c2d1" stopOpacity="0.6" />
-              <stop offset="1" stopColor="#00c2d1" stopOpacity="0" />
+              <stop stopColor="#2563eb" stopOpacity="0.6" />
+              <stop offset="1" stopColor="#2563eb" stopOpacity="0" />
             </linearGradient>
           </defs>
         </svg>

@@ -29,8 +29,8 @@ import { IntelligenceModal } from "@/components/ai/IntelligenceModal";
 import { QuickLookModal } from "@/components/motion/QuickLookModal";
 import { OrderCardSkeleton, TableRowSkeleton, MobileTableRowSkeleton } from "@/components/common/Skeleton";
 import { toast } from "@/lib/toast";
-import { getRecords } from "@/lib/api";
-import { RecordListItem, PaginationMeta } from "@/lib/types";
+import { getRecords, getCached } from "@/lib/api";
+import { RecordListItem, PaginationMeta, EnvelopeResponse } from "@/lib/types";
 import { formatINR, formatDate, truncateText, formatCleanSummary } from "@/lib/utils";
 import { RollingNumber } from "@/components/ui/RollingNumber";
 
@@ -104,15 +104,22 @@ function ExplorerContent() {
   const [page, setPage] = useState(pageParam);
   const [pageSize, setPageSize] = useState(pageSizeParam);
   const [viewMode, setViewMode] = useState<"table" | "cards">("cards");
+  const [hasUserToggledView, setHasUserToggledView] = useState(false);
 
-  const [records, setRecords] = useState<RecordListItem[]>([]);
-  const [meta, setMeta] = useState<PaginationMeta>({
-    total: 0,
+  // Instant SWR Cache Hydration
+  const cachedEnvelope = getCached<EnvelopeResponse<RecordListItem[]>>(
+    `/api/records?page=${pageParam}&page_size=${pageSizeParam}`
+  ) || getCached<EnvelopeResponse<RecordListItem[]>>("/api/records?page=1&page_size=10")
+    || getCached<EnvelopeResponse<RecordListItem[]>>("/api/records?page=1&page_size=20");
+
+  const [records, setRecords] = useState<RecordListItem[]>(() => cachedEnvelope?.data || []);
+  const [meta, setMeta] = useState<PaginationMeta>(() => cachedEnvelope?.meta || {
+    total: cachedEnvelope?.data?.length || 0,
     page: 1,
     page_size: pageSizeParam,
     total_pages: 1,
   });
-  const [initialLoading, setInitialLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(() => !cachedEnvelope?.data?.length);
   const [isFetching, setIsFetching] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
@@ -300,35 +307,49 @@ function ExplorerContent() {
 
           <div className="flex items-center border border-brivo-navy/15 rounded-lg bg-white p-0.5 shadow-sm relative">
             <button
-              onClick={() => setViewMode("cards")}
+              onClick={() => {
+                setHasUserToggledView(true);
+                setViewMode("cards");
+              }}
               className={`relative px-2.5 py-1.5 rounded-md text-xs font-mono transition-colors flex items-center gap-1.5 cursor-pointer ${
                 viewMode === "cards" ? "text-brivo-paper font-medium" : "text-brivo-slate hover:text-brivo-navy"
               }`}
               title="Card View"
             >
               {viewMode === "cards" && (
-                <motion.div
-                  layoutId="activeViewPill"
-                  className="absolute inset-0 bg-brivo-navy rounded-md shadow-xs"
-                  transition={{ type: "spring", bounce: 0.15, duration: 0.35 }}
-                />
+                hasUserToggledView ? (
+                  <motion.div
+                    layoutId="activeViewPill"
+                    className="absolute inset-0 bg-brivo-navy rounded-md shadow-xs"
+                    transition={{ type: "spring", bounce: 0.15, duration: 0.35 }}
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-brivo-navy rounded-md shadow-xs" />
+                )
               )}
               <LayoutGrid className="w-3.5 h-3.5 relative z-10" />
               <span className="relative z-10 text-[0.7rem]">Cards</span>
             </button>
             <button
-              onClick={() => setViewMode("table")}
+              onClick={() => {
+                setHasUserToggledView(true);
+                setViewMode("table");
+              }}
               className={`relative px-2.5 py-1.5 rounded-md text-xs font-mono transition-colors flex items-center gap-1.5 cursor-pointer ${
                 viewMode === "table" ? "text-brivo-paper font-medium" : "text-brivo-slate hover:text-brivo-navy"
               }`}
               title="Table View"
             >
               {viewMode === "table" && (
-                <motion.div
-                  layoutId="activeViewPill"
-                  className="absolute inset-0 bg-brivo-navy rounded-md shadow-xs"
-                  transition={{ type: "spring", bounce: 0.15, duration: 0.35 }}
-                />
+                hasUserToggledView ? (
+                  <motion.div
+                    layoutId="activeViewPill"
+                    className="absolute inset-0 bg-brivo-navy rounded-md shadow-xs"
+                    transition={{ type: "spring", bounce: 0.15, duration: 0.35 }}
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-brivo-navy rounded-md shadow-xs" />
+                )
               )}
               <ListIcon className="w-3.5 h-3.5 relative z-10" />
               <span className="relative z-10 text-[0.7rem]">Table</span>
