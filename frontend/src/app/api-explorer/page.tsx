@@ -10,7 +10,6 @@ import {
   Server,
   Zap,
 } from "lucide-react";
-import { MicroLabel } from "@/components/common/MicroLabel";
 import { JsonViewer } from "@/components/common/JsonViewer";
 import { getApiBaseUrl } from "@/lib/api";
 import { toast } from "@/lib/toast";
@@ -226,7 +225,6 @@ export default function ApiExplorerPage() {
       {/* Header */}
       <div className="border-b border-brivo-navy/10 pb-6">
         <div className="space-y-2 max-w-3xl">
-          <MicroLabel number="N°05" label="DEVELOPER PLATFORM" />
           <h1 className="text-2xl sm:text-3xl font-light tracking-tight text-brivo-navy font-sans">
             Interactive <span className="font-serif italic font-normal">API Console</span>
           </h1>

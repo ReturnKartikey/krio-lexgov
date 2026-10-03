@@ -12,7 +12,6 @@ import {
   ChevronRight,
   User,
 } from "lucide-react";
-import { MicroLabel } from "@/components/common/MicroLabel";
 import { getEntityDetail } from "@/lib/api";
 import { formatINR, formatDate } from "@/lib/utils";
 
@@ -65,7 +64,6 @@ export default async function EntityDetailPage({ params }: PageProps) {
       {/* Header */}
       <div className="space-y-3">
         <div className="flex items-center gap-2">
-          <MicroLabel number="N°03" label="ENTITY PROFILE" />
           <span className="font-mono text-[0.65rem] px-2 py-0.5 rounded bg-brivo-mist border border-brivo-cyan/30 text-brivo-navy uppercase font-medium">
             {entity.entity_type}
           </span>

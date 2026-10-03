@@ -22,7 +22,6 @@ import {
   Download,
   Loader2,
 } from "lucide-react";
-import { MicroLabel } from "@/components/common/MicroLabel";
 import { AIPaneSkeleton } from "@/components/common/Skeleton";
 import { toast } from "@/lib/toast";
 import { synthesizeIntelligence } from "@/lib/api";
@@ -348,7 +347,6 @@ ${data.compliance_takeaways.join("\n")}
                     {/* Top Headline & Risk Badge */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 pb-3 sm:pb-4 border-b border-brivo-navy/10">
                       <div className="space-y-1">
-                        <MicroLabel number="N°01" label="SYNTHESIS REPORT" />
                         <h2 className="text-base sm:text-xl lg:text-2xl font-light text-brivo-navy font-sans tracking-tight leading-snug">
                           {mode === "entity_exposure"
                             ? "Noticee & Promoter Cross-Matter Liability Synthesis"
