@@ -21,7 +21,7 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U postgres -d opengov_db"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -55,18 +55,32 @@ jobs:
         run: |
           ruff check backend/app --config backend/pyproject.toml
 
+      - name: Verify PostgreSQL Readiness
+        run: |
+          python -c "
+          import socket, time
+          for i in range(15):
+              try:
+                  with socket.create_connection(('127.0.0.1', 5432), timeout=2):
+                      print('PostgreSQL port 5432 is open and accepting connections')
+                      break
+              except Exception as e:
+                  print(f'Waiting for PostgreSQL (attempt {i+1}/15): {e}')
+                  time.sleep(2)
+          "
+
       - name: Run Alembic Migrations
         env:
-          DATABASE_URL: postgresql+asyncpg://postgres:ci_runner_db_pwd@localhost:5432/opengov_db
-          SYNC_DATABASE_URL: postgresql+psycopg://postgres:ci_runner_db_pwd@localhost:5432/opengov_db
+          DATABASE_URL: postgresql+asyncpg://postgres:ci_runner_db_pwd@127.0.0.1:5432/opengov_db
+          SYNC_DATABASE_URL: postgresql+psycopg://postgres:ci_runner_db_pwd@127.0.0.1:5432/opengov_db
         run: |
           cd backend && alembic upgrade head
 
       - name: Run Pytest Suite with Coverage
         env:
-          DATABASE_URL: postgresql+asyncpg://postgres:ci_runner_db_pwd@localhost:5432/opengov_db
-          SYNC_DATABASE_URL: postgresql+psycopg://postgres:ci_runner_db_pwd@localhost:5432/opengov_db
-          REDIS_URL: redis://localhost:6379/0
+          DATABASE_URL: postgresql+asyncpg://postgres:ci_runner_db_pwd@127.0.0.1:5432/opengov_db
+          SYNC_DATABASE_URL: postgresql+psycopg://postgres:ci_runner_db_pwd@127.0.0.1:5432/opengov_db
+          REDIS_URL: redis://127.0.0.1:6379/0
           ENVIRONMENT: test
         run: |
           pytest backend/tests -v --cov=backend/app --cov-config=backend/pyproject.toml --cov-report=xml --cov-report=term-missing --cov-fail-under=50
