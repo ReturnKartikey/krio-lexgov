@@ -14,7 +14,6 @@ import {
   Terminal,
   Activity,
 } from "lucide-react";
-import { MagneticButton } from "@/components/motion/MagneticButton";
 import { motion, AnimatePresence } from "framer-motion";
 import { JobsTableSkeleton, MobileTableRowSkeleton } from "@/components/common/Skeleton";
 import { toast } from "@/lib/toast";

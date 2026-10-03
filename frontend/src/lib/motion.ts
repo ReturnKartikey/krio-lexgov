@@ -67,47 +67,13 @@ export function animateHeroHeadline(
 }
 
 /**
- * Create a magnetic pull effect towards the mouse cursor
+ * Create a magnetic pull effect towards the mouse cursor (disabled per user preference - buttons stay stable on hover)
  */
 export function createMagneticEffect(
-  element: HTMLElement,
-  options?: { strength?: number; textPull?: boolean }
+  _element: HTMLElement,
+  _options?: { strength?: number; textPull?: boolean }
 ) {
-  if (prefersReducedMotion()) return () => {};
-
-  const strength = options?.strength ?? 0.35;
-  const maxMove = 10; // Max 10px translate to maintain elegance
-
-  const xTo = gsap.quickTo(element, "x", { duration: 0.6, ease: "power3.out" });
-  const yTo = gsap.quickTo(element, "y", { duration: 0.6, ease: "power3.out" });
-
-  const handleMouseMove = (e: MouseEvent) => {
-    const rect = element.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-
-    const deltaX = (e.clientX - centerX) * strength;
-    const deltaY = (e.clientY - centerY) * strength;
-
-    const clampedX = Math.max(-maxMove, Math.min(maxMove, deltaX));
-    const clampedY = Math.max(-maxMove, Math.min(maxMove, deltaY));
-
-    xTo(clampedX);
-    yTo(clampedY);
-  };
-
-  const handleMouseLeave = () => {
-    xTo(0);
-    yTo(0);
-  };
-
-  element.addEventListener("mousemove", handleMouseMove);
-  element.addEventListener("mouseleave", handleMouseLeave);
-
-  return () => {
-    element.removeEventListener("mousemove", handleMouseMove);
-    element.removeEventListener("mouseleave", handleMouseLeave);
-  };
+  return () => {};
 }
 
 /**
