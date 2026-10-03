@@ -270,46 +270,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 2. REGULATORY DATA SOURCE BADGES */}
-      <section className="w-full border-y border-brivo-navy/10 bg-white py-8 px-4 sm:px-6 lg:px-8 scroll-reveal-section">
-        <div className="max-w-7xl mx-auto space-y-4">
-          <div className="flex items-center justify-between pb-2 border-b border-brivo-navy/5">
-            <span className="text-[0.68rem] font-mono tracking-[0.2em] uppercase text-brivo-slate">
-              PUBLIC REGULATORY ARCHIVE // OFFICIAL INDIAN REGULATORY DISCLOSURES
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 pt-2 text-xs font-mono">
-            <div className="scroll-reveal-item p-4 rounded-xl border border-emerald-500/30 bg-emerald-50/20 flex flex-col justify-between hover:border-emerald-500/50 transition-all shadow-xs">
-              <span className="text-[0.68rem] text-emerald-800 font-semibold uppercase">Primary Source</span>
-              <span className="text-sm font-semibold text-brivo-navy mt-1">SEBI Enforcement Orders</span>
-              <span className="text-[0.68rem] text-emerald-700 font-medium mt-2 flex items-center gap-1">
-                <span>Ingested & Verified</span>
-              </span>
-            </div>
-
-            <div className="scroll-reveal-item p-4 rounded-xl border border-brivo-navy/10 bg-brivo-paper/40 flex flex-col justify-between hover:border-brivo-navy/25 transition-all opacity-85">
-              <span className="text-[0.68rem] text-brivo-slate uppercase">Exchange Filings</span>
-              <span className="text-sm font-semibold text-brivo-navy mt-1">BSE Corporate Disclosures</span>
-              <span className="text-[0.68rem] text-brivo-slate font-normal mt-2">Planned (Q4 Roadmap)</span>
-            </div>
-
-            <div className="scroll-reveal-item p-4 rounded-xl border border-brivo-navy/10 bg-brivo-paper/40 flex flex-col justify-between hover:border-brivo-navy/25 transition-all opacity-85">
-              <span className="text-[0.68rem] text-brivo-slate uppercase">Market Surveillance</span>
-              <span className="text-sm font-semibold text-brivo-navy mt-1">NSE Member Bulletins</span>
-              <span className="text-[0.68rem] text-brivo-slate font-normal mt-2">Planned (Q4 Roadmap)</span>
-            </div>
-
-            <div className="scroll-reveal-item p-4 rounded-xl border border-brivo-navy/10 bg-brivo-paper/40 flex flex-col justify-between hover:border-brivo-navy/25 transition-all opacity-85">
-              <span className="text-[0.68rem] text-brivo-slate uppercase">Corporate Filings</span>
-              <span className="text-sm font-semibold text-brivo-navy mt-1">MCA-21 RoC Orders</span>
-              <span className="text-[0.68rem] text-brivo-slate font-normal mt-2">Planned (Q4 Roadmap)</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 3. EDITORIAL MANIFESTO SECTION */}
+      {/* 2. EDITORIAL MANIFESTO SECTION */}
       <section className="py-12 sm:py-14 lg:py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-10 sm:space-y-12 scroll-reveal-section">
         <div className="space-y-3 max-w-2xl">
           <MicroLabel number="N°02" label="THE OPERATING PRINCIPLE" />
@@ -380,7 +341,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 4. CORE ARCHITECTURE */}
+      {/* 3. CORE ARCHITECTURE */}
       <section className="py-12 sm:py-14 lg:py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-10 sm:space-y-12 border-t border-brivo-navy/10 scroll-reveal-section">
         <div className="space-y-3">
           <MicroLabel number="N°03" label="CORE ARCHITECTURE" />
@@ -431,7 +392,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 5. INTERACTIVE CASE DOSSIERS */}
+      {/* 4. INTERACTIVE CASE DOSSIERS */}
       <section className="py-12 sm:py-14 lg:py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-10 sm:space-y-12 border-t border-brivo-navy/10 scroll-reveal-section">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div className="space-y-3">
@@ -536,7 +497,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 6. LIVE ENFORCEMENT DISPATCH TABLE */}
+      {/* 5. LIVE ENFORCEMENT DISPATCH TABLE */}
       <section className="pt-12 sm:pt-14 lg:pt-16 pb-6 sm:pb-8 lg:pb-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-8 border-t border-brivo-navy/10 scroll-reveal-section">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div className="space-y-3">
