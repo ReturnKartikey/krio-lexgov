@@ -22,7 +22,6 @@ import {
   Eye,
   X,
 } from "lucide-react";
-import { MicroLabel } from "@/components/common/MicroLabel";
 import { HighlightedText } from "@/components/common/HighlightedText";
 import { CustomSelect, SelectOption } from "@/components/common/CustomSelect";
 import { IntelligenceModal } from "@/components/ai/IntelligenceModal";
@@ -290,7 +289,6 @@ function ExplorerContent() {
       {/* Top Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-brivo-navy/10 pb-6">
         <div className="space-y-2">
-          <MicroLabel number="N°02" label="SEBI REGULATORY DATABASE" />
           <h1 className="text-2xl sm:text-3xl font-light tracking-tight text-brivo-navy font-sans">
             Adjudication & Enforcement <span className="font-serif italic font-normal">Order Archive</span>
           </h1>

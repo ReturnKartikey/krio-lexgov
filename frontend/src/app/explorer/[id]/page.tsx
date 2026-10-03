@@ -16,7 +16,6 @@ import {
   AlertCircle,
   Copy,
 } from "lucide-react";
-import { MicroLabel } from "@/components/common/MicroLabel";
 import { JsonViewer } from "@/components/common/JsonViewer";
 import { SynthesizeButton } from "@/components/ai/SynthesizeButton";
 import { ExportPdfButton } from "@/components/common/ExportPdfButton";
@@ -78,7 +77,6 @@ export default async function RecordDetailPage({ params }: PageProps) {
 
       {/* Main Header */}
       <div className="space-y-3">
-        <MicroLabel number="N°01" label="REGULATORY DOSSIER" />
         <h1 className="text-xl sm:text-3xl lg:text-4xl font-light tracking-tight text-brivo-navy leading-tight font-sans">
           {record.title}
         </h1>

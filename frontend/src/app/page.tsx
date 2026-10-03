@@ -27,7 +27,6 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { MicroLabel } from "@/components/common/MicroLabel";
 import { IntelligenceModal } from "@/components/ai/IntelligenceModal";
 import { QuickLookModal } from "@/components/motion/QuickLookModal";
 import { MagneticButton } from "@/components/motion/MagneticButton";
@@ -221,10 +220,6 @@ export default function LandingPage() {
         </div>
 
         <div className="relative z-10 space-y-6 max-w-4xl">
-          <div>
-            <MicroLabel number="N°01" label="PUBLIC REGULATORY INTELLIGENCE" />
-          </div>
-
           <h1
             ref={heroHeadlineRef}
             className="text-3xl sm:text-5xl lg:text-7xl font-light tracking-[-0.035em] text-brivo-navy leading-[1.08] sm:leading-[1.06] font-sans"
@@ -273,7 +268,6 @@ export default function LandingPage() {
       {/* 2. EDITORIAL MANIFESTO SECTION */}
       <section className="py-12 sm:py-14 lg:py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-10 sm:space-y-12 scroll-reveal-section">
         <div className="space-y-3 max-w-2xl">
-          <MicroLabel number="N°02" label="THE OPERATING PRINCIPLE" />
           <h2
             ref={manifestoHeadingRef}
             className="text-3xl sm:text-4xl lg:text-5xl font-light tracking-[-0.025em] text-brivo-navy leading-[1.12] font-sans"
@@ -344,7 +338,6 @@ export default function LandingPage() {
       {/* 3. CORE ARCHITECTURE */}
       <section className="py-12 sm:py-14 lg:py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-10 sm:space-y-12 border-t border-brivo-navy/10 scroll-reveal-section">
         <div className="space-y-3">
-          <MicroLabel number="N°03" label="CORE ARCHITECTURE" />
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-light text-brivo-navy font-sans tracking-[-0.025em] leading-[1.12]">
             Engineered for{" "}
             <span className="font-serif italic font-normal editorial-interactive-italic">
@@ -396,7 +389,6 @@ export default function LandingPage() {
       <section className="py-12 sm:py-14 lg:py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-10 sm:space-y-12 border-t border-brivo-navy/10 scroll-reveal-section">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div className="space-y-3">
-            <MicroLabel number="N°04" label="INTERACTIVE CASE DOSSIERS" />
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-light text-brivo-navy font-sans tracking-[-0.025em] leading-[1.12]">
               Precision dossiers for{" "}
               <span className="font-serif italic font-normal editorial-interactive-italic">
@@ -501,7 +493,6 @@ export default function LandingPage() {
       <section className="pt-12 sm:pt-14 lg:pt-16 pb-6 sm:pb-8 lg:pb-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-8 border-t border-brivo-navy/10 scroll-reveal-section">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div className="space-y-3">
-            <MicroLabel number="N°05" label="LIVE ENFORCEMENT DISPATCH" />
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-light text-brivo-navy font-sans tracking-[-0.025em] leading-[1.12]">
               Live regulatory telemetry,{" "}
               <span className="font-serif italic font-normal editorial-interactive-italic">
@@ -651,11 +642,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 7. DEVELOPER & API PLATFORM WORKSHOP */}
+      {/* 6. DEVELOPER & API PLATFORM WORKSHOP */}
       <section className="pt-2 sm:pt-4 pb-12 sm:pb-14 lg:pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full scroll-reveal-section">
         <div className="p-8 sm:p-12 rounded-2xl bg-brivo-paper border border-brivo-navy/15 relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-8 shadow-xs">
           <div className="space-y-3 max-w-xl">
-            <MicroLabel number="N°06" label="DEVELOPER & API PLATFORM" />
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-light text-brivo-navy font-sans tracking-tight leading-snug">
               The workshop,{" "}
               <span className="font-serif italic font-normal editorial-interactive-italic">
@@ -687,10 +677,9 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 8. NAVIGATION INDEX */}
+      {/* 7. NAVIGATION INDEX */}
       <section className="py-12 sm:py-14 lg:py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-10 sm:space-y-12 border-t border-brivo-navy/10 scroll-reveal-section">
         <div className="space-y-3">
-          <MicroLabel number="N°07" label="NAVIGATION INDEX" />
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-light text-brivo-navy font-sans tracking-[-0.025em] leading-[1.12]">
             Where would you like to{" "}
             <span className="font-serif italic font-normal editorial-interactive-italic">

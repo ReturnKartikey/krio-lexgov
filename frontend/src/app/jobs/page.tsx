@@ -14,7 +14,6 @@ import {
   Terminal,
   Activity,
 } from "lucide-react";
-import { MicroLabel } from "@/components/common/MicroLabel";
 import { MagneticButton } from "@/components/motion/MagneticButton";
 import { motion, AnimatePresence } from "framer-motion";
 import { JobsTableSkeleton, MobileTableRowSkeleton } from "@/components/common/Skeleton";
@@ -122,7 +121,6 @@ export default function JobsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-brivo-navy/10 pb-6">
         <div className="space-y-2">
-          <MicroLabel number="N°04" label="ETL ORCHESTRATION" />
           <h1 className="text-2xl sm:text-3xl font-light tracking-tight text-brivo-navy font-sans">
             Crawler Ingestion <span className="font-serif italic font-normal">Audit Log</span>
           </h1>
