@@ -136,7 +136,7 @@ export function Navbar() {
         }}
         transition={
           isMounted
-            ? { duration: 0.32, ease: [0.16, 1, 0.3, 1] }
+            ? { duration: 0.34, ease: [0.16, 1, 0.3, 1] }
             : { duration: 0 }
         }
         style={{
@@ -162,7 +162,7 @@ export function Navbar() {
           }}
           transition={
             isMounted
-              ? { duration: 0.32, ease: [0.16, 1, 0.3, 1] }
+              ? { duration: 0.34, ease: [0.16, 1, 0.3, 1] }
               : { duration: 0 }
           }
           style={{
@@ -173,7 +173,7 @@ export function Navbar() {
             transform: "translateZ(0)",
             willChange: "max-width, height, width, border-radius, background-color",
             transition: isMounted
-              ? "backdrop-filter 0.3s cubic-bezier(0.16, 1, 0.3, 1), -webkit-backdrop-filter 0.3s cubic-bezier(0.16, 1, 0.3, 1)"
+              ? "backdrop-filter 0.32s cubic-bezier(0.16, 1, 0.3, 1), -webkit-backdrop-filter 0.32s cubic-bezier(0.16, 1, 0.3, 1)"
               : "none",
           }}
         >
@@ -181,7 +181,7 @@ export function Navbar() {
           <motion.div
             initial={false}
             animate={{ opacity: isScrolled ? 0.9 : 0 }}
-            transition={isMounted ? { duration: 0.25, ease: "easeOut" } : { duration: 0 }}
+            transition={isMounted ? { duration: 0.26, ease: "easeOut" } : { duration: 0 }}
             className="absolute inset-x-8 top-0 h-[1px] bg-gradient-to-r from-transparent via-white to-transparent pointer-events-none rounded-full"
           />
 
