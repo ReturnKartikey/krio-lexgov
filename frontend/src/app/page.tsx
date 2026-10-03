@@ -23,7 +23,6 @@ import {
   MapPin,
   CheckCircle2,
   Zap,
-  Eye,
   ChevronRight,
 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -545,18 +544,6 @@ export default function LandingPage() {
                 </div>
 
                 <div className="flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setQuickLookRecord(r);
-                      setIsQuickLookOpen(true);
-                    }}
-                    className="px-2.5 py-1 rounded-md bg-brivo-paper hover:bg-brivo-mist text-[0.68rem] font-mono text-brivo-slate hover:text-brivo-navy border border-brivo-navy/10 flex items-center gap-1"
-                  >
-                    <Eye className="w-3 h-3" />
-                    <span>Peek</span>
-                  </button>
                   <Link
                     href={`/explorer/${r.id}`}
                     onClick={(e) => e.stopPropagation()}
@@ -612,27 +599,13 @@ export default function LandingPage() {
                     {r.amount ? formatINR(r.amount) : "Non-Monetary"}
                   </td>
                   <td className="px-5 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setQuickLookRecord(r);
-                          setIsQuickLookOpen(true);
-                        }}
-                        className="px-2.5 py-1 rounded bg-brivo-paper hover:bg-brivo-mist text-[0.68rem] font-mono text-brivo-slate hover:text-brivo-navy border border-brivo-navy/10 transition-colors"
-                        title="Quick Look preview (or press Space)"
-                      >
-                        ⎵ Peek
-                      </button>
-                      <Link
-                        href={`/explorer/${r.id}`}
-                        onClick={(e) => e.stopPropagation()}
-                        className="text-brivo-slate hover:text-brivo-navy font-mono text-[0.72rem] hover:underline"
-                      >
-                        Audit →
-                      </Link>
-                    </div>
+                    <Link
+                      href={`/explorer/${r.id}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-brivo-slate hover:text-brivo-navy font-mono text-[0.72rem] hover:underline"
+                    >
+                      Audit →
+                    </Link>
                   </td>
                 </tr>
               ))}
