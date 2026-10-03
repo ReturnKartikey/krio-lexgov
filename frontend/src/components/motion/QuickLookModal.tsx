@@ -95,9 +95,8 @@ export function QuickLookModal({
             {/* Header bar */}
             <div className="px-6 py-4 border-b border-brivo-navy/10 bg-brivo-paper flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-brivo-cyan animate-pulse" />
                 <span className="font-mono text-xs font-semibold text-brivo-navy tracking-tight uppercase">
-                  QUICK LOOK // SEBI ADJUDICATION ORDER
+                  QUICK LOOK
                 </span>
               </div>
 

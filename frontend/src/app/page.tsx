@@ -27,10 +27,8 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { MicroLabel } from "@/components/common/MicroLabel";
 import { IntelligenceModal } from "@/components/ai/IntelligenceModal";
 import { QuickLookModal } from "@/components/motion/QuickLookModal";
-import { MagneticButton } from "@/components/motion/MagneticButton";
 import { TiltCard } from "@/components/motion/TiltCard";
 import { getRecords, getTrends, getProcessingStats, getHealth } from "@/lib/api";
 import { formatINR, formatDate, truncateText } from "@/lib/utils";
@@ -221,10 +219,6 @@ export default function LandingPage() {
         </div>
 
         <div className="relative z-10 space-y-6 max-w-4xl">
-          <div>
-            <MicroLabel number="N°01" label="PUBLIC REGULATORY INTELLIGENCE" />
-          </div>
-
           <h1
             ref={heroHeadlineRef}
             className="text-3xl sm:text-5xl lg:text-7xl font-light tracking-[-0.035em] text-brivo-navy leading-[1.08] sm:leading-[1.06] font-sans"
@@ -245,19 +239,19 @@ export default function LandingPage() {
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 pt-3">
             <Link href="/explorer" className="w-full sm:w-auto">
-              <MagneticButton className="w-full sm:w-auto px-6 py-3 rounded-full bg-brivo-navy hover:bg-brivo-navy/90 text-brivo-paper font-medium text-xs tracking-wider uppercase flex items-center justify-center gap-2 shadow-sm hover:shadow-md group active:scale-95 transition-all">
+              <button className="w-full sm:w-auto px-6 py-3 rounded-full bg-brivo-navy hover:bg-brivo-navy/90 text-brivo-paper font-medium text-xs tracking-wider uppercase flex items-center justify-center gap-2 shadow-sm hover:shadow-md group active:scale-95 transition-all">
                 <span>Launch Explorer</span>
                 <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1 text-brivo-cyan" />
-              </MagneticButton>
+              </button>
             </Link>
 
             {/* AI Synthesizer Trigger Button */}
-            <MagneticButton
+            <button
               onClick={() => openAiWithQuery("")}
               className="w-full sm:w-auto px-6 py-3 rounded-full bg-white hover:bg-brivo-paper border border-brivo-navy/15 text-brivo-navy font-medium text-xs tracking-wider uppercase flex items-center justify-center gap-2 shadow-sm hover:shadow-md hover:border-brivo-cyan/50 active:scale-95 group transition-all"
             >
               <span>Synthesize Precedents</span>
-            </MagneticButton>
+            </button>
 
             <Link
               href="/analytics"
@@ -270,49 +264,9 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 2. REGULATORY DATA SOURCE BADGES */}
-      <section className="w-full border-y border-brivo-navy/10 bg-white py-8 px-4 sm:px-6 lg:px-8 scroll-reveal-section">
-        <div className="max-w-7xl mx-auto space-y-4">
-          <div className="flex items-center justify-between pb-2 border-b border-brivo-navy/5">
-            <span className="text-[0.68rem] font-mono tracking-[0.2em] uppercase text-brivo-slate">
-              PUBLIC REGULATORY ARCHIVE // OFFICIAL INDIAN REGULATORY DISCLOSURES
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 pt-2 text-xs font-mono">
-            <div className="scroll-reveal-item p-4 rounded-xl border border-emerald-500/30 bg-emerald-50/20 flex flex-col justify-between hover:border-emerald-500/50 transition-all shadow-xs">
-              <span className="text-[0.68rem] text-emerald-800 font-semibold uppercase">Primary Source</span>
-              <span className="text-sm font-semibold text-brivo-navy mt-1">SEBI Enforcement Orders</span>
-              <span className="text-[0.68rem] text-emerald-700 font-medium mt-2 flex items-center gap-1">
-                <span>Ingested & Verified</span>
-              </span>
-            </div>
-
-            <div className="scroll-reveal-item p-4 rounded-xl border border-brivo-navy/10 bg-brivo-paper/40 flex flex-col justify-between hover:border-brivo-navy/25 transition-all opacity-85">
-              <span className="text-[0.68rem] text-brivo-slate uppercase">Exchange Filings</span>
-              <span className="text-sm font-semibold text-brivo-navy mt-1">BSE Corporate Disclosures</span>
-              <span className="text-[0.68rem] text-brivo-slate font-normal mt-2">Planned (Q4 Roadmap)</span>
-            </div>
-
-            <div className="scroll-reveal-item p-4 rounded-xl border border-brivo-navy/10 bg-brivo-paper/40 flex flex-col justify-between hover:border-brivo-navy/25 transition-all opacity-85">
-              <span className="text-[0.68rem] text-brivo-slate uppercase">Market Surveillance</span>
-              <span className="text-sm font-semibold text-brivo-navy mt-1">NSE Member Bulletins</span>
-              <span className="text-[0.68rem] text-brivo-slate font-normal mt-2">Planned (Q4 Roadmap)</span>
-            </div>
-
-            <div className="scroll-reveal-item p-4 rounded-xl border border-brivo-navy/10 bg-brivo-paper/40 flex flex-col justify-between hover:border-brivo-navy/25 transition-all opacity-85">
-              <span className="text-[0.68rem] text-brivo-slate uppercase">Corporate Filings</span>
-              <span className="text-sm font-semibold text-brivo-navy mt-1">MCA-21 RoC Orders</span>
-              <span className="text-[0.68rem] text-brivo-slate font-normal mt-2">Planned (Q4 Roadmap)</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 3. EDITORIAL MANIFESTO SECTION */}
+      {/* 2. EDITORIAL MANIFESTO SECTION */}
       <section className="py-12 sm:py-14 lg:py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-10 sm:space-y-12 scroll-reveal-section">
         <div className="space-y-3 max-w-2xl">
-          <MicroLabel number="N°02" label="THE OPERATING PRINCIPLE" />
           <h2
             ref={manifestoHeadingRef}
             className="text-3xl sm:text-4xl lg:text-5xl font-light tracking-[-0.025em] text-brivo-navy leading-[1.12] font-sans"
@@ -380,10 +334,9 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 4. CORE ARCHITECTURE */}
+      {/* 3. CORE ARCHITECTURE */}
       <section className="py-12 sm:py-14 lg:py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-10 sm:space-y-12 border-t border-brivo-navy/10 scroll-reveal-section">
         <div className="space-y-3">
-          <MicroLabel number="N°03" label="CORE ARCHITECTURE" />
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-light text-brivo-navy font-sans tracking-[-0.025em] leading-[1.12]">
             Engineered for{" "}
             <span className="font-serif italic font-normal editorial-interactive-italic">
@@ -431,11 +384,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 5. INTERACTIVE CASE DOSSIERS */}
+      {/* 4. INTERACTIVE CASE DOSSIERS */}
       <section className="py-12 sm:py-14 lg:py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-10 sm:space-y-12 border-t border-brivo-navy/10 scroll-reveal-section">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div className="space-y-3">
-            <MicroLabel number="N°04" label="INTERACTIVE CASE DOSSIERS" />
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-light text-brivo-navy font-sans tracking-[-0.025em] leading-[1.12]">
               Precision dossiers for{" "}
               <span className="font-serif italic font-normal editorial-interactive-italic">
@@ -536,11 +488,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 6. LIVE ENFORCEMENT DISPATCH TABLE */}
+      {/* 5. LIVE ENFORCEMENT DISPATCH TABLE */}
       <section className="pt-12 sm:pt-14 lg:pt-16 pb-6 sm:pb-8 lg:pb-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-8 border-t border-brivo-navy/10 scroll-reveal-section">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div className="space-y-3">
-            <MicroLabel number="N°05" label="LIVE ENFORCEMENT DISPATCH" />
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-light text-brivo-navy font-sans tracking-[-0.025em] leading-[1.12]">
               Live regulatory telemetry,{" "}
               <span className="font-serif italic font-normal editorial-interactive-italic">
@@ -690,11 +641,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 7. DEVELOPER & API PLATFORM WORKSHOP */}
+      {/* 6. DEVELOPER & API PLATFORM WORKSHOP */}
       <section className="pt-2 sm:pt-4 pb-12 sm:pb-14 lg:pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full scroll-reveal-section">
         <div className="p-8 sm:p-12 rounded-2xl bg-brivo-paper border border-brivo-navy/15 relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-8 shadow-xs">
           <div className="space-y-3 max-w-xl">
-            <MicroLabel number="N°06" label="DEVELOPER & API PLATFORM" />
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-light text-brivo-navy font-sans tracking-tight leading-snug">
               The workshop,{" "}
               <span className="font-serif italic font-normal editorial-interactive-italic">
@@ -707,13 +657,13 @@ export default function LandingPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <MagneticButton
+            <button
               onClick={() => openAiWithQuery("")}
               className="px-5 py-3 rounded-full bg-white hover:bg-brivo-paper border border-brivo-navy/15 text-brivo-navy text-xs font-mono flex items-center gap-2 shadow-xs transition-all hover:border-brivo-cyan/50"
             >
               <Sparkles className="w-3.5 h-3.5 text-brivo-cyan" />
               <span>Live AI Briefing</span>
-            </MagneticButton>
+            </button>
 
             <Link
               href="/api-explorer"
@@ -726,10 +676,9 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 8. NAVIGATION INDEX */}
+      {/* 7. NAVIGATION INDEX */}
       <section className="py-12 sm:py-14 lg:py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-10 sm:space-y-12 border-t border-brivo-navy/10 scroll-reveal-section">
         <div className="space-y-3">
-          <MicroLabel number="N°07" label="NAVIGATION INDEX" />
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-light text-brivo-navy font-sans tracking-[-0.025em] leading-[1.12]">
             Where would you like to{" "}
             <span className="font-serif italic font-normal editorial-interactive-italic">
