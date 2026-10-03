@@ -149,7 +149,7 @@ export function Navbar() {
           className="relative pointer-events-auto flex items-center justify-between select-none overflow-hidden"
           animate={{
             width: isScrolled ? "calc(100% - 1.5rem)" : "100%",
-            maxWidth: isScrolled ? "548px" : "1360px",
+            maxWidth: isScrolled ? "572px" : "1360px",
             height: isScrolled ? "54px" : "80px",
             borderRadius: isScrolled ? "9999px" : "0px",
             paddingLeft: isScrolled ? "18px" : "32px",
