@@ -29,7 +29,6 @@ import {
 import { motion } from "framer-motion";
 import { IntelligenceModal } from "@/components/ai/IntelligenceModal";
 import { QuickLookModal } from "@/components/motion/QuickLookModal";
-import { MagneticButton } from "@/components/motion/MagneticButton";
 import { TiltCard } from "@/components/motion/TiltCard";
 import { getRecords, getTrends, getProcessingStats, getHealth } from "@/lib/api";
 import { formatINR, formatDate, truncateText } from "@/lib/utils";
@@ -240,19 +239,19 @@ export default function LandingPage() {
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 pt-3">
             <Link href="/explorer" className="w-full sm:w-auto">
-              <MagneticButton className="w-full sm:w-auto px-6 py-3 rounded-full bg-brivo-navy hover:bg-brivo-navy/90 text-brivo-paper font-medium text-xs tracking-wider uppercase flex items-center justify-center gap-2 shadow-sm hover:shadow-md group active:scale-95 transition-all">
+              <button className="w-full sm:w-auto px-6 py-3 rounded-full bg-brivo-navy hover:bg-brivo-navy/90 text-brivo-paper font-medium text-xs tracking-wider uppercase flex items-center justify-center gap-2 shadow-sm hover:shadow-md group active:scale-95 transition-all">
                 <span>Launch Explorer</span>
                 <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1 text-brivo-cyan" />
-              </MagneticButton>
+              </button>
             </Link>
 
             {/* AI Synthesizer Trigger Button */}
-            <MagneticButton
+            <button
               onClick={() => openAiWithQuery("")}
               className="w-full sm:w-auto px-6 py-3 rounded-full bg-white hover:bg-brivo-paper border border-brivo-navy/15 text-brivo-navy font-medium text-xs tracking-wider uppercase flex items-center justify-center gap-2 shadow-sm hover:shadow-md hover:border-brivo-cyan/50 active:scale-95 group transition-all"
             >
               <span>Synthesize Precedents</span>
-            </MagneticButton>
+            </button>
 
             <Link
               href="/analytics"
@@ -658,13 +657,13 @@ export default function LandingPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <MagneticButton
+            <button
               onClick={() => openAiWithQuery("")}
               className="px-5 py-3 rounded-full bg-white hover:bg-brivo-paper border border-brivo-navy/15 text-brivo-navy text-xs font-mono flex items-center gap-2 shadow-xs transition-all hover:border-brivo-cyan/50"
             >
               <Sparkles className="w-3.5 h-3.5 text-brivo-cyan" />
               <span>Live AI Briefing</span>
-            </MagneticButton>
+            </button>
 
             <Link
               href="/api-explorer"

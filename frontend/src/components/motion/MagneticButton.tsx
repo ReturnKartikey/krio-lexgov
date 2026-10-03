@@ -1,7 +1,4 @@
-"use client";
-
-import React, { useRef, useEffect } from "react";
-import { createMagneticEffect } from "@/lib/motion";
+import React from "react";
 
 interface MagneticButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
@@ -11,22 +8,12 @@ interface MagneticButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEleme
 
 export function MagneticButton({
   children,
-  strength = 0.3,
   className = "",
   ...props
 }: MagneticButtonProps) {
-  const buttonRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    if (!buttonRef.current) return;
-    const cleanup = createMagneticEffect(buttonRef.current, { strength });
-    return cleanup;
-  }, [strength]);
-
   return (
     <button
-      ref={buttonRef}
-      className={`btn-shine-sweep will-change-transform ${className}`}
+      className={`btn-shine-sweep transition-all duration-200 ${className}`}
       {...props}
     >
       {children}
