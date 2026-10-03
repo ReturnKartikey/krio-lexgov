@@ -46,15 +46,16 @@ function formatNumber(val: number, formatAsINR: boolean = false, decimals: numbe
 
 export function RollingNumber({
   value,
-  duration = 1.0,
+  duration = 0.6,
   prefix = "",
   suffix = "",
   formatAsINR = false,
   decimals = 0,
   className = "",
 }: RollingNumberProps) {
-  const [displayValue, setDisplayValue] = useState<number>(0);
-  const startValRef = useRef<number>(0);
+  const [displayValue, setDisplayValue] = useState<number>(() => value);
+  const startValRef = useRef<number>(value);
+  const prevTargetRef = useRef<number>(value);
   const startTimeRef = useRef<number | null>(null);
   const rafRef = useRef<number | null>(null);
 
@@ -64,7 +65,13 @@ export function RollingNumber({
       return;
     }
 
+    // Avoid re-rolling if the value hasn't changed
+    if (prevTargetRef.current === value && displayValue === value) {
+      return;
+    }
+
     startValRef.current = displayValue;
+    prevTargetRef.current = value;
     startTimeRef.current = null;
     const targetVal = value;
     const durationMs = duration * 1000;

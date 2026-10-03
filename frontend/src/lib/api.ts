@@ -148,16 +148,18 @@ export function prefetchEndpoint(endpoint: string, ttlMs: number = 60000) {
 export function prefetchTab(tabHref: string) {
   if (typeof window === "undefined") return;
   if (tabHref.includes("/explorer")) {
+    prefetchEndpoint("/api/records?page=1&page_size=10");
     prefetchEndpoint("/api/records?page=1&page_size=20");
     prefetchEndpoint("/api/analytics/trends?interval=month");
   } else if (tabHref.includes("/analytics")) {
     prefetchEndpoint("/api/analytics/trends?interval=month");
-    prefetchEndpoint("/api/analytics/daily?days=90");
-    prefetchEndpoint("/api/analytics/entities?limit=10");
+    prefetchEndpoint("/api/analytics/records-per-day?days=90");
+    prefetchEndpoint("/api/analytics/entity-frequency?top=10");
     prefetchEndpoint("/api/analytics/geo-distribution");
-    prefetchEndpoint("/api/analytics/duplicates?threshold=0.75");
-    prefetchEndpoint("/api/analytics/stats");
+    prefetchEndpoint("/api/analytics/duplicates?threshold=0.6");
+    prefetchEndpoint("/api/analytics/processing-stats");
   } else if (tabHref.includes("/jobs")) {
+    prefetchEndpoint("/api/jobs?page_size=20");
     prefetchEndpoint("/api/jobs");
     prefetchEndpoint("/api/health");
   }

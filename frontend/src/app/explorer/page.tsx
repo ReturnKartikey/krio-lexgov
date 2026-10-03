@@ -29,8 +29,8 @@ import { IntelligenceModal } from "@/components/ai/IntelligenceModal";
 import { QuickLookModal } from "@/components/motion/QuickLookModal";
 import { OrderCardSkeleton, TableRowSkeleton, MobileTableRowSkeleton } from "@/components/common/Skeleton";
 import { toast } from "@/lib/toast";
-import { getRecords } from "@/lib/api";
-import { RecordListItem, PaginationMeta } from "@/lib/types";
+import { getRecords, getCached } from "@/lib/api";
+import { RecordListItem, PaginationMeta, EnvelopeResponse } from "@/lib/types";
 import { formatINR, formatDate, truncateText, formatCleanSummary } from "@/lib/utils";
 import { RollingNumber } from "@/components/ui/RollingNumber";
 
@@ -105,14 +105,20 @@ function ExplorerContent() {
   const [pageSize, setPageSize] = useState(pageSizeParam);
   const [viewMode, setViewMode] = useState<"table" | "cards">("cards");
 
-  const [records, setRecords] = useState<RecordListItem[]>([]);
-  const [meta, setMeta] = useState<PaginationMeta>({
-    total: 0,
+  // Instant SWR Cache Hydration
+  const cachedEnvelope = getCached<EnvelopeResponse<RecordListItem[]>>(
+    `/api/records?page=${pageParam}&page_size=${pageSizeParam}`
+  ) || getCached<EnvelopeResponse<RecordListItem[]>>("/api/records?page=1&page_size=10")
+    || getCached<EnvelopeResponse<RecordListItem[]>>("/api/records?page=1&page_size=20");
+
+  const [records, setRecords] = useState<RecordListItem[]>(() => cachedEnvelope?.data || []);
+  const [meta, setMeta] = useState<PaginationMeta>(() => cachedEnvelope?.meta || {
+    total: cachedEnvelope?.data?.length || 0,
     page: 1,
     page_size: pageSizeParam,
     total_pages: 1,
   });
-  const [initialLoading, setInitialLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(() => !cachedEnvelope?.data?.length);
   const [isFetching, setIsFetching] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);

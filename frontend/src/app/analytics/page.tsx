@@ -32,6 +32,7 @@ import {
   getGeoDistribution,
   getDuplicates,
   getProcessingStats,
+  getCached,
 } from "@/lib/api";
 import {
   TrendsResponse,
@@ -48,22 +49,36 @@ export default function AnalyticsPage() {
   const [interval, setInterval] = useState<"week" | "month">("month");
   const [daysWindow, setDaysWindow] = useState<number>(90);
 
-  const [trends, setTrends] = useState<TrendsResponse | null>(null);
-  const [dailyData, setDailyData] = useState<DailyCount[]>([]);
-  const [topEntities, setTopEntities] = useState<EntityFrequencyItem[]>([]);
-  const [geoData, setGeoData] = useState<GeoDistributionItem[]>([]);
-  const [duplicates, setDuplicates] = useState<DuplicateItemResponse[]>([]);
-  const [processingStats, setProcessingStats] = useState<ProcessingStatsResponse | null>(null);
+  // Instant SWR Cache Hydration
+  const cachedTrends = getCached<TrendsResponse>(`/api/analytics/trends?interval=${interval}`);
+  const cachedDaily = getCached<DailyCount[]>(`/api/analytics/records-per-day?days=${daysWindow}`);
+  const cachedEntities = getCached<EntityFrequencyItem[]>("/api/analytics/entity-frequency?top=10");
+  const cachedGeo = getCached<GeoDistributionItem[]>("/api/analytics/geo-distribution");
+  const cachedDups = getCached<DuplicateItemResponse[]>("/api/analytics/duplicates?threshold=0.6");
+  const cachedStats = getCached<ProcessingStatsResponse>("/api/analytics/processing-stats");
+
+  const hasCachedData = Boolean(cachedTrends && cachedDaily);
+
+  const [trends, setTrends] = useState<TrendsResponse | null>(() => cachedTrends);
+  const [dailyData, setDailyData] = useState<DailyCount[]>(() => cachedDaily || []);
+  const [topEntities, setTopEntities] = useState<EntityFrequencyItem[]>(() => cachedEntities || []);
+  const [geoData, setGeoData] = useState<GeoDistributionItem[]>(() => cachedGeo || []);
+  const [duplicates, setDuplicates] = useState<DuplicateItemResponse[]>(() => cachedDups || []);
+  const [processingStats, setProcessingStats] = useState<ProcessingStatsResponse | null>(() => cachedStats);
   const [geoScope, setGeoScope] = useState<"head_office" | "regional">("head_office");
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(() => !hasCachedData);
 
   useEffect(() => {
     document.title = "Analytics & Trends | KRIO.LEXGOV";
   }, []);
 
   useEffect(() => {
+    let isCurrent = true;
     async function fetchAllAnalytics() {
-      setLoading(true);
+      // Only show skeleton if we have no cached data to display
+      if (!trends || dailyData.length === 0) {
+        setLoading(true);
+      }
       try {
         const [
           trendsRes,
@@ -81,20 +96,27 @@ export default function AnalyticsPage() {
           getProcessingStats(),
         ]);
 
-        setTrends(trendsRes);
-        setDailyData(dailyRes);
-        setTopEntities(entitiesRes);
-        setGeoData(geoRes);
-        setDuplicates(dupRes);
-        setProcessingStats(statsRes);
+        if (isCurrent) {
+          setTrends(trendsRes);
+          setDailyData(dailyRes);
+          setTopEntities(entitiesRes);
+          setGeoData(geoRes);
+          setDuplicates(dupRes);
+          setProcessingStats(statsRes);
+        }
       } catch (err) {
         console.error("Failed to load analytics data:", err);
       } finally {
-        setLoading(false);
+        if (isCurrent) {
+          setLoading(false);
+        }
       }
     }
 
     fetchAllAnalytics();
+    return () => {
+      isCurrent = false;
+    };
   }, [interval, daysWindow]);
 
   const CustomDailyTooltip = ({ active, payload, label }: any) => {
