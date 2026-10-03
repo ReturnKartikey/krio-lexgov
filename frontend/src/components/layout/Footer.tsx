@@ -47,7 +47,7 @@ export function Footer() {
             {/* Col 2: Specifications */}
             <div className="space-y-3">
               <h4 className="font-mono text-xs text-brivo-paper uppercase tracking-wider">Specifications</h4>
-              <ul className="space-y-2 text-xs font-mono">
+              <ul className="space-y-2 text-xs">
                 <li>
                   <Link
                     href="/api-explorer"
