@@ -104,6 +104,7 @@ function ExplorerContent() {
   const [page, setPage] = useState(pageParam);
   const [pageSize, setPageSize] = useState(pageSizeParam);
   const [viewMode, setViewMode] = useState<"table" | "cards">("cards");
+  const [hasUserToggledView, setHasUserToggledView] = useState(false);
 
   // Instant SWR Cache Hydration
   const cachedEnvelope = getCached<EnvelopeResponse<RecordListItem[]>>(
@@ -306,35 +307,49 @@ function ExplorerContent() {
 
           <div className="flex items-center border border-brivo-navy/15 rounded-lg bg-white p-0.5 shadow-sm relative">
             <button
-              onClick={() => setViewMode("cards")}
+              onClick={() => {
+                setHasUserToggledView(true);
+                setViewMode("cards");
+              }}
               className={`relative px-2.5 py-1.5 rounded-md text-xs font-mono transition-colors flex items-center gap-1.5 cursor-pointer ${
                 viewMode === "cards" ? "text-brivo-paper font-medium" : "text-brivo-slate hover:text-brivo-navy"
               }`}
               title="Card View"
             >
               {viewMode === "cards" && (
-                <motion.div
-                  layoutId="activeViewPill"
-                  className="absolute inset-0 bg-brivo-navy rounded-md shadow-xs"
-                  transition={{ type: "spring", bounce: 0.15, duration: 0.35 }}
-                />
+                hasUserToggledView ? (
+                  <motion.div
+                    layoutId="activeViewPill"
+                    className="absolute inset-0 bg-brivo-navy rounded-md shadow-xs"
+                    transition={{ type: "spring", bounce: 0.15, duration: 0.35 }}
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-brivo-navy rounded-md shadow-xs" />
+                )
               )}
               <LayoutGrid className="w-3.5 h-3.5 relative z-10" />
               <span className="relative z-10 text-[0.7rem]">Cards</span>
             </button>
             <button
-              onClick={() => setViewMode("table")}
+              onClick={() => {
+                setHasUserToggledView(true);
+                setViewMode("table");
+              }}
               className={`relative px-2.5 py-1.5 rounded-md text-xs font-mono transition-colors flex items-center gap-1.5 cursor-pointer ${
                 viewMode === "table" ? "text-brivo-paper font-medium" : "text-brivo-slate hover:text-brivo-navy"
               }`}
               title="Table View"
             >
               {viewMode === "table" && (
-                <motion.div
-                  layoutId="activeViewPill"
-                  className="absolute inset-0 bg-brivo-navy rounded-md shadow-xs"
-                  transition={{ type: "spring", bounce: 0.15, duration: 0.35 }}
-                />
+                hasUserToggledView ? (
+                  <motion.div
+                    layoutId="activeViewPill"
+                    className="absolute inset-0 bg-brivo-navy rounded-md shadow-xs"
+                    transition={{ type: "spring", bounce: 0.15, duration: 0.35 }}
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-brivo-navy rounded-md shadow-xs" />
+                )
               )}
               <ListIcon className="w-3.5 h-3.5 relative z-10" />
               <span className="relative z-10 text-[0.7rem]">Table</span>

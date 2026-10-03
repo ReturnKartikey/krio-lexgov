@@ -47,6 +47,7 @@ import { RollingNumber } from "@/components/ui/RollingNumber";
 
 export default function AnalyticsPage() {
   const [interval, setInterval] = useState<"week" | "month">("month");
+  const [hasUserToggledInterval, setHasUserToggledInterval] = useState(false);
   const [daysWindow, setDaysWindow] = useState<number>(90);
 
   // Instant SWR Cache Hydration
@@ -151,15 +152,22 @@ export default function AnalyticsPage() {
         <div className="flex items-center gap-2">
           <div className="flex items-center p-1 rounded-full bg-white border border-brivo-navy/15 shadow-sm">
             <button
-              onClick={() => setInterval("week")}
-              className="relative px-3.5 py-1 rounded-full text-xs font-mono font-medium transition-colors select-none"
+              onClick={() => {
+                setHasUserToggledInterval(true);
+                setInterval("week");
+              }}
+              className="relative px-3.5 py-1 rounded-full text-xs font-mono font-medium transition-colors select-none cursor-pointer"
             >
               {interval === "week" && (
-                <motion.div
-                  layoutId="analyticsIntervalPill"
-                  className="absolute inset-0 rounded-full bg-brivo-navy shadow-sm"
-                  transition={{ type: "spring", stiffness: 450, damping: 35 }}
-                />
+                hasUserToggledInterval ? (
+                  <motion.div
+                    layoutId="analyticsIntervalPill"
+                    className="absolute inset-0 rounded-full bg-brivo-navy shadow-sm"
+                    transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                  />
+                ) : (
+                  <div className="absolute inset-0 rounded-full bg-brivo-navy shadow-sm" />
+                )
               )}
               <span
                 className={`relative z-10 transition-colors ${
@@ -172,15 +180,22 @@ export default function AnalyticsPage() {
               </span>
             </button>
             <button
-              onClick={() => setInterval("month")}
-              className="relative px-3.5 py-1 rounded-full text-xs font-mono font-medium transition-colors select-none"
+              onClick={() => {
+                setHasUserToggledInterval(true);
+                setInterval("month");
+              }}
+              className="relative px-3.5 py-1 rounded-full text-xs font-mono font-medium transition-colors select-none cursor-pointer"
             >
               {interval === "month" && (
-                <motion.div
-                  layoutId="analyticsIntervalPill"
-                  className="absolute inset-0 rounded-full bg-brivo-navy shadow-sm"
-                  transition={{ type: "spring", stiffness: 450, damping: 35 }}
-                />
+                hasUserToggledInterval ? (
+                  <motion.div
+                    layoutId="analyticsIntervalPill"
+                    className="absolute inset-0 rounded-full bg-brivo-navy shadow-sm"
+                    transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                  />
+                ) : (
+                  <div className="absolute inset-0 rounded-full bg-brivo-navy shadow-sm" />
+                )
               )}
               <span
                 className={`relative z-10 transition-colors ${
@@ -261,14 +276,9 @@ export default function AnalyticsPage() {
                   </span>
                 </>
               ) : (
-                <>
-                  <span className="text-lg sm:text-xl font-bold font-mono text-brivo-navy">
-                    Non-Monetary
-                  </span>
-                  <span className="text-xs font-mono text-brivo-slate">
-                    Directional Orders Active
-                  </span>
-                </>
+                <span className="text-lg sm:text-xl font-bold font-mono text-brivo-navy">
+                  Non-Monetary
+                </span>
               )}
             </div>
             <p className="text-[0.65rem] font-mono text-brivo-slate">
