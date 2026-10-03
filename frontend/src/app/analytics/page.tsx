@@ -319,19 +319,19 @@ export default function AnalyticsPage() {
             <AreaChart data={dailyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="orderGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#00c2d1" stopOpacity={0.4} />
-                  <stop offset="95%" stopColor="#00c2d1" stopOpacity={0.0} />
+                  <stop offset="5%" stopColor="#2563eb" stopOpacity={0.25} />
+                  <stop offset="95%" stopColor="#2563eb" stopOpacity={0.0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(26,35,51,0.06)" />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(24,24,27,0.06)" />
               <XAxis
                 dataKey="date"
                 tickFormatter={(val) => formatDate(val)}
-                stroke="#98a2b3"
+                stroke="#71717a"
                 tick={{ fontSize: 10, fontFamily: "monospace" }}
               />
               <YAxis
-                stroke="#98a2b3"
+                stroke="#71717a"
                 tick={{ fontSize: 10, fontFamily: "monospace" }}
                 allowDecimals={false}
               />
@@ -339,7 +339,7 @@ export default function AnalyticsPage() {
               <Area
                 type="monotone"
                 dataKey="count"
-                stroke="#00c2d1"
+                stroke="#2563eb"
                 strokeWidth={2}
                 fillOpacity={1}
                 fill="url(#orderGrad)"

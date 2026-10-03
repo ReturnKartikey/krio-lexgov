@@ -94,12 +94,12 @@ export function generateExecutivePdfMemo(record: RecordDetailItem): void {
   const contentWidth = pageWidth - margin * 2;
   let y = margin;
 
-  // Obsidian Brand Palette (RGB)
-  const navy = [15, 23, 42]; // #0f172a
-  const cyan = [0, 194, 209]; // #00c2d1
-  const slate = [100, 116, 139]; // #64748b
-  const lightBg = [248, 250, 252]; // #f8fafc
-  const borderGray = [226, 232, 240]; // #e2e8f0
+  // Bloomberg & Cobalt Palette (RGB)
+  const navy = [9, 13, 22]; // #090d16 Pitch Carbon Ink
+  const cyan = [37, 99, 235]; // #2563eb Royal Cobalt Blue
+  const slate = [71, 84, 103]; // #475467 Cool Slate
+  const lightBg = [248, 250, 252]; // #f8fafc Cool Archival Alabaster Canvas
+  const borderGray = [226, 232, 240]; // #e2e8f0 Hairline Slate Border
 
   // --- HEADER BANNER ---
   doc.setFillColor(navy[0], navy[1], navy[2]);
@@ -399,12 +399,12 @@ export async function generateSynthesisPdfReport(
   const contentWidth = pageWidth - margin * 2;
   let y = margin;
 
-  // Editorial Brand Palette (RGB)
-  const navy = [26, 35, 51]; // #1a2333
-  const cyan = [0, 194, 209]; // #00c2d1
-  const slate = [152, 162, 179]; // #98a2b3
-  const lightBg = [250, 248, 252]; // #faf8fc
-  const borderGray = [229, 231, 235]; // #e5e7eb
+  // Bloomberg & Cobalt Palette (RGB)
+  const navy = [9, 13, 22]; // #090d16 Pitch Carbon Ink
+  const cyan = [37, 99, 235]; // #2563eb Royal Cobalt Blue
+  const slate = [71, 84, 103]; // #475467 Cool Slate
+  const lightBg = [248, 250, 252]; // #f8fafc Cool Archival Alabaster Canvas
+  const borderGray = [226, 232, 240]; // #e2e8f0 Hairline Slate Border
   const pureWhite = [255, 255, 255];
 
   // Helper for dynamic page break

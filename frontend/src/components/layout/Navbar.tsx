@@ -8,7 +8,6 @@ import {
   Search,
   BarChart3,
   Clock,
-  Terminal,
   Sparkles,
   Menu,
   X,
@@ -22,57 +21,78 @@ export function Navbar() {
   const pathname = usePathname();
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-
-  const tabRefs = useRef<(HTMLAnchorElement | null)[]>([]);
-  const [indicator, setIndicator] = useState<{ x: number; width: number; visible: boolean }>({
-    x: 4,
-    width: 100,
-    visible: false,
+  const [isScrolled, setIsScrolled] = useState(() => {
+    if (typeof window !== "undefined") {
+      return window.scrollY > 40;
+    }
+    return false;
   });
+  const [isMounted, setIsMounted] = useState(false);
 
   const navLinks = [
     { href: "/explorer", label: "Explorer", icon: Search },
     { href: "/analytics", label: "Analytics", icon: BarChart3 },
     { href: "/jobs", label: "Ingestion Jobs", icon: Clock },
-    { href: "/api-explorer", label: "API Console", icon: Terminal },
   ];
 
-  const activeIndex = navLinks.findIndex((link) => pathname.startsWith(link.href));
+  const [optimisticPath, setOptimisticPath] = useState<string | null>(null);
+  const currentPath = optimisticPath ?? pathname;
+  const activeIndex = navLinks.findIndex((link) => currentPath.startsWith(link.href));
 
-  // Measure strictly local relative offset within the nav container (horizontal only)
-  const updatePillPosition = useCallback(() => {
-    if (activeIndex !== -1 && tabRefs.current[activeIndex]) {
-      const el = tabRefs.current[activeIndex]!;
-      setIndicator({
-        x: el.offsetLeft,
-        width: el.offsetWidth,
-        visible: true,
-      });
+  const navRef = useRef<HTMLElement>(null);
+  const tabRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+  const [pillRect, setPillRect] = useState<{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } | null>(null);
+
+  const updatePill = useCallback(() => {
+    if (activeIndex >= 0 && tabRefs.current[activeIndex]) {
+      const el = tabRefs.current[activeIndex];
+      if (el) {
+        setPillRect({
+          x: el.offsetLeft,
+          y: el.offsetTop,
+          width: el.offsetWidth,
+          height: el.offsetHeight,
+        });
+      }
     } else {
-      setIndicator((prev) => ({ ...prev, visible: false }));
+      setPillRect(null);
     }
   }, [activeIndex]);
 
-  // Update on route change and resize
+  // Synchronize pill geometry whenever active index or scroll/morph state changes
   useEffect(() => {
-    updatePillPosition();
-    const raf = requestAnimationFrame(updatePillPosition);
-    return () => cancelAnimationFrame(raf);
-  }, [updatePillPosition, pathname]);
+    updatePill();
+  }, [updatePill, isScrolled]);
 
+  // Reset optimistic path when real pathname catches up
   useEffect(() => {
-    window.addEventListener("resize", updatePillPosition);
-    return () => window.removeEventListener("resize", updatePillPosition);
-  }, [updatePillPosition]);
+    setOptimisticPath(null);
+  }, [pathname]);
+
+  // Handle window resize and font load to keep pill sub-pixel accurate
+  useEffect(() => {
+    const handleResize = () => updatePill();
+    window.addEventListener("resize", handleResize);
+    if (typeof document !== "undefined" && document.fonts) {
+      document.fonts.ready.then(updatePill);
+    }
+    return () => window.removeEventListener("resize", handleResize);
+  }, [updatePill]);
 
   // Close mobile menu on route change
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [pathname]);
 
-  // Scroll listener with RAF throttling
+  // Scroll listener with RAF throttling and mount detection
   useEffect(() => {
+    setIsMounted(true);
+    updatePill();
     let ticking = false;
     const handleScroll = () => {
       if (!ticking) {
@@ -91,7 +111,7 @@ export function Navbar() {
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [updatePill]);
 
   // Global Cmd+K shortcut
   useEffect(() => {
@@ -108,63 +128,129 @@ export function Navbar() {
   return (
     <>
       {/* Dynamic Morphing Navigation Container */}
-      <header
-        className={`sticky top-0 z-40 w-full pointer-events-none transition-all duration-300 ease-out ${
-          isScrolled ? "pt-2.5 sm:pt-3.5 px-3 sm:px-6" : "pt-0 px-3 sm:px-6 lg:px-8"
-        }`}
+      <motion.header
+        initial={false}
+        className="sticky top-0 z-40 w-full pointer-events-none flex justify-center"
+        animate={{
+          paddingTop: isScrolled ? 14 : 0,
+        }}
+        transition={
+          isMounted
+            ? { type: "spring", stiffness: 220, damping: 26, mass: 0.75 }
+            : { duration: 0 }
+        }
+        style={{
+          transform: "translateZ(0)",
+          willChange: "padding-top",
+        }}
       >
-        <div
-          className={`w-full mx-auto pointer-events-auto transition-all duration-300 ease-out transform-gpu flex items-center justify-between gap-2 sm:gap-6 select-none ${
-            isScrolled
-              ? "max-w-[1040px] xl:max-w-5xl h-14 sm:h-16 px-4 sm:px-7 rounded-full bg-white/95 backdrop-blur-xl border border-brivo-navy/12 shadow-[0_16px_36px_-8px_rgba(11,16,32,0.12)]"
-              : "max-w-7xl h-16 sm:h-20 px-3 sm:px-6 rounded-2xl bg-white/0 backdrop-blur-none border border-transparent shadow-none"
-          }`}
+        <motion.div
+          initial={false}
+          className="relative pointer-events-auto flex items-center justify-between gap-5 sm:gap-6 select-none overflow-hidden"
+          animate={{
+            width: "100%",
+            maxWidth: isScrolled ? "548px" : "1360px",
+            height: isScrolled ? "54px" : "80px",
+            borderRadius: isScrolled ? "9999px" : "0px",
+            paddingLeft: isScrolled ? "18px" : "34px",
+            paddingRight: isScrolled ? "18px" : "34px",
+            backgroundColor: isScrolled ? "rgba(255, 255, 255, 0.72)" : "rgba(255, 255, 255, 0)",
+            borderColor: isScrolled ? "rgba(255, 255, 255, 0.85)" : "rgba(255, 255, 255, 0)",
+            boxShadow: isScrolled
+              ? "0 18px 46px rgba(9, 13, 22, 0.10), inset 0 1px 0 0 rgba(255, 255, 255, 0.95), inset 0 -1px 0 0 rgba(9, 13, 22, 0.04)"
+              : "0 0 0 rgba(0, 0, 0, 0)",
+          }}
+          transition={
+            isMounted
+              ? { type: "spring", stiffness: 220, damping: 26, mass: 0.75 }
+              : { duration: 0 }
+          }
+          style={{
+            backdropFilter: isScrolled ? "blur(24px) saturate(180%)" : "blur(0px) saturate(100%)",
+            WebkitBackdropFilter: isScrolled ? "blur(24px) saturate(180%)" : "blur(0px) saturate(100%)",
+            borderWidth: 1,
+            borderStyle: "solid",
+            transform: "translateZ(0)",
+            willChange: "max-width, height, transform",
+            transition: isMounted
+              ? "backdrop-filter 0.35s cubic-bezier(0.16, 1, 0.3, 1), -webkit-backdrop-filter 0.35s cubic-bezier(0.16, 1, 0.3, 1)"
+              : "none",
+          }}
         >
+          {/* iOS Specular Glass Bevel Reflection */}
+          <motion.div
+            initial={false}
+            animate={{ opacity: isScrolled ? 0.9 : 0 }}
+            transition={isMounted ? { duration: 0.25, ease: "easeOut" } : { duration: 0 }}
+            className="absolute inset-x-8 top-0 h-[1px] bg-gradient-to-r from-transparent via-white to-transparent pointer-events-none rounded-full"
+          />
+
           {/* Left Wing - Brand Monogram & Name */}
-          <div className="flex-1 flex items-center justify-start shrink-0">
-            <Link href="/" className="flex items-center gap-2 sm:gap-3 group shrink-0">
+          <div className="flex items-center shrink-0">
+            <Link href="/" className="flex items-center gap-2 sm:gap-2.5 group shrink-0">
               <div
-                className="w-8 h-8 sm:w-9 sm:h-9 max-w-[36px] max-h-[36px] rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform duration-300 overflow-hidden shrink-0"
+                className={`rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform duration-200 overflow-hidden shrink-0 shadow-2xs border border-white/80 ${
+                  isScrolled
+                    ? "w-7.5 h-7.5 max-w-[30px] max-h-[30px]"
+                    : "w-9 h-9 sm:w-9.5 sm:h-9.5 max-w-[38px] max-h-[38px]"
+                }`}
               >
                 <Image
                   src="/icon_logo.png"
                   alt="KRIO Icon"
-                  width={36}
-                  height={36}
-                  style={{ width: "36px", height: "36px", maxWidth: "36px", maxHeight: "36px" }}
-                  className="w-8 h-8 sm:w-9 sm:h-9 object-contain rounded-xl shrink-0"
+                  width={38}
+                  height={38}
+                  style={{ width: "100%", height: "100%" }}
+                  className="w-full h-full object-contain rounded-xl shrink-0"
                   priority
                 />
               </div>
               <div className="flex items-baseline shrink-0">
-                <span className="font-bold tracking-tight text-brivo-navy font-sans text-sm sm:text-base lg:text-lg">
+                <span
+                  className={`font-bold tracking-tight text-brivo-navy font-sans ${
+                    isScrolled ? "text-sm sm:text-base" : "text-base sm:text-lg lg:text-xl"
+                  }`}
+                >
                   KRIO
                 </span>
-                <span className="text-brivo-slate/70 font-mono font-medium tracking-tight text-[0.65rem] sm:text-xs">
+                <span
+                  className={`text-brivo-slate/75 font-mono font-medium tracking-tight ml-1 ${
+                    isScrolled ? "text-[0.625rem]" : "text-[0.7rem] sm:text-xs"
+                  }`}
+                >
                   .LEXGOV
                 </span>
               </div>
             </Link>
           </div>
 
-          {/* Center Navigation - Desktop Symmetrical Segmented Track */}
+          {/* Center Navigation - iOS Segmented Glass Track */}
           <div className="shrink-0 hidden md:flex items-center justify-center">
-            <nav className="relative flex items-center gap-1 shrink-0 h-10 select-none">
-              {/* Strictly Horizontal-Only Spring-Gliding Active Pill */}
-              <motion.div
-                className="absolute inset-y-1 rounded-full bg-brivo-navy shadow-xs z-0 pointer-events-none"
-                initial={false}
-                animate={{
-                  x: indicator.x,
-                  width: indicator.width,
-                  opacity: indicator.visible ? 1 : 0,
-                }}
-                transition={{
-                  x: { type: "spring", stiffness: 480, damping: 38 },
-                  width: { type: "spring", stiffness: 480, damping: 38 },
-                  opacity: { duration: 0.15, ease: "easeOut" },
-                }}
-              />
+            <motion.nav
+              ref={navRef}
+              className={`relative flex items-center rounded-full bg-black/[0.04] backdrop-blur-md border border-white/70 shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)] select-none ${
+                isScrolled ? "p-1" : "p-1 sm:p-1.5"
+              }`}
+            >
+              {/* Single Local Sliding Active Pill */}
+              {isMounted && pillRect && activeIndex >= 0 && (
+                <motion.div
+                  className="absolute top-0 left-0 rounded-full bg-brivo-navy shadow-[0_2px_8px_rgba(9,13,22,0.22),inset_0_1px_0_rgba(255,255,255,0.2)] pointer-events-none z-0"
+                  style={{ top: 0, left: 0 }}
+                  initial={false}
+                  animate={{
+                    x: pillRect.x,
+                    y: pillRect.y,
+                    width: pillRect.width,
+                    height: pillRect.height,
+                  }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 480,
+                    damping: 38,
+                  }}
+                />
+              )}
 
               {navLinks.map((link, index) => {
                 const Icon = link.icon;
@@ -176,48 +262,45 @@ export function Navbar() {
                       tabRefs.current[index] = el;
                     }}
                     href={link.href}
+                    onClick={() => setOptimisticPath(link.href)}
                     onMouseEnter={() => prefetchTab(link.href)}
                     onFocus={() => prefetchTab(link.href)}
-                    className={`relative h-8 px-3.5 lg:px-4 rounded-full text-xs lg:text-sm font-medium font-sans flex items-center justify-center gap-1.5 lg:gap-2 select-none cursor-pointer whitespace-nowrap shrink-0 transition-colors duration-200 z-10 outline-none focus:outline-none focus-visible:outline-none ${
+                    className={`relative rounded-full font-medium font-sans flex items-center justify-center select-none cursor-pointer whitespace-nowrap transition-colors duration-150 outline-none ${
+                      isScrolled
+                        ? "px-3 py-1.5 text-xs gap-1.5"
+                        : "px-4 py-2 text-xs sm:text-[0.8125rem] gap-2"
+                    } ${
                       isActive
-                        ? "text-brivo-paper font-semibold"
-                        : "text-brivo-navy/80 hover:text-brivo-navy"
+                        ? "text-white font-semibold"
+                        : "text-brivo-slate hover:text-brivo-navy hover:bg-black/[0.03]"
                     }`}
                   >
-                    <Icon
-                      className={`w-3.5 h-3.5 lg:w-4 lg:h-4 shrink-0 transition-colors duration-200 ${
-                        isActive ? "text-brivo-cyan" : "text-brivo-slate"
-                      }`}
-                    />
-                    <span className="whitespace-nowrap">
-                      {link.label}
+                    {/* Fallback static pill for SSR / initial paint before mount */}
+                    {!isMounted && isActive && (
+                      <div className="absolute inset-0 rounded-full bg-brivo-navy shadow-[0_2px_8px_rgba(9,13,22,0.22),inset_0_1px_0_rgba(255,255,255,0.2)] z-0 pointer-events-none" />
+                    )}
+                    <span className={`relative z-10 flex items-center ${isScrolled ? "gap-1.5" : "gap-2"}`}>
+                      <Icon
+                        className={`shrink-0 transition-colors duration-150 ${
+                          isScrolled ? "w-3.5 h-3.5" : "w-4 h-4"
+                        } ${
+                          isActive ? "text-brivo-cyan" : "text-brivo-slate/80"
+                        }`}
+                      />
+                      <span>{link.label}</span>
                     </span>
                   </Link>
                 );
               })}
-            </nav>
+            </motion.nav>
           </div>
 
-          {/* Right Wing - Action Buttons (Desktop + Mobile) */}
-          <div className="flex-1 flex items-center justify-end gap-1.5 sm:gap-2.5 shrink-0">
-            {/* Synthesizer Action Pill */}
-            <button
-              onClick={() => setIsAiModalOpen(true)}
-              className="h-8 sm:h-10 px-2.5 sm:px-4 rounded-full bg-brivo-paper/90 hover:bg-white border border-brivo-navy/10 hover:border-brivo-cyan/50 text-brivo-navy font-sans text-xs sm:text-sm font-semibold transition-all flex items-center gap-1.5 sm:gap-2.5 shadow-2xs group active:scale-95 cursor-pointer select-none shrink-0"
-              title="Open AI Precedent & Risk Synthesizer (Cmd+K)"
-            >
-              <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brivo-cyan group-hover:rotate-12 transition-transform shrink-0" />
-              <span className="font-semibold text-brivo-navy tracking-tight hidden xs:inline sm:inline">Synthesize</span>
-              <kbd className="hidden sm:inline-flex items-center justify-center text-[0.65rem] px-2 py-0.5 rounded-md bg-white border border-brivo-navy/12 text-brivo-slate font-mono font-medium shadow-2xs">
-                ⌘K
-              </kbd>
-            </button>
-
-            {/* Mobile Hamburger Menu Toggle */}
+          {/* Mobile Hamburger Toggle (Always visible on mobile) */}
+          <div className="md:hidden flex items-center justify-end shrink-0">
             <button
               type="button"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-brivo-paper hover:bg-white border border-brivo-navy/12 flex items-center justify-center text-brivo-navy transition-all active:scale-95 shadow-2xs"
+              className="h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-white/70 hover:bg-white backdrop-blur-md border border-white/80 flex items-center justify-center text-brivo-navy transition-all active:scale-95 shadow-[0_2px_8px_rgba(0,0,0,0.04),inset_0_1px_1px_rgba(255,255,255,1)]"
               aria-label="Toggle mobile menu"
             >
               {isMobileMenuOpen ? (
@@ -227,19 +310,19 @@ export function Navbar() {
               )}
             </button>
           </div>
-        </div>
+        </motion.div>
 
         {/* Mobile Slide-Down Navigation Drawer */}
         <AnimatePresence>
           {isMobileMenuOpen && (
             <motion.div
-              initial={{ opacity: 0, y: -12, scale: 0.98 }}
+              initial={{ opacity: 0, y: -10, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -12, scale: 0.98 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
-              className="pointer-events-auto md:hidden mt-2 mx-3 sm:mx-4 p-3 rounded-2xl bg-white/95 backdrop-blur-2xl border border-brivo-navy/15 shadow-2xl space-y-1.5"
+              exit={{ opacity: 0, y: -10, scale: 0.98 }}
+              transition={{ duration: 0.22, ease: "easeOut" }}
+              className="pointer-events-auto md:hidden mt-2 mx-3 sm:mx-4 p-3 rounded-3xl bg-white/75 backdrop-blur-2xl backdrop-saturate-[180%] border border-white/80 shadow-[0_24px_50px_rgba(9,13,22,0.12),inset_0_1px_1px_rgba(255,255,255,0.95)] space-y-1.5"
             >
-              <div className="text-[0.65rem] font-mono text-brivo-slate uppercase px-3 py-1 tracking-wider border-b border-brivo-navy/10 pb-1.5">
+              <div className="text-[0.65rem] font-mono text-brivo-slate uppercase px-3 py-1 tracking-wider border-b border-black/[0.06] pb-1.5">
                 Navigation Modules
               </div>
               <div className="grid grid-cols-1 gap-1">
@@ -251,10 +334,10 @@ export function Navbar() {
                       key={link.href}
                       href={link.href}
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className={`px-3.5 py-2.5 rounded-xl font-sans text-sm font-medium flex items-center justify-between transition-all ${
+                      className={`px-3.5 py-2.5 rounded-2xl font-sans text-sm font-medium flex items-center justify-between transition-all ${
                         isActive
                           ? "bg-brivo-navy text-white shadow-xs"
-                          : "text-brivo-navy hover:bg-brivo-paper text-brivo-navy/90"
+                          : "text-brivo-navy hover:bg-black/[0.03] text-brivo-navy/90"
                       }`}
                     >
                       <div className="flex items-center gap-3">
@@ -276,20 +359,20 @@ export function Navbar() {
               </div>
 
               {/* Mobile Quick Action */}
-              <div className="pt-2 border-t border-brivo-navy/10">
+              <div className="pt-2 border-t border-black/[0.06]">
                 <button
                   type="button"
                   onClick={() => {
                     setIsMobileMenuOpen(false);
                     setIsAiModalOpen(true);
                   }}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-brivo-mist/50 hover:bg-brivo-mist border border-brivo-cyan/30 text-brivo-navy font-sans text-sm font-semibold flex items-center justify-between transition-all shadow-xs"
+                  className="w-full px-3.5 py-2.5 rounded-2xl bg-white/80 hover:bg-white border border-white/90 text-brivo-navy font-sans text-sm font-semibold flex items-center justify-between transition-all shadow-[0_2px_8px_rgba(0,0,0,0.03),inset_0_1px_1px_rgba(255,255,255,1)]"
                 >
                   <div className="flex items-center gap-2.5">
                     <Sparkles className="w-4 h-4 text-brivo-cyan" />
                     <span>AI Precedent & Risk Synthesizer</span>
                   </div>
-                  <span className="text-[0.65rem] font-mono font-medium px-2 py-0.5 rounded bg-white text-brivo-navy border border-brivo-navy/10">
+                  <span className="text-[0.65rem] font-mono font-medium px-2 py-0.5 rounded-md bg-white text-brivo-navy border border-black/[0.08] shadow-2xs">
                     ⌘K
                   </span>
                 </button>
@@ -297,7 +380,7 @@ export function Navbar() {
             </motion.div>
           )}
         </AnimatePresence>
-      </header>
+      </motion.header>
 
       {/* Global Command Menu & Intelligence Modal */}
       <IntelligenceModal

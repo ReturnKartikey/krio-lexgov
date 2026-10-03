@@ -256,7 +256,6 @@ export default function LandingPage() {
               onClick={() => openAiWithQuery("")}
               className="w-full sm:w-auto px-6 py-3 rounded-full bg-white hover:bg-brivo-paper border border-brivo-navy/15 text-brivo-navy font-medium text-xs tracking-wider uppercase flex items-center justify-center gap-2 shadow-sm hover:shadow-md hover:border-brivo-cyan/50 active:scale-95 group transition-all"
             >
-              <span className="w-2 h-2 rounded-full bg-brivo-cyan animate-pulse" />
               <span>Synthesize Precedents</span>
             </MagneticButton>
 

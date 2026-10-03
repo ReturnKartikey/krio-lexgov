@@ -33,7 +33,6 @@ export function SynthesizeButton({
         className={`${baseStyles} ${variantStyles[variant]} ${className}`}
         title="Open AI Precedent & Risk Synthesizer"
       >
-        <span className="w-2 h-2 rounded-full bg-brivo-cyan animate-pulse" />
         <span>{label}</span>
       </button>
 
