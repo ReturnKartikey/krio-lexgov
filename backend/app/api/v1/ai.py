@@ -1,5 +1,5 @@
 import re
-from datetime import datetime
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
@@ -183,7 +183,7 @@ async def synthesize_regulatory_intelligence(
             ],
             risk_level="LOW",
             confidence_score=0.99,
-            generated_at=datetime.utcnow().isoformat() + "Z",
+            generated_at=datetime.now(UTC).isoformat(),
         )
 
     records = matched_records
@@ -374,5 +374,5 @@ async def synthesize_regulatory_intelligence(
         compliance_takeaways=takeaways[:4],
         risk_level=risk_level,
         confidence_score=confidence_score,
-        generated_at=datetime.utcnow().isoformat() + "Z",
+        generated_at=datetime.now(UTC).isoformat(),
     )

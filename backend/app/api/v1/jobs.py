@@ -103,7 +103,9 @@ async def get_job_detail(
     return IngestionRunItem.model_validate(run)
 
 
-async def execute_background_sync(adapter_key: str, limit: int, incremental: bool):
+async def execute_background_sync(
+    adapter_key: str, limit: int, incremental: bool, run_id: uuid.UUID | None = None
+):
     """Execute ETL run in background with fresh database session."""
     async with AsyncSessionLocal() as session:
         try:
@@ -154,6 +156,7 @@ async def execute_background_sync(adapter_key: str, limit: int, incremental: boo
                 triggered_by="manual_api",
                 limit=limit,
                 incremental=incremental,
+                run_id=run_id,
             )
         except Exception:
             pass
@@ -199,6 +202,7 @@ async def trigger_sync(
             payload.adapter_key,
             payload.limit,
             payload.incremental,
+            run_id,
         )
 
         return SyncJobResponse(
