@@ -96,16 +96,6 @@ export function Footer() {
               </ul>
             </div>
           </div>
-
-          {/* Bottom bar */}
-          <div className="pt-6 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4 text-[0.7rem] text-brivo-slate font-mono text-center sm:text-left">
-            <p>© {new Date().getFullYear()} Krio Intelligence Ltd. Public Domain Regulatory Intelligence.</p>
-            <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2 sm:gap-4 text-brivo-slate/60">
-              <span>Independent Public Domain Archive</span>
-              <span className="hidden sm:inline">•</span>
-              <span>Not Affiliated with SEBI</span>
-            </div>
-          </div>
         </div>
       </footer>
     </>
