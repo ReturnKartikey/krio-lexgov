@@ -48,14 +48,16 @@ export default function JobsPage() {
 
   const handleTriggerSync = async (incremental: boolean = true) => {
     setIsSyncing(true);
-    toast.info("Ingestion Triggered", incremental ? "Running incremental crawler pipeline..." : "Running full re-sync pipeline...");
     try {
       const res = await triggerSyncJob({
         adapter_key: "sebi_adjudication_orders",
         limit: 10,
         incremental,
       });
-      toast.success("Sync Initiated", `Pipeline active (Job Run ID: ${res.run_id.slice(0, 8)})`);
+      toast.success(
+        "Sync Queued",
+        `${incremental ? "Incremental" : "Full"} SEBI crawl active (Run ID: ${res.run_id.slice(0, 8)})`
+      );
       await fetchJobsList();
     } catch (err: any) {
       toast.error("Sync Failed", err.message || "Unable to trigger ETL pipeline");
