@@ -114,3 +114,15 @@ def shutdown_scheduler():
     if scheduler.running:
         scheduler.shutdown()
         logger.info("APScheduler stopped.")
+
+
+if __name__ == "__main__":
+    import asyncio
+
+    start_scheduler()
+    logger.info("Worker process initialized and waiting for scheduled tasks...")
+    try:
+        asyncio.get_event_loop().run_forever()
+    except (KeyboardInterrupt, SystemExit):
+        shutdown_scheduler()
+

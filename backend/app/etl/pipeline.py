@@ -35,6 +35,7 @@ class ETLPipeline:
         triggered_by: str = "scheduler",
         limit: int = 50,
         incremental: bool = True,
+        run_id: uuid.UUID | None = None,
     ) -> IngestionRun:
         """Execute a full or incremental ingestion pipeline run."""
         start_time = time.monotonic()
@@ -83,7 +84,7 @@ class ETLPipeline:
 
         # 3. Create Ingestion Run record
         ingestion_run = IngestionRun(
-            id=uuid.uuid4(),
+            id=run_id or uuid.uuid4(),
             source_id=source.id,
             started_at=datetime.now(UTC),
             status="running",
