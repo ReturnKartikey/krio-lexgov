@@ -64,10 +64,10 @@ export function Navbar() {
     }
   }, [activeIndex]);
 
-  // Synchronize pill geometry whenever active index or scroll/morph state changes
+  // Synchronize pill geometry whenever active index changes
   useEffect(() => {
     updatePill();
-  }, [updatePill, isScrolled]);
+  }, [updatePill]);
 
   // Reset optimistic path when real pathname catches up
   useEffect(() => {
@@ -154,11 +154,6 @@ export function Navbar() {
             borderRadius: isScrolled ? "9999px" : "0px",
             paddingLeft: isScrolled ? "18px" : "32px",
             paddingRight: isScrolled ? "18px" : "32px",
-            backgroundColor: isScrolled ? "rgba(255, 255, 255, 0.38)" : "rgba(255, 255, 255, 0)",
-            borderColor: isScrolled ? "rgba(255, 255, 255, 0.55)" : "rgba(255, 255, 255, 0)",
-            boxShadow: isScrolled
-              ? "0 20px 48px -10px rgba(9, 13, 22, 0.10), 0 8px 16px -4px rgba(9, 13, 22, 0.04), inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.85), inset 0 -1px 1px 0 rgba(9, 13, 22, 0.04), inset 1px 0 1px 0 rgba(255, 255, 255, 0.3), inset -1px 0 1px 0 rgba(255, 255, 255, 0.3)"
-              : "0 0 0 rgba(0, 0, 0, 0)",
           }}
           transition={
             isMounted
@@ -166,27 +161,43 @@ export function Navbar() {
               : { duration: 0 }
           }
           style={{
-            backdropFilter: isScrolled ? "blur(26px) saturate(200%) brightness(102%)" : "blur(0px) saturate(100%)",
-            WebkitBackdropFilter: isScrolled ? "blur(26px) saturate(200%) brightness(102%)" : "blur(0px) saturate(100%)",
             borderWidth: 1,
             borderStyle: "solid",
+            borderColor: isScrolled ? "rgba(255, 255, 255, 0.55)" : "rgba(255, 255, 255, 0)",
             transform: "translateZ(0)",
-            willChange: "max-width, height, width, border-radius, background-color",
+            willChange: "max-width, height, width, border-radius",
             transition: isMounted
-              ? "backdrop-filter 0.32s cubic-bezier(0.16, 1, 0.3, 1), -webkit-backdrop-filter 0.32s cubic-bezier(0.16, 1, 0.3, 1)"
+              ? "border-color 0.34s cubic-bezier(0.16, 1, 0.3, 1)"
               : "none",
           }}
         >
+          {/* Hardware-Accelerated Frosted Glass & Inset Shadow Layer (Pre-warmed on GPU) */}
+          <div
+            className="absolute inset-0 pointer-events-none rounded-[inherit] z-0"
+            style={{
+              opacity: isScrolled ? 1 : 0,
+              backgroundColor: "rgba(255, 255, 255, 0.38)",
+              backdropFilter: "blur(26px) saturate(200%) brightness(102%)",
+              WebkitBackdropFilter: "blur(26px) saturate(200%) brightness(102%)",
+              boxShadow:
+                "0 20px 48px -10px rgba(9, 13, 22, 0.10), 0 8px 16px -4px rgba(9, 13, 22, 0.04), inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.85), inset 0 -1px 1px 0 rgba(9, 13, 22, 0.04), inset 1px 0 1px 0 rgba(255, 255, 255, 0.3), inset -1px 0 1px 0 rgba(255, 255, 255, 0.3)",
+              transform: "translateZ(0)",
+              transition: isMounted
+                ? "opacity 0.34s cubic-bezier(0.16, 1, 0.3, 1)"
+                : "none",
+            }}
+          />
+
           {/* iOS Specular Glass Bevel Reflection */}
           <motion.div
             initial={false}
             animate={{ opacity: isScrolled ? 1 : 0 }}
             transition={isMounted ? { duration: 0.26, ease: "easeOut" } : { duration: 0 }}
-            className="absolute inset-x-6 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-white to-transparent pointer-events-none rounded-full shadow-[0_1px_2px_rgba(255,255,255,0.7)]"
+            className="absolute inset-x-6 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-white to-transparent pointer-events-none rounded-full shadow-[0_1px_2px_rgba(255,255,255,0.7)] z-1"
           />
 
           {/* Left Wing - Brand Monogram & Name */}
-          <div className="flex items-center shrink-0">
+          <div className="relative z-10 flex items-center shrink-0">
             <Link href="/" className="flex items-center gap-2 sm:gap-2.5 group shrink-0">
               <div
                 className={`rounded-xl flex items-center justify-center group-hover:scale-105 transition-all duration-300 overflow-hidden shrink-0 shadow-2xs border border-white/80 ${
@@ -217,7 +228,7 @@ export function Navbar() {
           </div>
 
           {/* Center Navigation - iOS Segmented Glass Track */}
-          <div className="shrink-0 hidden md:flex items-center justify-center">
+          <div className="relative z-10 shrink-0 hidden md:flex items-center justify-center">
             <motion.nav
               ref={navRef}
               className="relative flex items-center rounded-full bg-black/[0.035] backdrop-blur-md border border-white/80 shadow-[inset_0_1px_2px_rgba(0,0,0,0.04),0_1px_0_0_rgba(255,255,255,0.7)] select-none p-1"
@@ -280,7 +291,7 @@ export function Navbar() {
           </div>
 
           {/* Mobile Hamburger Toggle (Always visible on mobile) */}
-          <div className="md:hidden flex items-center justify-end shrink-0">
+          <div className="relative z-10 md:hidden flex items-center justify-end shrink-0">
             <button
               type="button"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
