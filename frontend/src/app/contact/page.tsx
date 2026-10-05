@@ -3,14 +3,14 @@ import Link from "next/link";
 import { Mail, ArrowLeft, ArrowUpRight, Github } from "lucide-react";
 
 export const metadata = {
-  title: "Contact | KRIO LexGov",
+  title: "Contact",
   description: "Contact KRIO LexGov at Krio27180@gmail.com or via GitHub.",
 };
 
 export default function ContactPage() {
   return (
-    <div className="min-h-[85vh] py-16 sm:py-20 px-4 sm:px-6 lg:px-8 text-brivo-navy">
-      <div className="max-w-3xl mx-auto space-y-12">
+    <div className="min-h-[85vh] pt-3 sm:pt-6 pb-12 sm:pb-16 px-4 sm:px-6 lg:px-8 text-brivo-navy">
+      <div className="max-w-3xl mx-auto space-y-6 sm:space-y-8">
         <Link
           href="/"
           className="inline-flex items-center gap-2 text-xs font-mono text-brivo-slate hover:text-brivo-navy transition-colors"
@@ -21,7 +21,7 @@ export default function ContactPage() {
 
         <div className="space-y-4 border-b border-brivo-navy/10 pb-8">
           <div className="flex items-center gap-2 text-xs font-mono text-brivo-navy tracking-widest uppercase">
-            <span className="w-2 h-2 rounded-full bg-brivo-cyan animate-pulse" />
+            <Mail className="w-3.5 h-3.5 text-brivo-cyan" />
             DIRECT CONTACT // DESK
           </div>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif tracking-tight text-brivo-navy">

@@ -3,14 +3,14 @@ import Link from "next/link";
 import { ArrowLeft, Shield } from "lucide-react";
 
 export const metadata = {
-  title: "Privacy Policy | KRIO LexGov",
+  title: "Privacy Policy",
   description: "Privacy policy for KRIO Regulatory Intelligence engine and public indexing registry.",
 };
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="min-h-[85vh] py-16 sm:py-20 px-4 sm:px-6 lg:px-8 text-brivo-navy">
-      <div className="max-w-3xl mx-auto space-y-12">
+    <div className="min-h-[85vh] pt-3 sm:pt-6 pb-12 sm:pb-16 px-4 sm:px-6 lg:px-8 text-brivo-navy">
+      <div className="max-w-3xl mx-auto space-y-6 sm:space-y-8">
         <Link
           href="/"
           className="inline-flex items-center gap-2 text-xs font-mono text-brivo-slate hover:text-brivo-navy transition-colors"
