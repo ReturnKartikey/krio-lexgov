@@ -3,14 +3,14 @@ import Link from "next/link";
 import { ArrowLeft, Scale } from "lucide-react";
 
 export const metadata = {
-  title: "Terms and Conditions | KRIO LexGov",
+  title: "Terms and Conditions",
   description: "Terms of Service and legal disclosures governing access to the KRIO public regulatory archive.",
 };
 
 export default function TermsPage() {
   return (
-    <div className="min-h-[85vh] py-16 sm:py-20 px-4 sm:px-6 lg:px-8 text-brivo-navy">
-      <div className="max-w-3xl mx-auto space-y-12">
+    <div className="min-h-[85vh] pt-3 sm:pt-6 pb-12 sm:pb-16 px-4 sm:px-6 lg:px-8 text-brivo-navy">
+      <div className="max-w-3xl mx-auto space-y-6 sm:space-y-8">
         <Link
           href="/"
           className="inline-flex items-center gap-2 text-xs font-mono text-brivo-slate hover:text-brivo-navy transition-colors"
