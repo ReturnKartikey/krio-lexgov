@@ -277,14 +277,21 @@ export default function LandingPage() {
             ref={manifestoHeadingRef}
             className="text-3xl sm:text-4xl lg:text-5xl font-light tracking-[-0.025em] text-brivo-navy leading-[1.12] font-sans"
           >
-            Law was meant to be{" "}
-            <span className="font-serif italic font-normal editorial-interactive-italic">
-              public.
+            <span className="block">
+              <MoltenText
+                segments={[
+                  { text: "Law was meant to be", className: "font-sans font-light" },
+                  { text: "public.", className: "font-serif italic font-normal text-brivo-navy" },
+                ]}
+              />
             </span>
-            <br />
-            We made it{" "}
-            <span className="font-serif italic font-normal editorial-interactive-italic">
-              computable.
+            <span className="block mt-1 sm:mt-1.5">
+              <MoltenText
+                segments={[
+                  { text: "We made it", className: "font-sans font-light" },
+                  { text: "computable.", className: "font-serif italic font-normal text-brivo-navy" },
+                ]}
+              />
             </span>
           </h2>
         </div>
@@ -344,10 +351,12 @@ export default function LandingPage() {
       <section className="py-12 sm:py-14 lg:py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-10 sm:space-y-12 border-t border-brivo-navy/10 scroll-reveal-section">
         <div className="space-y-3">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-light text-brivo-navy font-sans tracking-[-0.025em] leading-[1.12]">
-            Engineered for{" "}
-            <span className="font-serif italic font-normal editorial-interactive-italic">
-              audit-grade veracity.
-            </span>
+            <MoltenText
+              segments={[
+                { text: "Engineered for", className: "font-sans font-light" },
+                { text: "audit-grade veracity.", className: "font-serif italic font-normal text-brivo-navy" },
+              ]}
+            />
           </h2>
         </div>
 
@@ -395,10 +404,12 @@ export default function LandingPage() {
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div className="space-y-3">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-light text-brivo-navy font-sans tracking-[-0.025em] leading-[1.12]">
-              Precision dossiers for{" "}
-              <span className="font-serif italic font-normal editorial-interactive-italic">
-                high-stakes counsel.
-              </span>
+              <MoltenText
+                segments={[
+                  { text: "Precision dossiers for", className: "font-sans font-light" },
+                  { text: "high-stakes counsel.", className: "font-serif italic font-normal text-brivo-navy" },
+                ]}
+              />
             </h2>
           </div>
           <Link
@@ -512,10 +523,12 @@ export default function LandingPage() {
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div className="space-y-3">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-light text-brivo-navy font-sans tracking-[-0.025em] leading-[1.12]">
-              Live regulatory telemetry,{" "}
-              <span className="font-serif italic font-normal editorial-interactive-italic">
-                zero informational lag.
-              </span>
+              <MoltenText
+                segments={[
+                  { text: "Live regulatory telemetry,", className: "font-sans font-light" },
+                  { text: "zero informational lag.", className: "font-serif italic font-normal text-brivo-navy" },
+                ]}
+              />
             </h2>
           </div>
           <Link
@@ -639,10 +652,12 @@ export default function LandingPage() {
         <div className="p-8 sm:p-12 rounded-2xl bg-brivo-paper border border-brivo-navy/15 relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-8 shadow-xs">
           <div className="space-y-3 max-w-xl">
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-light text-brivo-navy font-sans tracking-tight leading-snug">
-              The workshop,{" "}
-              <span className="font-serif italic font-normal editorial-interactive-italic">
-                out back.
-              </span>
+              <MoltenText
+                segments={[
+                  { text: "The workshop,", className: "font-sans font-light" },
+                  { text: "out back.", className: "font-serif italic font-normal text-brivo-navy" },
+                ]}
+              />
             </h2>
             <p className="text-xs sm:text-sm text-brivo-slate leading-relaxed">
               Every search query, aggregate calculation, and AI risk synthesis is exposed via an async, self-documenting FastAPI REST architecture.
@@ -673,10 +688,12 @@ export default function LandingPage() {
       <section className="py-12 sm:py-14 lg:py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-10 sm:space-y-12 border-t border-brivo-navy/10 scroll-reveal-section">
         <div className="space-y-3">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-light text-brivo-navy font-sans tracking-[-0.025em] leading-[1.12]">
-            Where would you like to{" "}
-            <span className="font-serif italic font-normal editorial-interactive-italic">
-              start?
-            </span>
+            <MoltenText
+              segments={[
+                { text: "Where would you like to", className: "font-sans font-light" },
+                { text: "start?", className: "font-serif italic font-normal text-brivo-navy" },
+              ]}
+            />
           </h2>
         </div>
 

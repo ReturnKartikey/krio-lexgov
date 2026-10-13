@@ -4,8 +4,14 @@ import React, { useRef, useEffect, useCallback } from "react";
 import { gsap } from "gsap";
 import { prefersReducedMotion } from "@/lib/motion";
 
-interface MoltenTextProps {
+export interface MoltenTextSegment {
   text: string;
+  className?: string;
+}
+
+export interface MoltenTextProps {
+  text?: string;
+  segments?: MoltenTextSegment[];
   className?: string;
 }
 
@@ -20,16 +26,36 @@ interface QuickToBundle {
  *
  * Each character reacts to cursor movement with fluid cosine bell-curve
  * displacement, liquid skew, and viscous momentum.
+ * Supports segmented multi-style typography (e.g. sans + italic serif) within
+ * a single unified ripple field.
  * Uses persistent GSAP quickTo interpolators so it never degrades after repeat hovers.
  */
-export function MoltenText({ text, className = "" }: MoltenTextProps) {
+export function MoltenText({ text, segments, className = "" }: MoltenTextProps) {
   const containerRef = useRef<HTMLSpanElement>(null);
   const charRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const quickTosRef = useRef<(QuickToBundle | null)[]>([]);
 
-  // Split into words to preserve natural CSS line-wrapping on mobile
-  const words = text.split(" ");
-  const totalChars = words.reduce((acc, w) => acc + Array.from(w).length, 0);
+  // Parse words and their segment styling
+  const parsedWords = React.useMemo(() => {
+    const list: { word: string; className: string }[] = [];
+    if (segments && segments.length > 0) {
+      segments.forEach((seg) => {
+        const segWords = seg.text.trim().split(/\s+/).filter(Boolean);
+        segWords.forEach((word) => {
+          list.push({ word, className: seg.className || "" });
+        });
+      });
+    } else if (text) {
+      const wordsInText = text.trim().split(/\s+/).filter(Boolean);
+      wordsInText.forEach((word) => {
+        list.push({ word, className: "" });
+      });
+    }
+    return list;
+  }, [text, segments]);
+
+  const totalChars = parsedWords.reduce((acc, item) => acc + Array.from(item.word).length, 0);
+  const fullText = parsedWords.map((item) => item.word).join(" ");
 
   // Initialize persistent GSAP quickTo interpolators
   const initQuickTos = useCallback(() => {
@@ -56,15 +82,17 @@ export function MoltenText({ text, className = "" }: MoltenTextProps) {
   }, []);
 
   useEffect(() => {
+    charRefs.current = charRefs.current.slice(0, totalChars);
     initQuickTos();
     return () => {
       quickTosRef.current = [];
     };
-  }, [initQuickTos, text]);
+  }, [initQuickTos, totalChars]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLSpanElement>) => {
     if (prefersReducedMotion()) return;
     const mouseX = e.clientX;
+    const mouseY = e.clientY;
     const radius = 120; // Radius of liquid ripple influence in pixels
 
     charRefs.current.forEach((charEl, idx) => {
@@ -73,8 +101,10 @@ export function MoltenText({ text, className = "" }: MoltenTextProps) {
 
       const rect = charEl.getBoundingClientRect();
       const charCenterX = rect.left + rect.width / 2;
+      const charCenterY = rect.top + rect.height / 2;
       const deltaX = mouseX - charCenterX;
-      const dist = Math.abs(deltaX);
+      const deltaY = mouseY - charCenterY;
+      const dist = Math.hypot(deltaX, deltaY * 1.25);
 
       if (dist < radius) {
         // Smooth cosine bell-curve for liquid displacement falloff
@@ -127,7 +157,7 @@ export function MoltenText({ text, className = "" }: MoltenTextProps) {
           bundle.skewTo(0);
           bundle.scaleYTo(1);
         }, 220);
-      }, i * 30);
+      }, i * 28);
     });
   }, []);
 
@@ -139,15 +169,15 @@ export function MoltenText({ text, className = "" }: MoltenTextProps) {
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       onClick={handleTouch}
-      className={`inline-block cursor-pointer select-none py-0.5 will-change-transform ${className}`}
-      aria-label={text}
+      className={`inline-block max-w-full cursor-pointer select-none py-0.5 will-change-transform ${className}`}
+      aria-label={fullText}
       role="text"
     >
-      {words.map((word, wIdx) => (
+      {parsedWords.map((item, wIdx) => (
         <React.Fragment key={wIdx}>
-          {wIdx > 0 && <span className="inline-block">&nbsp;</span>}
-          <span className="inline-block whitespace-nowrap">
-            {Array.from(word).map((char) => {
+          {wIdx > 0 && <span className="inline-block select-none">&nbsp;</span>}
+          <span className={`inline-block whitespace-nowrap ${item.className}`}>
+            {Array.from(item.word).map((char) => {
               const charIndex = globalCharIndex++;
               return (
                 <span
