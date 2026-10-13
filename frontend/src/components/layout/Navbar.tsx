@@ -338,10 +338,6 @@ export function Navbar() {
               transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
               className="pointer-events-auto md:hidden w-[calc(100%-1.5rem)] max-w-sm mt-2 p-3 rounded-2xl bg-white/70 backdrop-blur-3xl backdrop-saturate-[210%] border border-white/75 shadow-[0_24px_50px_rgba(9,13,22,0.15),inset_0_1.5px_1px_rgba(255,255,255,0.90),inset_0_-1px_1px_rgba(9,13,22,0.04)] space-y-1.5 z-40"
             >
-              <div className="text-[0.65rem] font-mono text-brivo-slate uppercase px-3 py-1 tracking-wider border-b border-black/[0.06] pb-1.5 flex items-center justify-between">
-                <span>Navigation Modules</span>
-                <span className="text-[0.6rem] text-brivo-slate/60 font-mono">SEBI PORTAL</span>
-              </div>
               <div className="grid grid-cols-1 gap-1">
                 {navLinks.map((link) => {
                   const Icon = link.icon;
@@ -383,15 +379,10 @@ export function Navbar() {
                     setIsMobileMenuOpen(false);
                     setIsAiModalOpen(true);
                   }}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-brivo-paper hover:bg-white border border-brivo-navy/10 text-brivo-navy font-sans text-xs font-semibold flex items-center justify-between transition-all shadow-2xs min-h-[44px] cursor-pointer"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-brivo-paper hover:bg-white border border-brivo-navy/10 text-brivo-navy font-sans text-xs font-semibold flex items-center gap-2.5 transition-all shadow-2xs min-h-[44px] cursor-pointer"
                 >
-                  <div className="flex items-center gap-2.5">
-                    <Sparkles className="w-4 h-4 text-brivo-cyan shrink-0" />
-                    <span>AI Precedent & Risk Brief</span>
-                  </div>
-                  <span className="text-[0.625rem] font-mono font-medium px-2 py-0.5 rounded bg-white text-brivo-navy border border-black/[0.08] shadow-2xs">
-                    ⌘K
-                  </span>
+                  <Sparkles className="w-4 h-4 text-brivo-cyan shrink-0" />
+                  <span>AI Precedent & Risk Brief</span>
                 </button>
               </div>
             </motion.div>
