@@ -29,6 +29,7 @@ import { motion } from "framer-motion";
 import { IntelligenceModal } from "@/components/ai/IntelligenceModal";
 import { QuickLookModal } from "@/components/motion/QuickLookModal";
 import { TiltCard } from "@/components/motion/TiltCard";
+import { MoltenText } from "@/components/motion/MoltenSerif";
 import { getRecords, getTrends, getProcessingStats, getHealth } from "@/lib/api";
 import { formatINR, formatDate, truncateText } from "@/lib/utils";
 import { gsap, ScrollTrigger, SplitType, animateHeroHeadline, animateCounter, prefersReducedMotion } from "@/lib/motion";
@@ -139,8 +140,10 @@ export default function LandingPage() {
     // 3. Staggered reveals for Section Headings and Cards
     const revealSections = document.querySelectorAll(".scroll-reveal-section");
     revealSections.forEach((section) => {
-      gsap.fromTo(
-        section.querySelectorAll(".scroll-reveal-item"),
+      const items = section.querySelectorAll(".scroll-reveal-item");
+      if (items.length > 0) {
+        gsap.fromTo(
+          items,
         {
           opacity: 0,
           y: 28,
@@ -159,8 +162,8 @@ export default function LandingPage() {
             start: "top 85%",
             once: true,
           },
-        }
-      );
+        });
+      }
     });
 
     // 4. Sequential table row reveals
@@ -222,13 +225,17 @@ export default function LandingPage() {
             ref={heroHeadlineRef}
             className="text-3xl sm:text-5xl lg:text-7xl font-light tracking-[-0.035em] text-brivo-navy leading-[1.08] sm:leading-[1.06] font-sans"
           >
-            <span className="block hero-line">Precedent you can</span>
-            <span className="block hero-line font-serif italic font-normal editorial-interactive-italic text-brivo-navy">
-              prove.
+            <span className="block hero-line">
+              <MoltenText text="Precedent you can" className="font-sans font-light" />
             </span>
-            <span className="block hero-line mt-2 sm:mt-3">Intelligence you can</span>
-            <span className="block hero-line font-serif italic font-normal editorial-interactive-italic text-brivo-navy">
-              defend.
+            <span className="block hero-line text-brivo-navy">
+              <MoltenText text="prove." className="font-serif italic font-normal text-brivo-navy" />
+            </span>
+            <span className="block hero-line mt-2 sm:mt-3">
+              <MoltenText text="Intelligence you can" className="font-sans font-light" />
+            </span>
+            <span className="block hero-line text-brivo-navy">
+              <MoltenText text="defend." className="font-serif italic font-normal text-brivo-navy" />
             </span>
           </h1>
 
@@ -414,7 +421,7 @@ export default function LandingPage() {
               <div className="lg:col-span-3 space-y-1 sm:space-y-2 flex flex-row lg:flex-col items-baseline lg:items-start justify-between lg:justify-start gap-2">
                 <div>
                   <span className="font-mono text-[0.65rem] sm:text-[0.68rem] text-brivo-slate uppercase tracking-widest block">
-                    CASE STUDY // {record.state || "MAHARASHTRA"}
+                    CASE STUDY
                   </span>
                   <span className="font-light text-4xl sm:text-6xl lg:text-7xl font-sans text-brivo-navy/80 block">
                     {`0${index + 1}`}
@@ -430,8 +437,6 @@ export default function LandingPage() {
                 <div className="flex items-center gap-2 text-xs font-mono text-brivo-slate">
                   <Calendar className="w-3.5 h-3.5" />
                   <span>{formatDate(record.published_date)}</span>
-                  <span>•</span>
-                  <span>{record.jurisdiction || "Head Office, Mumbai"}</span>
                 </div>
                 <h3 className="text-lg sm:text-xl font-medium text-brivo-navy leading-snug">
                   {record.title}
@@ -440,16 +445,31 @@ export default function LandingPage() {
                   {record.summary || "Adjudication order issued under SEBI enforcement provisions."}
                 </p>
 
-                <div className="pt-2 flex flex-wrap items-center gap-1.5">
-                  <span className="text-[0.68rem] font-mono text-brivo-slate">Noticees:</span>
-                  {record.entity_names?.slice(0, 3).map((ent: string, idx: number) => (
-                    <span
-                      key={idx}
-                      className="px-2.5 py-0.5 rounded-full bg-brivo-paper border border-brivo-navy/10 text-[0.68rem] font-mono text-brivo-navy"
-                    >
-                      {truncateText(ent, 24)}
-                    </span>
-                  ))}
+                <div className="pt-2 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs font-mono text-brivo-slate">
+                  <span className="text-[0.68rem] text-brivo-slate/80 shrink-0">Noticees:</span>
+                  {record.entity_names && record.entity_names.length > 0 ? (
+                    <>
+                      {record.entity_names.slice(0, 3).map((ent: string, idx: number) => (
+                        <React.Fragment key={idx}>
+                          {idx > 0 && <span className="text-brivo-slate/30 shrink-0">·</span>}
+                          <Link
+                            href={`/explorer?entity=${encodeURIComponent(ent)}`}
+                            className="text-[0.68rem] text-brivo-navy hover:text-brivo-cyan hover:underline transition-colors font-mono truncate max-w-[240px]"
+                            title={`Filter by ${ent}`}
+                          >
+                            {truncateText(ent, 26)}
+                          </Link>
+                        </React.Fragment>
+                      ))}
+                      {record.entity_names.length > 3 && (
+                        <span className="text-[0.65rem] text-brivo-slate/60 shrink-0">
+                          (+{record.entity_names.length - 3} more)
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    <span className="text-[0.68rem] text-brivo-slate/50 italic">—</span>
+                  )}
                 </div>
               </div>
 

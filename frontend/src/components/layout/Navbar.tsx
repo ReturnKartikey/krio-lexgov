@@ -74,9 +74,28 @@ export function Navbar() {
     setOptimisticPath(null);
   }, [pathname]);
 
-  // Handle window resize and font load to keep pill sub-pixel accurate
+  const [horizontalPadding, setHorizontalPadding] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      if (window.innerWidth < 640) return "16px";
+      if (window.innerWidth < 1024) return "24px";
+      return "32px";
+    }
+    return "32px";
+  });
+
+  // Handle window resize and font load to keep pill sub-pixel accurate and responsive padding aligned
   useEffect(() => {
-    const handleResize = () => updatePill();
+    const handleResize = () => {
+      if (window.innerWidth < 640) {
+        setHorizontalPadding("16px");
+      } else if (window.innerWidth < 1024) {
+        setHorizontalPadding("24px");
+      } else {
+        setHorizontalPadding("32px");
+      }
+      updatePill();
+    };
+    handleResize();
     window.addEventListener("resize", handleResize);
     if (typeof document !== "undefined" && document.fonts) {
       document.fonts.ready.then(updatePill);
@@ -152,8 +171,8 @@ export function Navbar() {
             maxWidth: isScrolled ? "572px" : "1360px",
             height: isScrolled ? "54px" : "80px",
             borderRadius: isScrolled ? "9999px" : "0px",
-            paddingLeft: isScrolled ? "18px" : "32px",
-            paddingRight: isScrolled ? "18px" : "32px",
+            paddingLeft: isScrolled ? "18px" : horizontalPadding,
+            paddingRight: isScrolled ? "18px" : horizontalPadding,
           }}
           transition={
             isMounted
@@ -203,7 +222,7 @@ export function Navbar() {
                 className={`rounded-xl flex items-center justify-center group-hover:scale-105 transition-all duration-300 overflow-hidden shrink-0 shadow-2xs border border-white/80 ${
                   isScrolled
                     ? "w-8 h-8 max-w-[32px] max-h-[32px]"
-                    : "w-8.5 h-8.5 sm:w-9 sm:h-9 max-w-[36px] max-h-[36px]"
+                    : "w-8 h-8 sm:w-9 sm:h-9 max-w-[36px] max-h-[36px]"
                 }`}
               >
                 <Image
@@ -211,7 +230,7 @@ export function Navbar() {
                   alt="KRIO Icon"
                   width={36}
                   height={36}
-                  style={{ width: "100%", height: "100%" }}
+                  style={{ width: "100%", height: "100%", maxWidth: "36px", maxHeight: "36px" }}
                   className="w-full h-full object-contain rounded-xl shrink-0"
                   priority
                 />

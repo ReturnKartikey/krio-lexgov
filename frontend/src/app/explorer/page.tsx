@@ -713,21 +713,31 @@ function ExplorerContent() {
 
                     {/* Entities & Footer Actions */}
                     <div className="pt-3.5 border-t border-brivo-navy/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar max-w-full">
-                        <span className="text-[0.65rem] font-mono text-brivo-slate shrink-0">Noticees:</span>
-                        {record.entity_names?.slice(0, 3).map((ent, idx) => (
-                          <button
-                            key={idx}
-                            onClick={() => updateUrl({ entity: ent, page: 1 })}
-                            className="px-2 py-0.5 rounded bg-brivo-paper hover:bg-brivo-mist border border-brivo-navy/10 text-[0.65rem] text-brivo-navy transition-colors font-mono cursor-pointer shrink-0 whitespace-nowrap"
-                          >
-                            {truncateText(ent, 20)}
-                          </button>
-                        ))}
-                        {record.entity_names && record.entity_names.length > 3 && (
-                          <span className="text-[0.65rem] font-mono text-brivo-slate shrink-0">
-                            +{record.entity_names.length - 3}
-                          </span>
+                      <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs font-mono text-brivo-slate min-w-0">
+                        <span className="text-[0.68rem] text-brivo-slate/80 shrink-0">Noticees:</span>
+                        {record.entity_names && record.entity_names.length > 0 ? (
+                          <>
+                            {record.entity_names.slice(0, 3).map((ent, idx) => (
+                              <React.Fragment key={idx}>
+                                {idx > 0 && <span className="text-brivo-slate/30 shrink-0">·</span>}
+                                <button
+                                  type="button"
+                                  onClick={() => updateUrl({ entity: ent, page: 1 })}
+                                  className="text-[0.68rem] text-brivo-navy hover:text-brivo-cyan hover:underline transition-colors font-mono cursor-pointer shrink-0 truncate max-w-[220px]"
+                                  title={`Filter by ${ent}`}
+                                >
+                                  {truncateText(ent, 26)}
+                                </button>
+                              </React.Fragment>
+                            ))}
+                            {record.entity_names.length > 3 && (
+                              <span className="text-[0.65rem] text-brivo-slate/60 shrink-0">
+                                (+{record.entity_names.length - 3} more)
+                              </span>
+                            )}
+                          </>
+                        ) : (
+                          <span className="text-[0.68rem] text-brivo-slate/50 italic">—</span>
                         )}
                       </div>
 
