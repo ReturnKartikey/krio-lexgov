@@ -158,15 +158,26 @@ export function QuickLookModal({
                   <span className="text-[0.65rem] font-mono text-brivo-slate uppercase block">
                     Identified Noticees ({record.entity_names?.length || 0})
                   </span>
-                  <div className="flex flex-wrap gap-1">
-                    {record.entity_names?.slice(0, 3).map((name, i) => (
-                      <span
-                        key={i}
-                        className="px-2 py-0.2 rounded bg-white border border-brivo-navy/10 text-[0.65rem] font-mono text-brivo-navy"
-                      >
-                        {name}
-                      </span>
-                    ))}
+                  <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs font-mono">
+                    {record.entity_names && record.entity_names.length > 0 ? (
+                      <>
+                        {record.entity_names.slice(0, 4).map((name, i) => (
+                          <React.Fragment key={i}>
+                            {i > 0 && <span className="text-brivo-slate/30">·</span>}
+                            <span className="text-[0.68rem] font-mono text-brivo-navy">
+                              {name}
+                            </span>
+                          </React.Fragment>
+                        ))}
+                        {record.entity_names.length > 4 && (
+                          <span className="text-[0.65rem] text-brivo-slate/60">
+                            (+{record.entity_names.length - 4} more)
+                          </span>
+                        )}
+                      </>
+                    ) : (
+                      <span className="text-[0.68rem] text-brivo-slate/50 italic">—</span>
+                    )}
                   </div>
                 </div>
               </div>
