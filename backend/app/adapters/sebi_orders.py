@@ -16,6 +16,7 @@ from app.adapters.base import (
 from app.core.config import get_settings
 from app.core.logging import logger
 from app.core.rate_limiter import rate_limiter, robots_validator
+from app.core.security import is_safe_registry_url
 from app.etl.entity_extractor import (
     extract_entities_from_text,
     extract_location,
@@ -565,22 +566,32 @@ class SEBIOrdersAdapter(SourceAdapter):
         http_status = 200
 
         if settings.ENVIRONMENT != "test":
-            await rate_limiter.acquire(1.0)
-            try:
-                async with httpx.AsyncClient(
-                    timeout=settings.CRAWLER_REQUEST_TIMEOUT, follow_redirects=True
-                ) as client:
-                    resp = await client.get(ref.source_url, headers=self._get_headers())
-                    if resp.status_code == 200:
-                        content_bytes = resp.content
-                        mime_type = (
-                            resp.headers.get("content-type", mime_type).split(";")[0].strip()
-                        )
-                        http_status = 200
-            except Exception as e:
-                logger.debug(
-                    f"Live fetch for {ref.source_url} bypassed: {e}. Generating snapshot from record metadata."
+            if not is_safe_registry_url(ref.source_url):
+                logger.warning(
+                    f"SSRF protection: Skipped live fetch for unapproved/unsafe registry URL: {ref.source_url}"
                 )
+            else:
+                await rate_limiter.acquire(1.0)
+                try:
+                    async with httpx.AsyncClient(
+                        timeout=settings.CRAWLER_REQUEST_TIMEOUT, follow_redirects=True
+                    ) as client:
+                        resp = await client.get(ref.source_url, headers=self._get_headers())
+                        # Validate final URL after redirects
+                        if not is_safe_registry_url(str(resp.url)):
+                            logger.warning(
+                                f"SSRF protection: Redirected to disallowed destination: {resp.url}"
+                            )
+                        elif resp.status_code == 200:
+                            content_bytes = resp.content
+                            mime_type = (
+                                resp.headers.get("content-type", mime_type).split(";")[0].strip()
+                            )
+                            http_status = 200
+                except Exception as e:
+                    logger.debug(
+                        f"Live fetch for {ref.source_url} bypassed: {e}. Generating snapshot from record metadata."
+                    )
 
         if not content_bytes:
             # Generate reproducible raw document snapshot

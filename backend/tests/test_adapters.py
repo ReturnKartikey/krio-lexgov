@@ -41,3 +41,22 @@ async def test_sebi_adapter_fetch_and_parse():
     assert normalized.title == ref.title
     assert normalized.status == "published"
     assert len(normalized.entities) > 0
+
+
+def test_ssrf_url_validation():
+    from app.core.security import is_safe_registry_url
+
+    # Malicious / SSRF URLs that must be blocked
+    assert is_safe_registry_url("http://169.254.169.254/latest/meta-data/") is False
+    assert is_safe_registry_url("file:///etc/passwd") is False
+    assert is_safe_registry_url("gopher://127.0.0.1:6379/") is False
+    assert is_safe_registry_url("http://evil-hacker.com/exploit.pdf") is False
+    assert is_safe_registry_url("javascript:alert(1)") is False
+    assert is_safe_registry_url("") is False
+    assert is_safe_registry_url(None) is False
+
+    # Legitimate registry URLs that must be allowed
+    assert is_safe_registry_url("https://www.sebi.gov.in/enforcement/orders/mar-2024/order.pdf") is True
+    assert is_safe_registry_url("https://sebi.gov.in/order.html") is True
+    assert is_safe_registry_url("https://www.bseindia.com/downloads/order.pdf") is True
+

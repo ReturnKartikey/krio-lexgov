@@ -7,6 +7,7 @@ from sqlalchemy import String, and_, cast, desc, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
+from app.core.rate_limiter import check_rate_limit
 from app.db.models import Record
 
 router = APIRouter(prefix="/ai", tags=["AI Intelligence"])
@@ -73,7 +74,11 @@ def clean_summary_text(raw_text: str | None, title: str) -> str:
     return cleaned
 
 
-@router.post("/synthesize", response_model=SynthesisResponse)
+@router.post(
+    "/synthesize",
+    response_model=SynthesisResponse,
+    dependencies=[Depends(check_rate_limit(max_per_minute=30))],
+)
 async def synthesize_regulatory_intelligence(
     req: SynthesisRequest,
     db: AsyncSession = Depends(get_db),

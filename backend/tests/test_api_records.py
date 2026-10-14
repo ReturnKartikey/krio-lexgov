@@ -61,3 +61,20 @@ async def test_get_record_preview(client):
     assert "external_id" in data
     assert "entity_names" in data
 
+
+@pytest.mark.asyncio
+async def test_search_records_wildcards(client):
+    # Searching for wildcard characters (%, _) should safely escape and not crash or match everything
+    response = await client.get("/api/records?q=%25%25%25")
+    assert response.status_code == 200
+    data = response.json()
+    assert "data" in data
+    assert isinstance(data["data"], list)
+
+    response_underscore = await client.get("/api/records?q=____")
+    assert response_underscore.status_code == 200
+    data_us = response_underscore.json()
+    assert "data" in data_us
+    assert isinstance(data_us["data"], list)
+
+

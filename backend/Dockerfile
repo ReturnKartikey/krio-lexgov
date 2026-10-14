@@ -21,8 +21,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /root/.local /root/.local
-ENV PATH=/root/.local/bin:$PATH
+RUN groupadd -r appgroup && useradd -r -m -g appgroup -s /sbin/nologin appuser
+
+COPY --from=builder /root/.local /home/appuser/.local
+ENV PATH=/home/appuser/.local/bin:$PATH
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
@@ -31,6 +33,10 @@ COPY start.sh .
 RUN sed -i 's/\r$//' start.sh && chmod +x start.sh
 
 COPY app/ ./app/
+
+RUN chown -R appuser:appgroup /app /home/appuser
+
+USER appuser
 
 EXPOSE 8000
 

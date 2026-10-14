@@ -8,7 +8,11 @@ class Settings(BaseSettings):
     VERSION: str = "1.0.0"
     API_V1_STR: str = "/api"
     ENVIRONMENT: str = "development"
-    DEBUG: bool = True
+    DEBUG: bool = False
+
+    # Security & Admin Access
+    ADMIN_API_KEY: str = "krio_admin_secret_key_change_me"
+    RATE_LIMIT_PER_MINUTE: int = 120
 
     # Database
     DATABASE_URL: str = "postgresql+asyncpg://postgres:change_me_in_env@localhost:5432/opengov_db"

@@ -16,6 +16,7 @@ from app.api.schemas import (
     RecordListItem,
 )
 from app.core.database import get_db
+from app.core.security import escape_like
 from app.db.models import Record, RecordEntity
 
 router = APIRouter(prefix="/records", tags=["Records"])
@@ -57,16 +58,17 @@ async def list_records(
     filters = []
 
     if isinstance(q, str) and q.strip():
-        search_term = q.strip()[:500]
-        tokens = [t for t in search_term.split() if len(t) > 1][:10]
+        raw_query = q.strip()[:500]
+        search_term = escape_like(raw_query)
+        tokens = [escape_like(t) for t in raw_query.split() if len(t) > 1][:10]
 
         # Base full-phrase match
         full_phrase_filter = or_(
-            Record.title.ilike(f"%{search_term}%"),
-            Record.summary.ilike(f"%{search_term}%"),
-            Record.jurisdiction.ilike(f"%{search_term}%"),
-            Record.external_id.ilike(f"%{search_term}%"),
-            cast(Record.entity_names, String).ilike(f"%{search_term}%"),
+            Record.title.ilike(f"%{search_term}%", escape="\\"),
+            Record.summary.ilike(f"%{search_term}%", escape="\\"),
+            Record.jurisdiction.ilike(f"%{search_term}%", escape="\\"),
+            Record.external_id.ilike(f"%{search_term}%", escape="\\"),
+            cast(Record.entity_names, String).ilike(f"%{search_term}%", escape="\\"),
         )
 
         if len(tokens) > 1:
@@ -75,11 +77,11 @@ async def list_records(
             for tok in tokens:
                 token_filters.append(
                     or_(
-                        Record.title.ilike(f"%{tok}%"),
-                        Record.summary.ilike(f"%{tok}%"),
-                        Record.jurisdiction.ilike(f"%{tok}%"),
-                        Record.external_id.ilike(f"%{tok}%"),
-                        cast(Record.entity_names, String).ilike(f"%{tok}%"),
+                        Record.title.ilike(f"%{tok}%", escape="\\"),
+                        Record.summary.ilike(f"%{tok}%", escape="\\"),
+                        Record.jurisdiction.ilike(f"%{tok}%", escape="\\"),
+                        Record.external_id.ilike(f"%{tok}%", escape="\\"),
+                        cast(Record.entity_names, String).ilike(f"%{tok}%", escape="\\"),
                     )
                 )
             filters.append(or_(full_phrase_filter, and_(*token_filters)))
@@ -87,37 +89,38 @@ async def list_records(
             filters.append(full_phrase_filter)
 
     if isinstance(state, str) and state.strip():
-        filters.append(Record.state.ilike(f"%{state.strip()[:100]}%"))
+        filters.append(Record.state.ilike(f"%{escape_like(state.strip()[:100])}%", escape="\\"))
 
     if isinstance(record_type, str) and record_type.strip():
-        filters.append(Record.record_type.ilike(record_type.strip()[:100]))
+        filters.append(Record.record_type.ilike(escape_like(record_type.strip()[:100]), escape="\\"))
 
     if isinstance(status, str) and status.strip():
-        filters.append(Record.status.ilike(status.strip()[:100]))
+        filters.append(Record.status.ilike(escape_like(status.strip()[:100]), escape="\\"))
 
     if isinstance(entity, str) and entity.strip():
-        ent_term = entity.strip()[:200]
-        ent_tokens = [t for t in ent_term.split() if len(t) > 1][:10]
+        raw_entity = entity.strip()[:200]
+        ent_term = escape_like(raw_entity)
+        ent_tokens = [escape_like(t) for t in raw_entity.split() if len(t) > 1][:10]
         if len(ent_tokens) > 1:
             ent_token_filters = [
                 or_(
-                    cast(Record.entity_names, String).ilike(f"%{tok}%"),
-                    Record.title.ilike(f"%{tok}%"),
+                    cast(Record.entity_names, String).ilike(f"%{tok}%", escape="\\"),
+                    Record.title.ilike(f"%{tok}%", escape="\\"),
                 )
                 for tok in ent_tokens
             ]
             filters.append(
                 or_(
-                    cast(Record.entity_names, String).ilike(f"%{ent_term}%"),
-                    Record.title.ilike(f"%{ent_term}%"),
+                    cast(Record.entity_names, String).ilike(f"%{ent_term}%", escape="\\"),
+                    Record.title.ilike(f"%{ent_term}%", escape="\\"),
                     and_(*ent_token_filters),
                 )
             )
         else:
             filters.append(
                 or_(
-                    cast(Record.entity_names, String).ilike(f"%{ent_term}%"),
-                    Record.title.ilike(f"%{ent_term}%"),
+                    cast(Record.entity_names, String).ilike(f"%{ent_term}%", escape="\\"),
+                    Record.title.ilike(f"%{ent_term}%", escape="\\"),
                 )
             )
 

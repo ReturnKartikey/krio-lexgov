@@ -7,6 +7,8 @@ from app.api.v1.ai import clean_summary_text
 async def test_root_endpoint(client):
     response = await client.get("/")
     assert response.status_code == 200
+    assert response.headers.get("x-content-type-options") == "nosniff"
+    assert response.headers.get("x-frame-options") == "DENY"
     data = response.json()
     assert "title" in data
     assert "version" in data
@@ -113,3 +115,28 @@ def test_clean_summary_text_normal_length():
     summary = "Adjudication order establishing monetary penalties for disclosure default under LODR Regulations."
     result = clean_summary_text(summary, title)
     assert result == summary
+
+
+@pytest.mark.asyncio
+async def test_inbound_rate_limiter_logic():
+    from app.core.rate_limiter import InboundRateLimiter
+
+    limiter = InboundRateLimiter(default_limit=2, window_seconds=60)
+    # 1st request
+    allowed, retry_after = await limiter.is_allowed("192.168.1.100")
+    assert allowed is True
+    assert retry_after == 0
+
+    # 2nd request
+    allowed, retry_after = await limiter.is_allowed("192.168.1.100")
+    assert allowed is True
+
+    # 3rd request exceeds limit of 2
+    allowed, retry_after = await limiter.is_allowed("192.168.1.100")
+    assert allowed is False
+    assert retry_after > 0
+
+    # Different IP is unaffected
+    allowed, retry_after = await limiter.is_allowed("192.168.1.101")
+    assert allowed is True
+

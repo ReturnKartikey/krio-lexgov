@@ -14,7 +14,10 @@ from app.api.schemas import (
     SyncJobRequest,
     SyncJobResponse,
 )
+from app.core.auth import verify_admin_key
 from app.core.database import AsyncSessionLocal, get_db
+from app.core.logging import logger
+from app.core.rate_limiter import check_rate_limit
 from app.db.models import IngestionRun, Record, RecordEntity
 from app.etl.pipeline import ETLPipeline
 
@@ -123,15 +126,14 @@ async def execute_background_sync(
                 "SEBI-ZENITH-2026",
                 "SEBI-WINSOME-2026",
             ]
-            for leg_id in legacy_ids:
-                rec_stmt = select(Record).where(Record.external_id == leg_id)
-                rec_res = await session.execute(rec_stmt)
-                rec = rec_res.scalar_one_or_none()
-                if rec:
-                    await session.execute(
-                        delete(RecordEntity).where(RecordEntity.record_id == rec.id)
-                    )
-                    await session.execute(delete(Record).where(Record.id == rec.id))
+            if legacy_ids:
+                subq = select(Record.id).where(Record.external_id.in_(legacy_ids))
+                await session.execute(
+                    delete(RecordEntity).where(RecordEntity.record_id.in_(subq))
+                )
+                await session.execute(
+                    delete(Record).where(Record.external_id.in_(legacy_ids))
+                )
 
             # Update all seed records to exact static ISO published dates and verified PDF penalty amounts
             for item in SAMPLE_SEBI_DATA:
@@ -158,11 +160,15 @@ async def execute_background_sync(
                 incremental=incremental,
                 run_id=run_id,
             )
-        except Exception:
-            pass
+        except Exception as e:
+            logger.error(f"Background ETL sync failed for run {run_id}: {e}", exc_info=True)
 
 
-@router.post("/sync", response_model=SyncJobResponse)
+@router.post(
+    "/sync",
+    response_model=SyncJobResponse,
+    dependencies=[Depends(verify_admin_key), Depends(check_rate_limit(max_per_minute=10))],
+)
 async def trigger_sync(
     payload: SyncJobRequest = SyncJobRequest(),
     background_tasks: BackgroundTasks = BackgroundTasks(),

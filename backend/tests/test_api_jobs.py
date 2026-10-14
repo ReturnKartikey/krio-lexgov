@@ -90,3 +90,29 @@ async def test_stuck_job_auto_timeout(client, db_session):
     assert detail["duration_seconds"] == 3600.0
     assert "timeout" in detail["error_log"].lower()
 
+
+@pytest.mark.asyncio
+async def test_jobs_sync_admin_key_security(client):
+    from app.core.config import get_settings
+
+    settings = get_settings()
+
+    # 1. Invalid admin key should be rejected with 401
+    bad_resp = await client.post(
+        "/api/jobs/sync",
+        headers={"X-Admin-Key": "completely_wrong_key"},
+        json={"adapter_key": "sebi_adjudication_orders", "limit": 1, "incremental": False},
+    )
+    assert bad_resp.status_code == 401
+    assert "Invalid administrative API key" in bad_resp.json()["detail"]
+
+    # 2. Valid admin key should succeed
+    good_resp = await client.post(
+        "/api/jobs/sync",
+        headers={"X-Admin-Key": settings.ADMIN_API_KEY},
+        json={"adapter_key": "sebi_adjudication_orders", "limit": 1, "incremental": False},
+    )
+    assert good_resp.status_code == 200
+    assert "run_id" in good_resp.json()
+
+

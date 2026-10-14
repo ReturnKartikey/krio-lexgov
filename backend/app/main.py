@@ -18,14 +18,19 @@ from app.scheduler.runner import (
 settings = get_settings()
 
 
+_background_tasks: set[asyncio.Task] = set()
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup actions
     logger.info(f"Starting {settings.PROJECT_NAME} v{settings.VERSION} [{settings.ENVIRONMENT}]")
 
-    # Run initial seed check asynchronously
+    # Run initial seed check asynchronously with anchored task reference
     if settings.AUTO_SEED_FALLBACK:
-        asyncio.create_task(bootstrap_initial_data_if_empty())
+        task = asyncio.create_task(bootstrap_initial_data_if_empty())
+        _background_tasks.add(task)
+        task.add_done_callback(_background_tasks.discard)
 
     if settings.ENABLE_SCHEDULER_ON_STARTUP:
         start_scheduler()
@@ -66,6 +71,17 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    return response
 
 
 # Exception handlers

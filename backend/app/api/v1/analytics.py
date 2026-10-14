@@ -15,6 +15,7 @@ from app.api.schemas import (
     TrendsResponse,
 )
 from app.core.database import get_db
+from app.core.rate_limiter import check_rate_limit
 from app.db.models import Entity, IngestionRun, Record, RecordEntity
 from app.etl.deduplication import detect_near_duplicates
 
@@ -280,7 +281,11 @@ async def get_processing_stats(db: AsyncSession = Depends(get_db)):
     )
 
 
-@router.get("/duplicates", response_model=list[DuplicateItemResponse])
+@router.get(
+    "/duplicates",
+    response_model=list[DuplicateItemResponse],
+    dependencies=[Depends(check_rate_limit(max_per_minute=20))],
+)
 async def get_duplicates(
     threshold: float = Query(0.70, ge=0.5, le=1.0),
     db: AsyncSession = Depends(get_db),

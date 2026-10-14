@@ -14,6 +14,7 @@ from app.api.schemas import (
     RecordListItem,
 )
 from app.core.database import get_db
+from app.core.security import escape_like
 from app.db.models import Entity, RecordEntity
 
 router = APIRouter(prefix="/entities", tags=["Entities"])
@@ -38,9 +39,11 @@ async def list_entities(
     count_stmt = select(func.count(Entity.id))
 
     if isinstance(q, str) and q.strip():
-        term = q.strip().lower()[:500]
+        raw_term = q.strip().lower()[:500]
+        term = escape_like(raw_term)
         search_filter = or_(
-            Entity.normalized_name.ilike(f"%{term}%"), Entity.name.ilike(f"%{term}%")
+            Entity.normalized_name.ilike(f"%{term}%", escape="\\"),
+            Entity.name.ilike(f"%{term}%", escape="\\"),
         )
         stmt = stmt.where(search_filter)
         count_stmt = count_stmt.where(search_filter)
