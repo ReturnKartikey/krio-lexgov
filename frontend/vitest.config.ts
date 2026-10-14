@@ -11,6 +11,7 @@ export default defineConfig({
     exclude: ["e2e/**", "node_modules/**"],
   },
   resolve: {
+    preserveSymlinks: true,
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
