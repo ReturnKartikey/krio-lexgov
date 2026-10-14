@@ -31,6 +31,7 @@ import { QuickLookModal } from "@/components/motion/QuickLookModal";
 import { TiltCard } from "@/components/motion/TiltCard";
 import { MoltenText } from "@/components/motion/MoltenSerif";
 import { getRecords, getTrends, getProcessingStats, getHealth } from "@/lib/api";
+import { RecordListItem } from "@/lib/types";
 import { formatINR, formatDate, truncateText } from "@/lib/utils";
 import { gsap, ScrollTrigger, SplitType, animateHeroHeadline, animateCounter, prefersReducedMotion } from "@/lib/motion";
 
@@ -41,10 +42,10 @@ export default function LandingPage() {
     totalEntities: 40,
     successRate: 100.0,
   });
-  const [recentRecords, setRecentRecords] = useState<any[]>([]);
+  const [recentRecords, setRecentRecords] = useState<RecordListItem[]>([]);
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const [aiInitialQuery, setAiInitialQuery] = useState("");
-  const [quickLookRecord, setQuickLookRecord] = useState<any>(null);
+  const [quickLookRecord, setQuickLookRecord] = useState<RecordListItem | null>(null);
   const [isQuickLookOpen, setIsQuickLookOpen] = useState(false);
 
   const heroHeadlineRef = useRef<HTMLHeadingElement>(null);
@@ -100,95 +101,98 @@ export default function LandingPage() {
 
     gsap.registerPlugin(ScrollTrigger);
 
-    // 1. Hero Headline staggered line reveal animation
-    if (heroHeadlineRef.current) {
-      const lineElements = heroHeadlineRef.current.querySelectorAll(".hero-line");
-      gsap.fromTo(
-        lineElements,
-        {
-          opacity: 0,
-          y: 35,
-          filter: "blur(6px)",
-        },
-        {
-          opacity: 1,
-          y: 0,
-          filter: "blur(0px)",
-          duration: 0.85,
-          stagger: 0.12,
-          ease: "power4.out",
-          clearProps: "filter,transform",
-        }
-      );
-    }
-
-    // 2. Parallax vertical drift for background giant 'K' watermark
-    if (heroWatermarkRef.current) {
-      gsap.to(heroWatermarkRef.current, {
-        yPercent: 35,
-        opacity: 0.08,
-        ease: "none",
-        scrollTrigger: {
-          trigger: heroWatermarkRef.current,
-          start: "top top",
-          end: "bottom top",
-          scrub: 1.2,
-        },
-      });
-    }
-
-    // 3. Staggered reveals for Section Headings and Cards
-    const revealSections = document.querySelectorAll(".scroll-reveal-section");
-    revealSections.forEach((section) => {
-      const items = section.querySelectorAll(".scroll-reveal-item");
-      if (items.length > 0) {
+    const ctx = gsap.context(() => {
+      // 1. Hero Headline staggered line reveal animation
+      if (heroHeadlineRef.current) {
+        const lineElements = heroHeadlineRef.current.querySelectorAll(".hero-line");
         gsap.fromTo(
-          items,
-        {
-          opacity: 0,
-          y: 28,
-          filter: "blur(4px)",
-        },
-        {
-          opacity: 1,
-          y: 0,
-          filter: "blur(0px)",
-          duration: 0.75,
-          stagger: 0.08,
-          ease: "power3.out",
-          clearProps: "filter,transform",
+          lineElements,
+          {
+            opacity: 0,
+            y: 35,
+            filter: "blur(6px)",
+          },
+          {
+            opacity: 1,
+            y: 0,
+            filter: "blur(0px)",
+            duration: 0.85,
+            stagger: 0.12,
+            ease: "power4.out",
+            clearProps: "filter,transform",
+          }
+        );
+      }
+
+      // 2. Parallax vertical drift for background giant 'K' watermark
+      if (heroWatermarkRef.current) {
+        gsap.to(heroWatermarkRef.current, {
+          yPercent: 35,
+          opacity: 0.08,
+          ease: "none",
           scrollTrigger: {
-            trigger: section,
-            start: "top 85%",
-            once: true,
+            trigger: heroWatermarkRef.current,
+            start: "top top",
+            end: "bottom top",
+            scrub: 1.2,
           },
         });
       }
+
+      // 3. Staggered reveals for Section Headings and Cards
+      const revealSections = document.querySelectorAll(".scroll-reveal-section");
+      revealSections.forEach((section) => {
+        const items = section.querySelectorAll(".scroll-reveal-item");
+        if (items.length > 0) {
+          gsap.fromTo(
+            items,
+            {
+              opacity: 0,
+              y: 28,
+              filter: "blur(4px)",
+            },
+            {
+              opacity: 1,
+              y: 0,
+              filter: "blur(0px)",
+              duration: 0.75,
+              stagger: 0.08,
+              ease: "power3.out",
+              clearProps: "filter,transform",
+              scrollTrigger: {
+                trigger: section,
+                start: "top 85%",
+                once: true,
+              },
+            }
+          );
+        }
+      });
+
+      // 4. Sequential table row reveals
+      const tableRows = document.querySelectorAll(".dispatch-table-row");
+      if (tableRows.length > 0) {
+        gsap.fromTo(
+          tableRows,
+          { opacity: 0, y: 14 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.5,
+            stagger: 0.05,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: ".dispatch-table-container",
+              start: "top 85%",
+              once: true,
+            },
+          }
+        );
+      }
     });
 
-    // 4. Sequential table row reveals
-    const tableRows = document.querySelectorAll(".dispatch-table-row");
-    if (tableRows.length > 0) {
-      gsap.fromTo(
-        tableRows,
-        { opacity: 0, y: 14 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.5,
-          stagger: 0.05,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: ".dispatch-table-container",
-            start: "top 85%",
-            once: true,
-          },
-        }
-      );
-    }
-
     return () => {
-      ScrollTrigger.getAll().forEach((t) => t.kill());
+      ctx.revert();
     };
   }, []);
 

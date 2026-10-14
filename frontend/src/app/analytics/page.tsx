@@ -44,6 +44,28 @@ import {
 import { formatINR, formatDate } from "@/lib/utils";
 import { RollingNumber } from "@/components/ui/RollingNumber";
 
+interface DailyTooltipProps {
+  active?: boolean;
+  payload?: Array<{
+    payload: DailyCount;
+  }>;
+  label?: string;
+}
+
+function CustomDailyTooltip({ active, payload, label }: DailyTooltipProps) {
+  if (active && payload && payload.length) {
+    const d = payload[0].payload;
+    return (
+      <div className="p-3 bg-brivo-void border border-brivo-navy/20 rounded-md shadow-xl text-xs space-y-1 font-mono text-brivo-paper">
+        <div className="text-brivo-slate font-semibold">{formatDate(label || "")}</div>
+        <div className="text-brivo-cyan">Orders: {d.count}</div>
+        <div className="text-brivo-mist">Penalties: {formatINR(d.total_penalty)}</div>
+      </div>
+    );
+  }
+  return null;
+}
+
 export default function AnalyticsPage() {
   const [interval, setInterval] = useState<"week" | "month">("month");
   const [hasUserToggledInterval, setHasUserToggledInterval] = useState(false);
@@ -118,20 +140,6 @@ export default function AnalyticsPage() {
       isCurrent = false;
     };
   }, [interval, daysWindow]);
-
-  const CustomDailyTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      const d = payload[0].payload;
-      return (
-        <div className="p-3 bg-brivo-void border border-brivo-navy/20 rounded-md shadow-xl text-xs space-y-1 font-mono text-brivo-paper">
-          <div className="text-brivo-slate font-semibold">{formatDate(label)}</div>
-          <div className="text-brivo-cyan">Orders: {d.count}</div>
-          <div className="text-brivo-mist">Penalties: {formatINR(d.total_penalty)}</div>
-        </div>
-      );
-    }
-    return null;
-  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 sm:pt-6 pb-10 sm:pb-16 space-y-6 sm:space-y-10">
