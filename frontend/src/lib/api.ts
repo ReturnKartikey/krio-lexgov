@@ -33,7 +33,7 @@ export function getCached<T>(key: string): T | null {
   return entry.data as T;
 }
 
-export function setCached<T>(key: string, data: T, ttlMs: number = 60000): void {
+function setCached<T>(key: string, data: T, ttlMs: number = 60000): void {
   if (memoryCache.size > 150) {
     const keys = Array.from(memoryCache.keys());
     if (keys.length > 0) {
@@ -43,7 +43,7 @@ export function setCached<T>(key: string, data: T, ttlMs: number = 60000): void 
   memoryCache.set(key, { data, timestamp: Date.now(), ttl: ttlMs });
 }
 
-export function clearCache(pattern?: string): void {
+function clearCache(pattern?: string): void {
   if (!pattern) {
     memoryCache.clear();
     return;
@@ -66,10 +66,6 @@ export function getApiBaseUrl(): string {
     return (process.env.INTERNAL_API_URL || process.env.API_URL)!.replace(/\/$/, "");
   }
   return "https://krio-lexgov-api.onrender.com";
-}
-
-export function getDocsUrl(): string {
-  return "/api-explorer";
 }
 
 function getApiBase(): string {
@@ -137,7 +133,7 @@ async function fetchJson<T>(
   return fetchPromise;
 }
 
-export function prefetchEndpoint(endpoint: string, ttlMs: number = 60000) {
+function prefetchEndpoint(endpoint: string, ttlMs: number = 60000) {
   if (typeof window === "undefined") return;
   const base = getApiBase();
   const url = endpoint.startsWith("http") ? endpoint : `${base}${endpoint}`;

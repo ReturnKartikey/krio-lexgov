@@ -66,15 +66,6 @@ export function animateHeroHeadline(
   }
 }
 
-/**
- * Create a magnetic pull effect towards the mouse cursor (disabled per user preference - buttons stay stable on hover)
- */
-export function createMagneticEffect(
-  _element: HTMLElement,
-  _options?: { strength?: number; textPull?: boolean }
-) {
-  return () => {};
-}
 
 /**
  * Create a subtle 3D card tilt effect (max 2-3 degrees)
