@@ -257,15 +257,21 @@ export default async function RecordDetailPage({ params }: PageProps) {
             </p>
 
             <div className="pt-1">
-              <a
-                href={record.source_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-between gap-2 p-3 rounded-lg bg-brivo-paper border border-brivo-navy/10 text-brivo-navy hover:text-brivo-cyan hover:border-brivo-cyan/40 text-xs font-mono transition-all group"
-              >
-                <span className="truncate flex-1">{record.source_url}</span>
-                <ExternalLink className="w-3.5 h-3.5 shrink-0 text-brivo-slate group-hover:text-brivo-cyan transition-colors" />
-              </a>
+              {record.source_url && /^https?:\/\//i.test(record.source_url) ? (
+                <a
+                  href={record.source_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between gap-2 p-3 rounded-lg bg-brivo-paper border border-brivo-navy/10 text-brivo-navy hover:text-brivo-cyan hover:border-brivo-cyan/40 text-xs font-mono transition-all group"
+                >
+                  <span className="truncate flex-1">{record.source_url}</span>
+                  <ExternalLink className="w-3.5 h-3.5 shrink-0 text-brivo-slate group-hover:text-brivo-cyan transition-colors" />
+                </a>
+              ) : (
+                <div className="flex items-center justify-between gap-2 p-3 rounded-lg bg-brivo-paper border border-brivo-navy/10 text-brivo-slate text-xs font-mono">
+                  <span className="truncate flex-1">{record.source_url || "No verified external registry URL available"}</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
