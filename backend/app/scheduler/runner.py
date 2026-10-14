@@ -52,15 +52,14 @@ async def bootstrap_initial_data_if_empty():
                 "SEBI-INSIDER-2026",
                 "SEBI-RECOVERY-2026",
             ]
-            for leg_id in legacy_ids:
-                rec_stmt = select(Record).where(Record.external_id == leg_id)
-                rec_res = await session.execute(rec_stmt)
-                rec = rec_res.scalar_one_or_none()
-                if rec:
-                    await session.execute(
-                        delete(RecordEntity).where(RecordEntity.record_id == rec.id)
-                    )
-                    await session.execute(delete(Record).where(Record.id == rec.id))
+            if legacy_ids:
+                subq = select(Record.id).where(Record.external_id.in_(legacy_ids))
+                await session.execute(
+                    delete(RecordEntity).where(RecordEntity.record_id.in_(subq))
+                )
+                await session.execute(
+                    delete(Record).where(Record.external_id.in_(legacy_ids))
+                )
             await session.commit()
             # Update all seed records to exact static ISO published dates and verified PDF penalty amounts
             for item in SAMPLE_SEBI_DATA:

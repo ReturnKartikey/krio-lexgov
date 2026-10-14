@@ -138,7 +138,7 @@ async def ingest_live_sebi_settlement_orders():
                     else ["Noticee Entity"]
                 )
 
-                ext_id = f"SEBI-SETTLE-{hashlib.md5(order_url.encode()).hexdigest()[:10].upper()}"
+                ext_id = f"SEBI-SETTLE-{hashlib.sha256(order_url.encode()).hexdigest()[:10].upper()}"
 
                 record = Record(
                     id=uuid.uuid4(),

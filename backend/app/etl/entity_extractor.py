@@ -302,6 +302,7 @@ def parse_inr_amount(amount_str: str, multiplier_unit: str | None = None) -> flo
 
 def extract_entities_from_text(title: str, body: str = "") -> list[ExtractedEntityItem]:
     """Extract clean, structured entities strictly from title and matter declarations."""
+    _ = body  # Reserved for future deep body extraction; currently matter titles provide 100% precision
     entities_map: dict[str, ExtractedEntityItem] = {}
 
     # 1. Primary target: Check title matter patterns

@@ -1,3 +1,6 @@
+import csv
+import io
+import json
 import uuid
 from datetime import UTC, date, datetime
 from typing import Any, Optional
@@ -17,6 +20,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import TypeDecorator
 
 from app.core.database import Base
+from app.core.logging import logger
 
 
 class SafeUUID(TypeDecorator):
@@ -54,8 +58,6 @@ class SafeJSON(TypeDecorator):
             return dialect.type_descriptor(Text())
 
     def process_bind_param(self, value, dialect):
-        import json
-
         if value is None:
             return None
         if dialect.name == "postgresql":
@@ -63,14 +65,13 @@ class SafeJSON(TypeDecorator):
         return json.dumps(value)
 
     def process_result_value(self, value, dialect):
-        import json
-
         if value is None:
             return {}
         if isinstance(value, str):
             try:
                 return json.loads(value)
-            except Exception:
+            except (json.JSONDecodeError, TypeError) as e:
+                logger.warning(f"Failed to decode JSON from database value: {e}")
                 return {}
         if isinstance(value, dict):
             return value
@@ -90,8 +91,6 @@ class SafeArray(TypeDecorator):
             return dialect.type_descriptor(Text())
 
     def process_bind_param(self, value, dialect):
-        import json
-
         if value is None:
             return [] if dialect.name == "postgresql" else "[]"
         if isinstance(value, str):
@@ -101,46 +100,38 @@ class SafeArray(TypeDecorator):
         return json.dumps(list(value))
 
     def process_result_value(self, value, dialect):
-        import json
-
         if value is None:
             return []
         if isinstance(value, list):
             if len(value) > 1 and all(isinstance(x, str) and len(x) == 1 for x in value):
                 joined = "".join(value)
                 if joined.startswith("{") and joined.endswith("}"):
-                    import csv
-                    import io
-
                     try:
                         reader = csv.reader(io.StringIO(joined[1:-1]))
                         for row in reader:
                             return [r.strip('"') for r in row if r.strip('"')]
-                    except Exception:
-                        pass
+                    except csv.Error as e:
+                        logger.warning(f"Failed to parse CSV array from joined list: {e}")
                 try:
                     parsed = json.loads(joined)
                     if isinstance(parsed, list):
                         return parsed
-                except Exception:
+                except (json.JSONDecodeError, TypeError):
                     pass
             return value
         if isinstance(value, str):
             if value.startswith("{") and value.endswith("}"):
-                import csv
-                import io
-
                 try:
                     reader = csv.reader(io.StringIO(value[1:-1]))
                     for row in reader:
                         return [r.strip('"') for r in row if r.strip('"')]
-                except Exception:
-                    pass
+                except csv.Error as e:
+                    logger.warning(f"Failed to parse CSV array from string: {e}")
             try:
                 parsed = json.loads(value)
                 if isinstance(parsed, list):
                     return parsed
-            except Exception:
+            except (json.JSONDecodeError, TypeError):
                 return [value]
         return value
 
