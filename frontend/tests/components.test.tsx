@@ -1,9 +1,10 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { formatINR, formatDate, truncateText } from "../src/lib/utils";
 import { MicroLabel } from "../src/components/common/MicroLabel";
 import { HighlightedText } from "../src/components/common/HighlightedText";
+import { ErrorState } from "../src/components/common/ErrorState";
 
 describe("Frontend Utilities", () => {
   it("formats Indian Rupee currency correctly", () => {
@@ -38,5 +39,28 @@ describe("UI Components", () => {
     const marks = container.querySelectorAll("mark");
     expect(marks.length).toBe(1);
     expect(marks[0].textContent).toBe("Reliance");
+  });
+
+  it("renders ErrorState and handles retry callback", () => {
+    const handleReset = vi.fn();
+    const testError = Object.assign(new Error("Test network drop"), { digest: "DIGEST-123" });
+
+    render(
+      <ErrorState
+        title="Custom Failure Title"
+        description="Detailed failure explanation"
+        error={testError}
+        reset={handleReset}
+        backHref="/explorer"
+      />
+    );
+
+    expect(screen.getByText("Custom Failure Title")).toBeDefined();
+    expect(screen.getByText("Detailed failure explanation")).toBeDefined();
+
+    const retryBtn = screen.getByRole("button", { name: /try again/i });
+    expect(retryBtn).toBeDefined();
+    fireEvent.click(retryBtn);
+    expect(handleReset).toHaveBeenCalledTimes(1);
   });
 });
