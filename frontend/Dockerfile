@@ -1,4 +1,5 @@
 FROM node:20-alpine AS deps
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm install
@@ -15,6 +16,7 @@ ENV NODE_ENV=production
 RUN npm run build
 
 FROM node:20-alpine AS runner
+RUN apk add --no-cache libc6-compat curl
 WORKDIR /app
 
 ENV NODE_ENV=production
