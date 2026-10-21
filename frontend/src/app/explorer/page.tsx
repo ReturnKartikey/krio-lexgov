@@ -264,10 +264,27 @@ function ExplorerContent() {
     loadData();
   }, [loadData]);
 
+  // Keep search input synced with URL query param
+  useEffect(() => {
+    setSearchInput(qParam);
+  }, [qParam]);
+
+  // Debounced live search (300ms)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchInput.trim() !== qParam.trim()) {
+        updateUrl({ q: searchInput.trim() || undefined, page: 1 });
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchInput, qParam, updateUrl]);
+
   // Handle Search submit
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    updateUrl({ q: searchInput, page: 1 });
+    if (searchInput.trim() !== qParam.trim()) {
+      updateUrl({ q: searchInput.trim() || undefined, page: 1 });
+    }
   };
 
   const handleResetFilters = () => {
@@ -530,7 +547,7 @@ function ExplorerContent() {
               </div>
             </div>
 
-            {/* Active Filters Pill Bar */}
+            {/* Active Filters Pill Bar (in Drawer) */}
             {(selectedState || selectedEntity || selectedPenaltySlab || dateFrom || dateTo || qParam) && (
               <div className="pt-3 border-t border-brivo-navy/10 flex flex-wrap items-center justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-1.5">
@@ -541,8 +558,12 @@ function ExplorerContent() {
                     <span className="px-2 py-0.5 rounded bg-brivo-paper border border-brivo-navy/10 text-xs font-mono text-brivo-navy flex items-center gap-1">
                       Query: &ldquo;{qParam}&rdquo;
                       <button
-                        onClick={() => updateUrl({ q: undefined, page: 1 })}
-                        className="hover:text-rose-500"
+                        onClick={() => {
+                          setSearchInput("");
+                          updateUrl({ q: undefined, page: 1 });
+                        }}
+                        className="hover:text-rose-500 font-bold ml-0.5"
+                        title="Remove search query"
                       >
                         ×
                       </button>
@@ -556,7 +577,8 @@ function ExplorerContent() {
                           setSelectedPenaltySlab("");
                           updateUrl({ penalty_slab: undefined, page: 1 });
                         }}
-                        className="hover:text-rose-500"
+                        className="hover:text-rose-500 font-bold ml-0.5"
+                        title="Remove penalty filter"
                       >
                         ×
                       </button>
@@ -566,8 +588,12 @@ function ExplorerContent() {
                     <span className="px-2 py-0.5 rounded bg-brivo-paper border border-brivo-navy/10 text-xs font-mono text-brivo-navy flex items-center gap-1">
                       State: {selectedState}
                       <button
-                        onClick={() => updateUrl({ state: undefined, page: 1 })}
-                        className="hover:text-rose-500"
+                        onClick={() => {
+                          setSelectedState("");
+                          updateUrl({ state: undefined, page: 1 });
+                        }}
+                        className="hover:text-rose-500 font-bold ml-0.5"
+                        title="Remove state filter"
                       >
                         ×
                       </button>
@@ -575,10 +601,44 @@ function ExplorerContent() {
                   )}
                   {selectedEntity && (
                     <span className="px-2 py-0.5 rounded bg-brivo-paper border border-brivo-navy/10 text-xs font-mono text-brivo-navy flex items-center gap-1">
-                      Entity: {selectedEntity}
+                      Noticee: {selectedEntity}
                       <button
-                        onClick={() => updateUrl({ entity: undefined, page: 1 })}
-                        className="hover:text-rose-500"
+                        onClick={() => {
+                          setSelectedEntity("");
+                          updateUrl({ entity: undefined, page: 1 });
+                        }}
+                        className="hover:text-rose-500 font-bold ml-0.5"
+                        title="Remove noticee filter"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                  {dateFrom && (
+                    <span className="px-2 py-0.5 rounded bg-brivo-paper border border-brivo-navy/10 text-xs font-mono text-brivo-navy flex items-center gap-1">
+                      From: {dateFrom}
+                      <button
+                        onClick={() => {
+                          setDateFrom("");
+                          updateUrl({ date_from: undefined, page: 1 });
+                        }}
+                        className="hover:text-rose-500 font-bold ml-0.5"
+                        title="Remove date from"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                  {dateTo && (
+                    <span className="px-2 py-0.5 rounded bg-brivo-paper border border-brivo-navy/10 text-xs font-mono text-brivo-navy flex items-center gap-1">
+                      To: {dateTo}
+                      <button
+                        onClick={() => {
+                          setDateTo("");
+                          updateUrl({ date_to: undefined, page: 1 });
+                        }}
+                        className="hover:text-rose-500 font-bold ml-0.5"
+                        title="Remove date to"
                       >
                         ×
                       </button>
@@ -595,6 +655,115 @@ function ExplorerContent() {
                 </button>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Prominent External Active Filter Chips (Always visible when filters active, even if panel closed) */}
+        {!showFilters && (selectedState || selectedEntity || selectedPenaltySlab || dateFrom || dateTo || qParam) && (
+          <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 sm:p-3 rounded-xl bg-white border border-brivo-navy/10 shadow-2xs animate-fade-in">
+            <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+              <span className="text-[0.65rem] font-mono text-brivo-slate uppercase mr-1">
+                Active:
+              </span>
+              {qParam && (
+                <span className="px-2 py-0.5 rounded bg-brivo-paper border border-brivo-navy/15 text-xs font-mono text-brivo-navy flex items-center gap-1.5 shadow-2xs">
+                  Query: &ldquo;{qParam}&rdquo;
+                  <button
+                    onClick={() => {
+                      setSearchInput("");
+                      updateUrl({ q: undefined, page: 1 });
+                    }}
+                    className="hover:text-rose-500 font-bold text-xs"
+                    title="Remove search query"
+                  >
+                    ×
+                  </button>
+                </span>
+              )}
+              {selectedPenaltySlab && (
+                <span className="px-2 py-0.5 rounded bg-brivo-paper border border-brivo-navy/15 text-xs font-mono text-brivo-navy flex items-center gap-1.5 shadow-2xs">
+                  Penalty: {PENALTY_OPTIONS.find((s) => s.value === selectedPenaltySlab)?.label || selectedPenaltySlab}
+                  <button
+                    onClick={() => {
+                      setSelectedPenaltySlab("");
+                      updateUrl({ penalty_slab: undefined, page: 1 });
+                    }}
+                    className="hover:text-rose-500 font-bold text-xs"
+                    title="Remove penalty filter"
+                  >
+                    ×
+                  </button>
+                </span>
+              )}
+              {selectedState && (
+                <span className="px-2 py-0.5 rounded bg-brivo-paper border border-brivo-navy/15 text-xs font-mono text-brivo-navy flex items-center gap-1.5 shadow-2xs">
+                  State: {selectedState}
+                  <button
+                    onClick={() => {
+                      setSelectedState("");
+                      updateUrl({ state: undefined, page: 1 });
+                    }}
+                    className="hover:text-rose-500 font-bold text-xs"
+                    title="Remove state filter"
+                  >
+                    ×
+                  </button>
+                </span>
+              )}
+              {selectedEntity && (
+                <span className="px-2 py-0.5 rounded bg-brivo-paper border border-brivo-navy/15 text-xs font-mono text-brivo-navy flex items-center gap-1.5 shadow-2xs">
+                  Noticee: {selectedEntity}
+                  <button
+                    onClick={() => {
+                      setSelectedEntity("");
+                      updateUrl({ entity: undefined, page: 1 });
+                    }}
+                    className="hover:text-rose-500 font-bold text-xs"
+                    title="Remove noticee filter"
+                  >
+                    ×
+                  </button>
+                </span>
+              )}
+              {dateFrom && (
+                <span className="px-2 py-0.5 rounded bg-brivo-paper border border-brivo-navy/15 text-xs font-mono text-brivo-navy flex items-center gap-1.5 shadow-2xs">
+                  From: {dateFrom}
+                  <button
+                    onClick={() => {
+                      setDateFrom("");
+                      updateUrl({ date_from: undefined, page: 1 });
+                    }}
+                    className="hover:text-rose-500 font-bold text-xs"
+                    title="Remove date from"
+                  >
+                    ×
+                  </button>
+                </span>
+              )}
+              {dateTo && (
+                <span className="px-2 py-0.5 rounded bg-brivo-paper border border-brivo-navy/15 text-xs font-mono text-brivo-navy flex items-center gap-1.5 shadow-2xs">
+                  To: {dateTo}
+                  <button
+                    onClick={() => {
+                      setDateTo("");
+                      updateUrl({ date_to: undefined, page: 1 });
+                    }}
+                    className="hover:text-rose-500 font-bold text-xs"
+                    title="Remove date to"
+                  >
+                    ×
+                  </button>
+                </span>
+              )}
+            </div>
+
+            <button
+              onClick={handleResetFilters}
+              className="text-xs font-mono text-brivo-slate hover:text-brivo-navy flex items-center gap-1 transition-colors"
+            >
+              <RotateCcw className="w-3 h-3" />
+              <span>Reset</span>
+            </button>
           </div>
         )}
       </div>
@@ -726,7 +895,7 @@ function ExplorerContent() {
                                   className="text-[0.68rem] text-brivo-navy hover:text-brivo-cyan hover:underline transition-colors font-mono cursor-pointer shrink-0 truncate max-w-[220px]"
                                   title={`Filter by ${ent}`}
                                 >
-                                  {truncateText(ent, 26)}
+                                  <HighlightedText text={truncateText(ent, 26)} highlight={qParam} />
                                 </button>
                               </React.Fragment>
                             ))}
@@ -812,7 +981,7 @@ function ExplorerContent() {
 
                       {/* Title */}
                       <div className="text-sm font-medium text-brivo-navy leading-snug line-clamp-2">
-                        {r.title}
+                        <HighlightedText text={r.title} highlight={qParam} />
                       </div>
 
                       {/* Bottom Info & Quick Actions */}
@@ -887,7 +1056,7 @@ function ExplorerContent() {
                           </td>
                           <td className="px-5 py-3.5 text-brivo-navy max-w-md">
                             <span className="group-hover:text-brivo-cyan transition-colors font-medium line-clamp-1">
-                              {r.title}
+                              <HighlightedText text={r.title} highlight={qParam} />
                             </span>
                           </td>
                           <td className="px-5 py-3.5 font-mono text-brivo-slate whitespace-nowrap">
