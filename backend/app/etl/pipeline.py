@@ -83,8 +83,9 @@ class ETLPipeline:
             await db.flush()
 
         # 3. Create Ingestion Run record
+        run_obj_id = run_id or uuid.uuid4()
         ingestion_run = IngestionRun(
-            id=run_id or uuid.uuid4(),
+            id=run_obj_id,
             source_id=source.id,
             started_at=datetime.now(UTC),
             status="running",
@@ -97,6 +98,10 @@ class ETLPipeline:
         db.add(ingestion_run)
         await db.commit()
 
+        records_seen = 0
+        records_added = 0
+        records_updated = 0
+        records_failed = 0
         errors = []
         cursor = crawl_state.last_cursor if incremental else None
 
@@ -107,7 +112,7 @@ class ETLPipeline:
                 cursor=cursor,
                 limit=limit,
             )
-            ingestion_run.records_seen = len(refs)
+            records_seen = len(refs)
 
             touched_entity_ids: set[uuid.UUID] = set()
             entity_cache: dict[str, uuid.UUID] = {}
@@ -164,7 +169,7 @@ class ETLPipeline:
                         existing_record.raw_document_id = raw_doc.id
                         existing_record.updated_at = datetime.now(UTC)
                         record_obj = existing_record
-                        ingestion_run.records_updated += 1
+                        records_updated += 1
                     else:
                         record_obj = Record(
                             id=uuid.uuid4(),
@@ -186,7 +191,7 @@ class ETLPipeline:
                         )
                         db.add(record_obj)
                         await db.flush()
-                        ingestion_run.records_added += 1
+                        records_added += 1
 
                     # 8. Upsert Entities & Record Links
                     for ent_item in normalized.entities:
@@ -245,7 +250,7 @@ class ETLPipeline:
 
                 except Exception as rec_err:
                     await db.rollback()
-                    ingestion_run.records_failed += 1
+                    records_failed += 1
                     err_msg = f"Error processing record {getattr(ref, 'external_id', 'unknown')}: {rec_err}"
                     logger.error(err_msg, exc_info=True)
                     errors.append(err_msg)
@@ -278,21 +283,35 @@ class ETLPipeline:
                 except Exception as batch_err:
                     logger.warning(f"Error in batch entity stats recalculation: {batch_err}")
 
-            # Update crawl state
+            # Re-fetch crawl state & ingestion run in case a record rollback expired them
+            res_state = await db.execute(select(CrawlState).where(CrawlState.source_id == source.id))
+            crawl_state = res_state.scalar_one_or_none()
+            if not crawl_state:
+                crawl_state = CrawlState(id=uuid.uuid4(), source_id=source.id, total_runs=0)
+                db.add(crawl_state)
+
             crawl_state.last_cursor = next_cursor
             crawl_state.last_run_at = datetime.now(UTC)
             crawl_state.total_runs += 1
 
-            # Finalize run status
             status = "success"
-            if ingestion_run.records_failed > 0:
+            if records_failed > 0:
                 status = (
                     "partial"
-                    if ingestion_run.records_added + ingestion_run.records_updated > 0
+                    if records_added + records_updated > 0
                     else "failed"
                 )
 
             duration = round(time.monotonic() - start_time, 2)
+            ingestion_run = await db.get(IngestionRun, run_obj_id)
+            if not ingestion_run:
+                ingestion_run = IngestionRun(id=run_obj_id, source_id=source.id)
+                db.add(ingestion_run)
+
+            ingestion_run.records_seen = records_seen
+            ingestion_run.records_added = records_added
+            ingestion_run.records_updated = records_updated
+            ingestion_run.records_failed = records_failed
             ingestion_run.status = status
             ingestion_run.finished_at = datetime.now(UTC)
             ingestion_run.duration_seconds = duration
@@ -301,18 +320,29 @@ class ETLPipeline:
 
             logger.info(
                 f"ETL Run finished with status [{status}] in {duration}s: "
-                f"Seen={ingestion_run.records_seen}, Added={ingestion_run.records_added}, "
-                f"Updated={ingestion_run.records_updated}, Failed={ingestion_run.records_failed}"
+                f"Seen={records_seen}, Added={records_added}, "
+                f"Updated={records_updated}, Failed={records_failed}"
             )
             return ingestion_run
 
         except Exception as e:
             await db.rollback()
             duration = round(time.monotonic() - start_time, 2)
-            ingestion_run.status = "failed"
-            ingestion_run.finished_at = datetime.now(UTC)
-            ingestion_run.duration_seconds = duration
-            ingestion_run.error_log = f"Pipeline execution failed: {e}\n{traceback.format_exc()}"
-            await db.commit()
+            try:
+                failed_run = await db.get(IngestionRun, run_obj_id)
+                if failed_run:
+                    failed_run.status = "failed"
+                    failed_run.records_seen = records_seen
+                    failed_run.records_added = records_added
+                    failed_run.records_updated = records_updated
+                    failed_run.records_failed = max(records_failed, 1)
+                    failed_run.finished_at = datetime.now(UTC)
+                    failed_run.duration_seconds = duration
+                    failed_run.error_log = f"Pipeline execution failed: {e}\n{traceback.format_exc()}"
+                    await db.commit()
+                    ingestion_run = failed_run
+            except Exception as inner_e:
+                logger.error(f"Failed to record run failure in DB: {inner_e}")
+
             logger.error(f"ETL pipeline fatal error: {e}", exc_info=True)
             return ingestion_run

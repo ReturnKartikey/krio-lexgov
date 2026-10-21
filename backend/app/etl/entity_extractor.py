@@ -248,8 +248,112 @@ def is_valid_entity_candidate(name: str) -> bool:
     return True
 
 
+def classify_entity_type(name: str) -> str:
+    """Accurately classify an entity as 'company', 'intermediary', or 'individual'."""
+    lower = name.lower()
+
+    # Intermediary designations
+    intermediary_signals = [
+        "broker",
+        "broking",
+        "stock broking",
+        "research analyst",
+        "investment adviser",
+        "investment advisor",
+        "portfolio manager",
+        "wealth manager",
+        "wealth managers",
+        "merchant banker",
+        "depository participant",
+        "aif",
+        "alternative investment",
+        "mutual fund",
+        "asset management",
+        "clearing member",
+    ]
+    if any(k in lower for k in intermediary_signals):
+        return "intermediary"
+
+    # Corporate keywords
+    corp_signals = [
+        "limited",
+        "ltd",
+        "private limited",
+        "pvt ltd",
+        "pvt. ltd",
+        "pvt.ltd",
+        "pvt",
+        "llp",
+        "corp",
+        "corporation",
+        "inc",
+        "incorporated",
+        "company",
+        "companies",
+        "group",
+        "investments",
+        "investment",
+        "platform",
+        "portal",
+        "co.",
+        "industries",
+        "enterprises",
+        "holdings",
+        "holding",
+        "capital",
+        "securities",
+        "finance",
+        "finvest",
+        "bank",
+        "banking",
+        "trust",
+        "fund",
+        "advisory",
+        "consultancy",
+        "services",
+        "infra",
+        "infrastructure",
+        "realty",
+        "properties",
+        "technologies",
+        "tech",
+        "management",
+        "ventures",
+        "huf",
+        "proprietorship",
+        "firm",
+        "partners",
+        "associates",
+        "logistics",
+        "exports",
+        "chemicals",
+        "pharma",
+        "solutions",
+        "commercial",
+        "trading",
+        "jewellers",
+        "power",
+    ]
+    for k in corp_signals:
+        if re.search(r"\b" + re.escape(k) + r"\b", lower):
+            return "company"
+
+    # Honorifics designate individuals
+    if INDIVIDUAL_REGEX.search(name) or re.search(r"\b(shri|smt|mr|ms|dr|huf)\b", lower):
+        if "huf" in lower:
+            return "company"
+        return "individual"
+
+    # Fallback heuristic
+    words = name.strip().split()
+    if len(words) in (2, 3) and not any(k in lower for k in corp_signals):
+        return "individual"
+
+    return "company"
+
+
 def clean_entity_name(name: str) -> str:
-    """Format and clean company or person name."""
+    """Format and clean company or person name, stripping allegation/subject prefixes."""
     s = name.strip(" ,.-/:;\"'()")
     s = re.sub(r"^M/s\.?\s+", "", s, flags=re.IGNORECASE)
     s = re.sub(r"^IPO\s+of\s+", "", s, flags=re.IGNORECASE)
@@ -259,8 +363,21 @@ def clean_entity_name(name: str) -> str:
         s,
         flags=re.IGNORECASE,
     )
+    # Strip allegation/case prefixes that precede the actual entity name
     s = re.sub(
-        r"^(?:front[\s\-]+running\s+(?:in\s+the\s+matter\s+of\s+|by\s+)?|illiquid\s+stock\s+options\s+at\s+bse\s+against\s+|illiquid\s+stock\s+options\s+against\s+|unregistered\s+investment\s+advisory\s+(?:and\s+unregistered\s+portfolio\s+management\s+services\s+)?activities\s+by\s+|unregistered\s+investment\s+advisory\s+activities\s+by\s+|activities\s+by\s+|suspected\s+insider\s+trading\s+activity\s+of\s+certain\s+entities\s+in\s+the\s+scrip\s+of\s+|bse\s+against\s+)",
+        r"^(?:GDR\s+issue\s+manipulation\s+in\s+|"
+        r"dealings\s+in\s+illiquid\s+stock\s+options\s+(?:at\s+bse\s+)?(?:in\s+respect\s+of\s+|against\s+|by\s+)?|"
+        r"trading\s+in\s+illiquid\s+stock\s+options\s+(?:at\s+bse\s+)?(?:in\s+respect\s+of\s+|against\s+|by\s+)?|"
+        r"inspection\s+of\s+|"
+        r"investigation\s+in\s+(?:the\s+matter\s+of\s+)?|"
+        r"alleged\s+violation\s+of\s+|"
+        r"violation\s+of\s+|"
+        r"suspected\s+insider\s+trading\s+(?:activity\s+)?(?:in\s+the\s+scrip\s+of\s+)?|"
+        r"front[\s\-]+running\s+(?:activities\s+)?(?:in\s+the\s+matter\s+of\s+|by\s+)?|"
+        r"unregistered\s+investment\s+advisory\s+(?:and\s+unregistered\s+portfolio\s+management\s+services\s+)?activities\s+by\s+|"
+        r"unregistered\s+investment\s+advisory\s+activities\s+by\s+|"
+        r"activities\s+by\s+|"
+        r"bse\s+against\s+)",
         "",
         s,
         flags=re.IGNORECASE,
@@ -312,31 +429,7 @@ def extract_entities_from_text(title: str, body: str = "") -> list[ExtractedEnti
         if is_valid_entity_candidate(cleaned):
             norm = normalize_entity_name(cleaned)
             if norm and norm not in entities_map:
-                is_corp = any(
-                    k in cleaned.lower()
-                    for k in [
-                        "ltd",
-                        "llp",
-                        "corp",
-                        "pvt",
-                        "inc",
-                        "holding",
-                        "securities",
-                        "broker",
-                        "advisory",
-                        "capital",
-                        "enterprises",
-                        "technologies",
-                        "infra",
-                        "realty",
-                        "finvest",
-                    ]
-                )
-                ent_type = (
-                    "company"
-                    if is_corp
-                    else ("individual" if INDIVIDUAL_REGEX.search(cleaned) else "company")
-                )
+                ent_type = classify_entity_type(cleaned)
                 entities_map[norm] = ExtractedEntityItem(
                     name=cleaned,
                     normalized_name=norm,

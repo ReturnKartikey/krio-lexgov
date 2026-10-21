@@ -18,6 +18,7 @@ from app.core.logging import logger
 from app.core.rate_limiter import rate_limiter, robots_validator
 from app.core.security import is_safe_registry_url
 from app.etl.entity_extractor import (
+    classify_entity_type,
     extract_entities_from_text,
     extract_location,
     extract_penalties,
@@ -678,11 +679,7 @@ class SEBIOrdersAdapter(SourceAdapter):
                         ExtractedEntityItem(
                             name=ent_name,
                             normalized_name=norm,
-                            entity_type="company"
-                            if "ltd" in ent_name.lower()
-                            or "llp" in ent_name.lower()
-                            or "corp" in ent_name.lower()
-                            else "individual",
+                            entity_type=classify_entity_type(ent_name),
                             role="noticee",
                         )
                     )
