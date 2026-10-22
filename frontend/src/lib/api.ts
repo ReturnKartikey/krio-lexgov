@@ -262,14 +262,45 @@ export async function getJobDetail(jobId: string): Promise<IngestionRunItem> {
   return fetchJson<IngestionRunItem>(`/api/jobs/${jobId}`);
 }
 
+export function getAdminApiKey(): string {
+  if (typeof window !== "undefined") {
+    const local = localStorage.getItem("krio_admin_api_key");
+    if (local && local.trim()) return local.trim();
+  }
+  return (
+    process.env.NEXT_PUBLIC_ADMIN_API_KEY || "krio_admin_secret_key_change_me"
+  );
+}
+
+export function setAdminApiKey(key: string): void {
+  if (typeof window !== "undefined") {
+    if (key && key.trim()) {
+      localStorage.setItem("krio_admin_api_key", key.trim());
+    } else {
+      localStorage.removeItem("krio_admin_api_key");
+    }
+  }
+}
+
+export function resetAdminApiKey(): void {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("krio_admin_api_key");
+  }
+}
+
 export async function triggerSyncJob(options?: {
   adapter_key?: string;
   limit?: number;
   incremental?: boolean;
+  adminKey?: string;
 }): Promise<{ message: string; run_id: string; status: string }> {
   clearCache();
+  const key = options?.adminKey || getAdminApiKey();
   return fetchJson<{ message: string; run_id: string; status: string }>("/api/jobs/sync", {
     method: "POST",
+    headers: {
+      "X-Admin-Key": key,
+    },
     body: JSON.stringify({
       adapter_key: options?.adapter_key || "sebi_adjudication_orders",
       limit: options?.limit || 50,

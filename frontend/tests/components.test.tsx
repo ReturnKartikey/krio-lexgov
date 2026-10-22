@@ -1,10 +1,11 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { formatINR, formatDate, truncateText } from "../src/lib/utils";
 import { MicroLabel } from "../src/components/common/MicroLabel";
 import { HighlightedText } from "../src/components/common/HighlightedText";
 import { ErrorState } from "../src/components/common/ErrorState";
+import { getAdminApiKey, setAdminApiKey, resetAdminApiKey } from "../src/lib/api";
 
 describe("Frontend Utilities", () => {
   it("formats Indian Rupee currency correctly", () => {
@@ -23,6 +24,17 @@ describe("Frontend Utilities", () => {
   it("truncates long strings with ellipsis", () => {
     const text = "This is a very long regulatory description that should be truncated.";
     expect(truncateText(text, 20)).toBe("This is a very long...");
+  });
+
+  it("manages administrative API keys with localStorage fallback", () => {
+    resetAdminApiKey();
+    expect(getAdminApiKey()).toBe("krio_admin_secret_key_change_me");
+
+    setAdminApiKey("custom_secret_key_999");
+    expect(getAdminApiKey()).toBe("custom_secret_key_999");
+
+    resetAdminApiKey();
+    expect(getAdminApiKey()).toBe("krio_admin_secret_key_change_me");
   });
 });
 

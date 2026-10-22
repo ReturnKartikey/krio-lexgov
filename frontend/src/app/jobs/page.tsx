@@ -14,7 +14,7 @@ import {
   Terminal,
   Activity,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { JobsTableSkeleton, MobileTableRowSkeleton } from "@/components/common/Skeleton";
 import { toast } from "@/lib/toast";
 import { getJobs, triggerSyncJob, getCached } from "@/lib/api";
@@ -22,8 +22,9 @@ import { IngestionRunItem } from "@/lib/types";
 import { formatDate, formatRelativeTime } from "@/lib/utils";
 
 export default function JobsPage() {
-  const initialJobs = getCached<{ data: IngestionRunItem[] }>("/api/jobs?page_size=20")?.data
-    || getCached<{ data: IngestionRunItem[] }>("/api/jobs")?.data;
+  const initialJobs =
+    getCached<{ data: IngestionRunItem[] }>("/api/jobs?page_size=20")?.data ||
+    getCached<{ data: IngestionRunItem[] }>("/api/jobs")?.data;
 
   const [jobs, setJobs] = useState<IngestionRunItem[]>(() => initialJobs || []);
   const [loading, setLoading] = useState(() => !initialJobs || initialJobs.length === 0);
@@ -60,7 +61,7 @@ export default function JobsPage() {
       );
       await fetchJobsList();
     } catch (err: any) {
-      toast.error("Sync Failed", err.message || "Unable to trigger ETL pipeline");
+      toast.error("Sync Failed", err?.message || "Unable to trigger ETL pipeline");
     } finally {
       setIsSyncing(false);
     }
@@ -70,7 +71,8 @@ export default function JobsPage() {
     const t = trigger.toLowerCase().replace(/_/g, " ");
     if (t.includes("bootstrap")) return "Initial Bootstrap";
     if (t.includes("idempotency")) return "Idempotency Check";
-    if (t.includes("scheduler") || t.includes("periodic") || t.includes("cron")) return "Scheduled Cron";
+    if (t.includes("scheduler") || t.includes("periodic") || t.includes("cron"))
+      return "Scheduled Cron";
     if (t.includes("repeat_noticees") || t.includes("noticees")) return "Noticee Re-Index";
     if (t.includes("manual") || t.includes("api")) return "Manual API";
     return trigger.replace(/_/g, " ");
@@ -251,26 +253,22 @@ export default function JobsPage() {
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: "auto" }}
                             exit={{ opacity: 0, height: 0 }}
-                            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                            className="px-6 py-4 space-y-2 overflow-hidden"
+                            transition={{ duration: 0.25, ease: "easeOut" }}
+                            className="p-4 bg-brivo-paper/40 font-mono text-xs space-y-2 border-t border-brivo-navy/5 overflow-hidden"
                           >
-                            <div className="flex items-center justify-between text-[0.7rem] font-mono text-brivo-slate">
-                              <span>Ingestion Run Full ID: {job.id}</span>
-                              <span>Finished: {job.finished_at ? formatDate(job.finished_at) : "In Progress"}</span>
+                            <div className="flex items-center justify-between text-brivo-slate text-[0.7rem]">
+                              <span>Full Execution ID: {job.id}</span>
+                              <span>Started: {formatDate(job.started_at)}</span>
                             </div>
+
                             {job.error_log ? (
-                              <div
-                                className={`p-3 rounded font-mono text-[0.75rem] whitespace-pre-wrap max-h-48 overflow-y-auto shadow-sm border ${
-                                  job.status === "timed_out" || job.status === "interrupted"
-                                    ? "bg-amber-50/50 border-amber-200 text-amber-900"
-                                    : "bg-white border-rose-200 text-rose-800"
-                                }`}
-                              >
+                              <div className="p-3 rounded bg-rose-50 border border-rose-200 text-rose-800 text-[0.7rem] whitespace-pre-wrap max-h-48 overflow-y-auto font-mono">
+                                <span className="font-semibold block mb-1">Execution Log Transcript:</span>
                                 {job.error_log}
                               </div>
                             ) : (
-                              <div className="p-3 rounded bg-white border border-brivo-navy/10 text-brivo-slate font-mono text-[0.75rem] shadow-sm">
-                                Clean execution. No errors logged during discovery, parsing, or indexing phases.
+                              <div className="p-3 rounded bg-white border border-brivo-navy/10 text-brivo-slate text-[0.7rem] font-mono">
+                                Clean execution. Ingestion crawler processed successfully without fatal exceptions.
                               </div>
                             )}
                           </motion.div>
@@ -285,12 +283,16 @@ export default function JobsPage() {
         </table>
       </div>
 
-      {/* Mobile Card List View */}
-      <div className="space-y-3 block md:hidden">
+      {/* Mobile Card List View (< md) */}
+      <div className="md:hidden space-y-3">
         {loading ? (
-          <MobileTableRowSkeleton count={4} />
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <MobileTableRowSkeleton key={i} />
+            ))}
+          </div>
         ) : jobs.length === 0 ? (
-          <div className="p-8 rounded-xl bg-white border border-brivo-navy/10 text-center text-xs font-mono text-brivo-slate shadow-sm">
+          <div className="border border-brivo-navy/10 rounded-lg p-6 bg-white text-center text-xs font-mono text-brivo-slate">
             No ingestion runs recorded yet. Tap &quot;Run Incremental Sync&quot; above.
           </div>
         ) : (
@@ -299,45 +301,56 @@ export default function JobsPage() {
             return (
               <div
                 key={job.id}
-                className="p-4 rounded-xl bg-white border border-brivo-navy/10 shadow-sm space-y-3 text-xs"
+                className="border border-brivo-navy/10 rounded-lg p-4 bg-white shadow-sm space-y-3"
               >
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-brivo-navy font-semibold text-xs">
-                      #{job.id.slice(0, 8)}
-                    </span>
-                    <span className="font-mono text-[0.65rem] px-2 py-0.5 rounded-full bg-brivo-paper border border-brivo-navy/10 text-brivo-navy font-medium">
-                      {formatTrigger(job.triggered_by)}
-                    </span>
+                {/* Header: ID + Status */}
+                <div className="flex items-center justify-between">
+                  <div className="font-mono text-xs font-semibold text-brivo-navy">
+                    {job.id.slice(0, 8)}...
                   </div>
-                  {getStatusBadge(job.status)}
+                  <div>{getStatusBadge(job.status)}</div>
                 </div>
 
-                <div className="flex items-center justify-between text-[0.7rem] font-mono text-brivo-slate">
-                  <span>Started: {formatRelativeTime(job.started_at)}</span>
-                  <span>Duration: {job.duration_seconds !== null && job.duration_seconds !== undefined ? `${job.duration_seconds}s` : "—"}</span>
+                {/* Subheader: Trigger + Time */}
+                <div className="flex items-center justify-between text-xs text-brivo-slate">
+                  <span className="px-2 py-0.5 rounded-full bg-brivo-paper border border-brivo-navy/10 font-mono text-[0.65rem] text-brivo-navy">
+                    {formatTrigger(job.triggered_by)}
+                  </span>
+                  <span className="font-mono text-[0.7rem]">
+                    {formatRelativeTime(job.started_at)}
+                  </span>
                 </div>
 
-                {/* Metrics 4-slot grid */}
-                <div className="grid grid-cols-4 gap-2 pt-1 font-mono text-center">
-                  <div className="p-2 rounded-lg bg-brivo-paper border border-brivo-navy/5">
-                    <div className="text-[0.6rem] text-brivo-slate uppercase">Seen</div>
-                    <div className="font-bold text-brivo-navy text-xs mt-0.5">{job.records_seen}</div>
+                {/* Metrics 4-cell Grid */}
+                <div className="grid grid-cols-4 gap-2 py-2 border-y border-brivo-navy/5 text-center font-mono">
+                  <div className="space-y-0.5">
+                    <div className="text-[0.65rem] uppercase text-brivo-slate">Seen</div>
+                    <div className="text-xs font-semibold text-brivo-navy">{job.records_seen}</div>
                   </div>
-                  <div className="p-2 rounded-lg bg-brivo-paper border border-brivo-navy/5">
-                    <div className="text-[0.6rem] text-brivo-slate uppercase">Added</div>
-                    <div className="font-bold text-emerald-700 text-xs mt-0.5">+{job.records_added}</div>
+                  <div className="space-y-0.5">
+                    <div className="text-[0.65rem] uppercase text-brivo-slate">Added</div>
+                    <div className="text-xs font-semibold text-emerald-700">+{job.records_added}</div>
                   </div>
-                  <div className="p-2 rounded-lg bg-brivo-paper border border-brivo-navy/5">
-                    <div className="text-[0.6rem] text-brivo-slate uppercase">Updated</div>
-                    <div className="font-bold text-brivo-navy text-xs mt-0.5">{job.records_updated}</div>
+                  <div className="space-y-0.5">
+                    <div className="text-[0.65rem] uppercase text-brivo-slate">Updated</div>
+                    <div className="text-xs font-semibold text-brivo-navy">{job.records_updated}</div>
                   </div>
-                  <div className="p-2 rounded-lg bg-brivo-paper border border-brivo-navy/5">
-                    <div className="text-[0.6rem] text-brivo-slate uppercase">Failed</div>
-                    <div className={`font-bold text-xs mt-0.5 ${job.records_failed > 0 ? "text-rose-700" : "text-brivo-slate/60"}`}>
+                  <div className="space-y-0.5">
+                    <div className="text-[0.65rem] uppercase text-brivo-slate">Failed</div>
+                    <div className={`text-xs font-semibold ${job.records_failed > 0 ? "text-rose-700" : "text-brivo-slate/60"}`}>
                       {job.records_failed}
                     </div>
                   </div>
+                </div>
+
+                {/* Duration */}
+                <div className="flex items-center justify-between text-[0.7rem] font-mono text-brivo-slate">
+                  <span>Execution Duration</span>
+                  <span className="text-brivo-navy font-semibold">
+                    {job.duration_seconds !== null && job.duration_seconds !== undefined
+                      ? `${job.duration_seconds}s`
+                      : "—"}
+                  </span>
                 </div>
 
                 {/* Log toggle button */}
