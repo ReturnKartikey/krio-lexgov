@@ -34,6 +34,7 @@
 html {
   font-size: 16.5px;
   scroll-behavior: initial;
+  overflow-y: scroll;
   scrollbar-gutter: stable;
 }
 
@@ -49,7 +50,7 @@ body {
   font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* Fluid Tactile Micro-Interactions */
