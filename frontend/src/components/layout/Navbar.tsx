@@ -6,8 +6,8 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
+  Building2,
   BarChart3,
-  Clock,
   Sparkles,
   Menu,
   X,
@@ -31,8 +31,8 @@ export function Navbar() {
 
   const navLinks = [
     { href: "/explorer", label: "Explorer", icon: Search },
+    { href: "/entities", label: "Entities", icon: Building2 },
     { href: "/analytics", label: "Analytics", icon: BarChart3 },
-    { href: "/jobs", label: "Ingestion Jobs", icon: Clock },
   ];
 
   const [optimisticPath, setOptimisticPath] = useState<string | null>(null);
@@ -168,7 +168,7 @@ export function Navbar() {
           className="relative pointer-events-auto flex items-center justify-between select-none overflow-hidden"
           animate={{
             width: isScrolled ? "calc(100% - 1.5rem)" : "100%",
-            maxWidth: isScrolled ? "572px" : "1360px",
+            maxWidth: isScrolled ? "540px" : "1360px",
             height: isScrolled ? "54px" : "80px",
             borderRadius: isScrolled ? "9999px" : "0px",
             paddingLeft: isScrolled ? "18px" : horizontalPadding,
