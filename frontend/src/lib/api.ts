@@ -4,6 +4,7 @@ import {
   RecordDetailItem,
   EntitySimple,
   EntityDetailItem,
+  EntitySummaryResponse,
   DailyCount,
   TrendsResponse,
   EntityFrequencyItem,
@@ -147,6 +148,10 @@ export function prefetchTab(tabHref: string) {
     prefetchEndpoint("/api/records?page=1&page_size=10");
     prefetchEndpoint("/api/records?page=1&page_size=20");
     prefetchEndpoint("/api/analytics/trends?interval=month");
+  } else if (tabHref.includes("/entities")) {
+    prefetchEndpoint("/api/entities?page=1&page_size=24&sort_by=total_penalty_amount&sort_order=desc");
+    prefetchEndpoint("/api/entities?page=1&page_size=20&sort_by=total_penalty_amount&sort_order=desc");
+    prefetchEndpoint("/api/entities/summary");
   } else if (tabHref.includes("/analytics")) {
     prefetchEndpoint("/api/analytics/trends?interval=month");
     prefetchEndpoint("/api/analytics/records-per-day?days=90");
@@ -211,6 +216,10 @@ export async function getEntities(params?: {
   }
   const qs = searchParams.toString();
   return fetchJson<EnvelopeResponse<EntitySimple[]>>(`/api/entities${qs ? `?${qs}` : ""}`);
+}
+
+export async function getEntitySummary(): Promise<EntitySummaryResponse> {
+  return fetchJson<EntitySummaryResponse>("/api/entities/summary");
 }
 
 export async function getEntityDetail(id: string): Promise<EntityDetailItem> {

@@ -40,6 +40,14 @@ async def test_entities_endpoints(client):
     assert ent_detail["id"] == ent_id
     assert "recent_records" in ent_detail
 
+    # Test global summary KPI endpoint
+    summary_resp = await client.get("/api/entities/summary")
+    assert summary_resp.status_code == 200
+    summary = summary_resp.json()
+    assert "total_entities" in summary
+    assert "total_penalty_exposure" in summary
+    assert summary["total_entities"] > 0
+
 
 @pytest.mark.asyncio
 async def test_health_endpoint(client):

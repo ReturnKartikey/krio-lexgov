@@ -19,6 +19,22 @@ export interface RawDocumentSimple {
   mime_type: string;
 }
 
+export interface EntitySummaryResponse {
+  total_entities: number;
+  total_companies: number;
+  total_individuals: number;
+  total_intermediaries: number;
+  total_penalty_exposure: number;
+  top_entity?: {
+    id: string;
+    name: string;
+    normalized_name: string;
+    entity_type: string;
+    total_penalty_amount: number;
+    record_count: number;
+  } | null;
+}
+
 export interface EntitySimple {
   id: string;
   name: string;

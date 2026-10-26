@@ -98,6 +98,45 @@ async def list_entities(
     )
 
 
+@router.get("/summary")
+async def get_entities_summary(
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Get high-level summary KPIs for entities across the entire registry.
+    """
+    total_stmt = select(func.count(Entity.id))
+    corps_stmt = select(func.count(Entity.id)).where(Entity.entity_type == "company")
+    indiv_stmt = select(func.count(Entity.id)).where(Entity.entity_type == "individual")
+    interm_stmt = select(func.count(Entity.id)).where(Entity.entity_type == "intermediary")
+    penalty_stmt = select(func.coalesce(func.sum(Entity.total_penalty_amount), 0.0))
+    top_stmt = select(Entity).order_by(Entity.total_penalty_amount.desc()).limit(1)
+
+    total_count = (await db.execute(total_stmt)).scalar_one() or 0
+    corps_count = (await db.execute(corps_stmt)).scalar_one() or 0
+    indiv_count = (await db.execute(indiv_stmt)).scalar_one() or 0
+    interm_count = (await db.execute(interm_stmt)).scalar_one() or 0
+    total_penalty = float((await db.execute(penalty_stmt)).scalar_one() or 0.0)
+    top_res = await db.execute(top_stmt)
+    top_entity = top_res.scalars().first()
+
+    return {
+        "total_entities": total_count,
+        "total_companies": corps_count,
+        "total_individuals": indiv_count,
+        "total_intermediaries": interm_count,
+        "total_penalty_exposure": total_penalty,
+        "top_entity": {
+            "id": str(top_entity.id),
+            "name": top_entity.name,
+            "normalized_name": top_entity.normalized_name,
+            "entity_type": top_entity.entity_type,
+            "total_penalty_amount": float(top_entity.total_penalty_amount or 0.0),
+            "record_count": top_entity.record_count,
+        } if top_entity else None,
+    }
+
+
 @router.get("/{entity_id}", response_model=EntityDetailItem)
 async def get_entity_detail(
     entity_id: str,
