@@ -50,11 +50,11 @@ export default async function EntityDetailPage({ params }: PageProps) {
       {/* Back button */}
       <div className="flex items-center justify-between border-b border-brivo-navy/10 pb-4">
         <Link
-          href="/explorer"
+          href="/entities"
           className="text-xs font-mono text-brivo-slate hover:text-brivo-navy transition-colors flex items-center gap-1.5"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          <span>Back to Records Explorer</span>
+          <span>Back to Entity Directory</span>
         </Link>
         <span className="font-mono text-[0.65rem] px-2 py-0.5 rounded bg-brivo-paper border border-brivo-navy/15 text-brivo-slate uppercase">
           Entity Dossier
