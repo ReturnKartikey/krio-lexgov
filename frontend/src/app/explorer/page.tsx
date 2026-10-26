@@ -302,7 +302,7 @@ function ExplorerContent() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 sm:pt-6 pb-10 sm:pb-16 space-y-6 sm:space-y-8">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 sm:pt-6 pb-10 sm:pb-16 space-y-6 sm:space-y-8">
       {/* Top Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-brivo-navy/10 pb-6">
         <div className="space-y-2">
@@ -780,7 +780,7 @@ function ExplorerContent() {
           <div className="space-y-3">
             <MobileTableRowSkeleton count={4} />
             <div className="hidden md:block border border-brivo-navy/10 rounded-2xl overflow-x-auto bg-white shadow-sm">
-              <table className="w-full text-left text-xs min-w-[700px]">
+              <table className="w-full table-fixed text-left text-xs min-w-[700px]">
                 <thead className="bg-brivo-paper text-brivo-slate font-mono uppercase text-[0.65rem] tracking-wider border-b border-brivo-navy/10">
                   <tr>
                     <th className="px-5 py-3.5">Order ID</th>
@@ -811,12 +811,7 @@ function ExplorerContent() {
           </button>
         </div>
       ) : (
-        <div className={`relative z-10 transition-opacity duration-200 ${isFetching ? "opacity-60 pointer-events-none" : "opacity-100"}`}>
-          {isFetching && (
-            <div className="absolute -top-3 left-0 right-0 h-1 bg-brivo-cyan/20 overflow-hidden rounded-full z-20">
-              <div className="h-full bg-brivo-cyan animate-pulse w-full" />
-            </div>
-          )}
+        <div className="relative z-10">
           <AnimatePresence mode="wait" initial={false}>
             {viewMode === "cards" ? (
               /* Card Grid View */
@@ -1021,15 +1016,15 @@ function ExplorerContent() {
 
                 {/* Desktop Full 6-Column Table (Preserved 100% on md: and above) */}
                 <div className="hidden md:block border border-brivo-navy/10 rounded-2xl overflow-x-auto bg-white shadow-sm">
-                  <table className="w-full text-left text-xs min-w-[700px]">
+                  <table className="w-full table-fixed text-left text-xs min-w-[700px]">
                     <thead className="bg-brivo-paper text-brivo-slate font-mono uppercase text-[0.65rem] tracking-wider border-b border-brivo-navy/10">
                       <tr>
-                        <th className="px-5 py-3.5">Order ID</th>
-                        <th className="px-5 py-3.5">Published Date</th>
-                        <th className="px-5 py-3.5">Subject / Title</th>
-                        <th className="px-5 py-3.5">Jurisdiction</th>
-                        <th className="px-5 py-3.5 text-right">Penalty</th>
-                        <th className="px-5 py-3.5 text-right">Action</th>
+                        <th className="px-5 py-3.5 w-36 whitespace-nowrap">Order ID</th>
+                        <th className="px-5 py-3.5 w-32 whitespace-nowrap">Published Date</th>
+                        <th className="px-5 py-3.5 w-auto">Subject / Title</th>
+                        <th className="px-5 py-3.5 w-32 whitespace-nowrap">Jurisdiction</th>
+                        <th className="px-5 py-3.5 w-36 text-right whitespace-nowrap">Penalty</th>
+                        <th className="px-5 py-3.5 w-36 text-right whitespace-nowrap">Action</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-brivo-navy/5">
@@ -1054,8 +1049,8 @@ function ExplorerContent() {
                           <td className="px-5 py-3.5 font-mono text-brivo-slate whitespace-nowrap">
                             {formatDate(r.published_date)}
                           </td>
-                          <td className="px-5 py-3.5 text-brivo-navy max-w-md">
-                            <span className="group-hover:text-brivo-cyan transition-colors font-medium line-clamp-1">
+                          <td className="px-5 py-3.5 text-brivo-navy min-w-0">
+                            <span className="group-hover:text-brivo-cyan transition-colors font-medium line-clamp-1 block">
                               <HighlightedText text={r.title} highlight={qParam} />
                             </span>
                           </td>
@@ -1102,31 +1097,38 @@ function ExplorerContent() {
       )}
 
       {/* Pagination Bar */}
-      {meta.total_pages > 1 && (
+      {meta.total > 0 && (
         <div className="flex items-center justify-between pt-4 border-t border-brivo-navy/10">
           <span className="text-xs font-mono text-brivo-slate">
-            Page {meta.page} of {meta.total_pages} ({meta.total} records)
+            Page <strong className="text-brivo-navy">{meta.page}</strong> of{" "}
+            <strong className="text-brivo-navy">{meta.total_pages}</strong> ({meta.total} {meta.total === 1 ? "record" : "total records"})
           </span>
 
-          <div className="flex items-center gap-2">
-            <button
-              disabled={meta.page <= 1 || isFetching}
-              onClick={() => handlePageChange(meta.page - 1)}
-              className="px-3 py-1.5 rounded-full bg-white hover:bg-brivo-paper disabled:opacity-40 border border-brivo-navy/15 text-xs text-brivo-navy font-mono flex items-center gap-1 transition-colors shadow-sm cursor-pointer disabled:cursor-not-allowed active:scale-95"
-            >
-              <ChevronLeft className="w-3.5 h-3.5" />
-              <span>Previous</span>
-            </button>
+          {meta.total_pages > 1 ? (
+            <div className="flex items-center gap-2">
+              <button
+                disabled={meta.page <= 1 || isFetching}
+                onClick={() => handlePageChange(meta.page - 1)}
+                className="px-3 py-1.5 rounded-lg bg-white hover:bg-brivo-paper disabled:opacity-40 border border-brivo-navy/15 text-xs text-brivo-navy font-mono flex items-center gap-1 transition-colors shadow-2xs cursor-pointer disabled:cursor-not-allowed active:scale-95"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+                <span>Previous</span>
+              </button>
 
-            <button
-              disabled={meta.page >= meta.total_pages || isFetching}
-              onClick={() => handlePageChange(meta.page + 1)}
-              className="px-3.5 py-1.5 rounded-full bg-brivo-navy hover:bg-brivo-navy/90 disabled:opacity-40 text-xs text-brivo-paper font-mono flex items-center gap-1 transition-colors shadow-sm cursor-pointer disabled:cursor-not-allowed active:scale-95"
-            >
-              <span>Next</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
+              <button
+                disabled={meta.page >= meta.total_pages || isFetching}
+                onClick={() => handlePageChange(meta.page + 1)}
+                className="px-3.5 py-1.5 rounded-lg bg-brivo-navy hover:bg-brivo-navy/90 disabled:opacity-40 text-xs text-brivo-paper font-mono flex items-center gap-1 transition-colors shadow-2xs cursor-pointer disabled:cursor-not-allowed active:scale-95"
+              >
+                <span>Next</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ) : (
+            <span className="text-[0.7rem] font-mono text-brivo-slate/60">
+              All {meta.total} records displayed
+            </span>
+          )}
         </div>
       )}
 
@@ -1153,7 +1155,7 @@ export default function ExplorerPage() {
   return (
     <Suspense
       fallback={
-        <div className="max-w-7xl mx-auto px-4 py-20 text-center text-xs font-mono text-brivo-slate">
+        <div className="w-full max-w-7xl mx-auto px-4 py-20 text-center text-xs font-mono text-brivo-slate">
           Loading regulatory explorer...
         </div>
       }
