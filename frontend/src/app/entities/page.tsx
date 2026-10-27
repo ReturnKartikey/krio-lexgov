@@ -475,89 +475,162 @@ function EntitiesContent() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.12 }}
-                className="w-full border border-brivo-navy/10 rounded-xl overflow-hidden bg-white shadow-2xs"
+                className="w-full space-y-3"
               >
-                <div className="w-full overflow-x-auto">
-                  <table className="w-full table-fixed text-left text-xs min-w-[700px]">
-                    <thead className="bg-brivo-paper text-brivo-slate font-mono uppercase text-[0.65rem] tracking-wider border-b border-brivo-navy/10">
-                      <tr>
-                        <th className="px-5 py-3.5 w-16 text-center whitespace-nowrap">#</th>
-                        <th className="px-5 py-3.5 w-auto">Entity / Noticee</th>
-                        <th className="px-5 py-3.5 w-36 whitespace-nowrap">Classification</th>
-                        <th className="px-5 py-3.5 w-36 text-center whitespace-nowrap">Enforced Orders</th>
-                        <th className="px-5 py-3.5 w-44 text-right whitespace-nowrap">Aggregate Sanctions</th>
-                        <th className="px-5 py-3.5 w-24 text-right whitespace-nowrap">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-brivo-navy/5">
-                      {entities.map((ent, idx) => {
-                        const rank = (pageParam - 1) * pageSizeParam + idx + 1;
-                        const formattedRank = String(rank).padStart(2, "0");
-                        const isIndividual = ent.entity_type === "individual";
-                        const isIntermediary = ent.entity_type === "intermediary";
+                {/* Mobile-Native High-Density List (Shown on screens < md) */}
+                <div className="block md:hidden space-y-2.5">
+                  {entities.map((ent, idx) => {
+                    const rank = (pageParam - 1) * pageSizeParam + idx + 1;
+                    const formattedRank = String(rank).padStart(2, "0");
+                    const isIndividual = ent.entity_type === "individual";
+                    const isIntermediary = ent.entity_type === "intermediary";
 
-                        return (
-                          <tr
-                            key={ent.id}
-                            className="hover:bg-brivo-paper/60 transition-colors group"
-                          >
-                            <td className="px-5 py-3.5 text-center font-mono text-xs text-brivo-slate font-semibold whitespace-nowrap">
+                    return (
+                      <Link
+                        key={ent.id}
+                        href={`/entities/${ent.id}`}
+                        className="p-3.5 rounded-xl bg-white border border-brivo-navy/10 hover:border-brivo-navy/30 transition-all space-y-2 shadow-2xs block active:scale-[0.99] group"
+                      >
+                        {/* Top: Rank + Classification + Penalty */}
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-xs text-brivo-slate font-semibold">
                               {formattedRank}
-                            </td>
-                            <td className="px-5 py-3.5 text-brivo-navy font-sans font-medium min-w-0">
-                              <Link
-                                href={`/entities/${ent.id}`}
-                                className="hover:text-brivo-cyan transition-colors truncate block text-sm font-semibold"
-                              >
-                                <HighlightedText text={ent.name} highlight={qParam} />
-                              </Link>
-                              <span className="text-[0.68rem] font-mono text-brivo-slate block truncate">
-                                Canonical: {ent.normalized_name}
-                              </span>
-                            </td>
-                            <td className="px-5 py-3.5 whitespace-nowrap">
-                              <span
-                                className={`font-mono text-[0.65rem] px-2 py-0.5 rounded uppercase border font-medium ${
-                                  isIntermediary
-                                    ? "bg-emerald-50 text-emerald-800 border-emerald-200"
-                                    : isIndividual
-                                    ? "bg-indigo-50 text-indigo-800 border-indigo-200"
-                                    : "bg-brivo-mist text-brivo-navy border-brivo-navy/15"
-                                }`}
-                              >
-                                {ent.entity_type}
-                              </span>
-                            </td>
-                            <td className="px-5 py-3.5 text-center whitespace-nowrap">
-                              <Link
-                                href={`/explorer?entity=${encodeURIComponent(ent.name)}`}
-                                className="text-brivo-navy hover:text-brivo-cyan hover:underline font-mono font-medium"
-                                title={`View ${ent.record_count} enforcement orders`}
-                              >
-                                {ent.record_count}
-                              </Link>
-                            </td>
-                            <td className="px-5 py-3.5 text-right font-bold text-brivo-navy font-sans tracking-tight text-sm whitespace-nowrap">
-                              {ent.total_penalty_amount > 0 ? (
-                                formatINR(ent.total_penalty_amount)
-                              ) : (
-                                <span className="text-brivo-slate font-normal text-xs">Non-Monetary</span>
-                              )}
-                            </td>
-                            <td className="px-5 py-3.5 text-right whitespace-nowrap">
-                              <Link
-                                href={`/entities/${ent.id}`}
-                                className="text-xs text-brivo-navy hover:text-brivo-cyan font-mono hover:underline inline-flex items-center gap-1"
-                              >
-                                <span>Dossier</span>
-                                <ArrowRight className="w-3 h-3" />
-                              </Link>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                            </span>
+                            <span
+                              className={`font-mono text-[0.62rem] px-2 py-0.5 rounded uppercase font-medium border ${
+                                isIntermediary
+                                  ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                                  : isIndividual
+                                  ? "bg-indigo-50 text-indigo-800 border-indigo-200"
+                                  : "bg-brivo-mist text-brivo-navy border-brivo-navy/15"
+                              }`}
+                            >
+                              {ent.entity_type}
+                            </span>
+                          </div>
+                          <span className="font-sans font-bold text-xs text-brivo-navy tracking-tight">
+                            {ent.total_penalty_amount > 0 ? formatINR(ent.total_penalty_amount) : "Non-Monetary"}
+                          </span>
+                        </div>
+
+                        {/* Name & Canonical */}
+                        <div className="space-y-0.5">
+                          <div className="text-sm font-semibold text-brivo-navy flex items-center gap-1.5 leading-snug group-hover:text-brivo-cyan transition-colors">
+                            {isIndividual ? (
+                              <User className="w-3.5 h-3.5 text-brivo-slate shrink-0" />
+                            ) : (
+                              <Building2 className="w-3.5 h-3.5 text-brivo-slate shrink-0" />
+                            )}
+                            <span className="truncate">
+                              <HighlightedText text={ent.name} highlight={qParam} />
+                            </span>
+                          </div>
+                          <div className="text-[0.68rem] font-mono text-brivo-slate truncate">
+                            Canonical: {ent.normalized_name}
+                          </div>
+                        </div>
+
+                        {/* Bottom: Orders & Dossier link */}
+                        <div className="pt-2 border-t border-brivo-navy/5 flex items-center justify-between text-xs font-mono text-brivo-slate">
+                          <span className="flex items-center gap-1 text-[0.7rem]">
+                            <FileText className="w-3 h-3 text-brivo-slate/70" />
+                            <span>{ent.record_count} {ent.record_count === 1 ? "Order" : "Orders"}</span>
+                          </span>
+                          <span className="text-brivo-navy font-medium text-[0.7rem] flex items-center gap-1">
+                            <span>Dossier</span>
+                            <ArrowRight className="w-3 h-3 text-brivo-cyan group-hover:translate-x-0.5 transition-transform" />
+                          </span>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+
+                {/* Desktop Full 6-Column Table (Preserved on md: and above) */}
+                <div className="hidden md:block w-full border border-brivo-navy/10 rounded-xl overflow-hidden bg-white shadow-2xs">
+                  <div className="w-full overflow-x-auto">
+                    <table className="w-full table-fixed text-left text-xs min-w-[700px]">
+                      <thead className="bg-brivo-paper text-brivo-slate font-mono uppercase text-[0.65rem] tracking-wider border-b border-brivo-navy/10">
+                        <tr>
+                          <th className="px-5 py-3.5 w-16 text-center whitespace-nowrap">#</th>
+                          <th className="px-5 py-3.5 w-auto min-w-[200px]">Entity / Noticee</th>
+                          <th className="px-5 py-3.5 w-36 whitespace-nowrap">Classification</th>
+                          <th className="px-5 py-3.5 w-36 text-center whitespace-nowrap">Enforced Orders</th>
+                          <th className="px-5 py-3.5 w-44 text-right whitespace-nowrap">Aggregate Sanctions</th>
+                          <th className="px-5 py-3.5 w-24 text-right whitespace-nowrap">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-brivo-navy/5">
+                        {entities.map((ent, idx) => {
+                          const rank = (pageParam - 1) * pageSizeParam + idx + 1;
+                          const formattedRank = String(rank).padStart(2, "0");
+                          const isIndividual = ent.entity_type === "individual";
+                          const isIntermediary = ent.entity_type === "intermediary";
+
+                          return (
+                            <tr
+                              key={ent.id}
+                              className="hover:bg-brivo-paper/60 transition-colors group"
+                            >
+                              <td className="px-5 py-3.5 text-center font-mono text-xs text-brivo-slate font-semibold whitespace-nowrap">
+                                {formattedRank}
+                              </td>
+                              <td className="px-5 py-3.5 text-brivo-navy font-sans font-medium min-w-0">
+                                <Link
+                                  href={`/entities/${ent.id}`}
+                                  className="hover:text-brivo-cyan transition-colors truncate block text-sm font-semibold"
+                                >
+                                  <HighlightedText text={ent.name} highlight={qParam} />
+                                </Link>
+                                <span className="text-[0.68rem] font-mono text-brivo-slate block truncate">
+                                  Canonical: {ent.normalized_name}
+                                </span>
+                              </td>
+                              <td className="px-5 py-3.5 whitespace-nowrap">
+                                <span
+                                  className={`font-mono text-[0.65rem] px-2 py-0.5 rounded uppercase border font-medium ${
+                                    isIntermediary
+                                      ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                                      : isIndividual
+                                      ? "bg-indigo-50 text-indigo-800 border-indigo-200"
+                                      : "bg-brivo-mist text-brivo-navy border-brivo-navy/15"
+                                  }`}
+                                >
+                                  {ent.entity_type}
+                                </span>
+                              </td>
+                              <td className="px-5 py-3.5 text-center whitespace-nowrap">
+                                <Link
+                                  href={`/explorer?entity=${encodeURIComponent(ent.name)}`}
+                                  className="text-brivo-navy hover:text-brivo-cyan hover:underline font-mono font-medium"
+                                  title={`View ${ent.record_count} enforcement orders`}
+                                >
+                                  {ent.record_count}
+                                </Link>
+                              </td>
+                              <td className="px-5 py-3.5 text-right font-bold text-brivo-navy font-sans tracking-tight text-sm whitespace-nowrap">
+                                {ent.total_penalty_amount > 0 ? (
+                                  formatINR(ent.total_penalty_amount)
+                                ) : (
+                                  <span className="text-brivo-slate font-normal text-xs">Non-Monetary</span>
+                                )}
+                              </td>
+                              <td className="px-5 py-3.5 text-right whitespace-nowrap">
+                                <Link
+                                  href={`/entities/${ent.id}`}
+                                  className="text-xs text-brivo-navy hover:text-brivo-cyan font-mono hover:underline inline-flex items-center gap-1"
+                                >
+                                  <span>Dossier</span>
+                                  <ArrowRight className="w-3 h-3" />
+                                </Link>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </motion.div>
             )}
