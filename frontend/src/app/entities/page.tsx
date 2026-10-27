@@ -14,7 +14,6 @@ import {
   ChevronRight,
   FileText,
   ArrowRight,
-  RotateCcw,
   Loader2,
 } from "lucide-react";
 import { CustomSelect, SelectOption } from "@/components/common/CustomSelect";
@@ -326,26 +325,15 @@ function EntitiesContent() {
           })}
         </div>
 
-        {/* Right: Sort & Reset */}
-        <div className="flex items-center justify-between sm:justify-end gap-2 border-t lg:border-t-0 pt-2 lg:pt-0 border-brivo-navy/10 shrink-0">
-          <div className="w-48 sm:w-52">
+        {/* Right: Sort */}
+        <div className="flex items-center justify-end border-t lg:border-t-0 pt-2 lg:pt-0 border-brivo-navy/10 shrink-0">
+          <div className="w-full sm:w-48 lg:w-52">
             <CustomSelect
               value={sortCombined}
               onChange={handleSortChange}
               options={SORT_OPTIONS}
             />
           </div>
-
-          <button
-            onClick={handleResetFilters}
-            disabled={!isFiltered}
-            className={`p-2 rounded-lg border border-brivo-navy/15 bg-brivo-paper hover:bg-brivo-mist text-brivo-slate hover:text-brivo-navy transition-all shrink-0 cursor-pointer ${
-              isFiltered ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none"
-            }`}
-            title="Reset all filters"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-          </button>
         </div>
       </div>
 
