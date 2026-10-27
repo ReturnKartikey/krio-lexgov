@@ -21,6 +21,7 @@ import {
   Sparkles,
   Eye,
   X,
+  Loader2,
 } from "lucide-react";
 import { HighlightedText } from "@/components/common/HighlightedText";
 import { CustomSelect, SelectOption } from "@/components/common/CustomSelect";
@@ -105,11 +106,18 @@ function ExplorerContent() {
   const [viewMode, setViewMode] = useState<"table" | "cards">("cards");
   const [hasUserToggledView, setHasUserToggledView] = useState(false);
 
-  // Instant SWR Cache Hydration
-  const cachedEnvelope = getCached<EnvelopeResponse<RecordListItem[]>>(
-    `/api/records?page=${pageParam}&page_size=${pageSizeParam}`
-  ) || getCached<EnvelopeResponse<RecordListItem[]>>("/api/records?page=1&page_size=10")
-    || getCached<EnvelopeResponse<RecordListItem[]>>("/api/records?page=1&page_size=20");
+  const hasActiveFilters = Boolean(
+    qParam || stateParam || entityParam || penaltySlabParam || dateFromParam || dateToParam || pageParam !== 1 || pageSizeParam !== 10
+  );
+
+  // Instant SWR Cache Hydration: only use default fallback if no active filters
+  const cacheKey = `/api/records?page=${pageParam}&page_size=${pageSizeParam}${qParam ? `&q=${encodeURIComponent(qParam)}` : ""}${stateParam ? `&state=${encodeURIComponent(stateParam)}` : ""}${entityParam ? `&entity=${encodeURIComponent(entityParam)}` : ""}${penaltySlabParam ? `&penalty_slab=${encodeURIComponent(penaltySlabParam)}` : ""}${dateFromParam ? `&date_from=${dateFromParam}` : ""}${dateToParam ? `&date_to=${dateToParam}` : ""}${sortByParam ? `&sort_by=${sortByParam}` : ""}${sortOrderParam ? `&sort_order=${sortOrderParam}` : ""}`;
+
+  const cachedEnvelope = getCached<EnvelopeResponse<RecordListItem[]>>(cacheKey)
+    || (!hasActiveFilters
+      ? (getCached<EnvelopeResponse<RecordListItem[]>>("/api/records?page=1&page_size=10")
+        || getCached<EnvelopeResponse<RecordListItem[]>>("/api/records?page=1&page_size=20"))
+      : null);
 
   const [records, setRecords] = useState<RecordListItem[]>(() => cachedEnvelope?.data || []);
   const [meta, setMeta] = useState<PaginationMeta>(() => cachedEnvelope?.meta || {
@@ -212,6 +220,7 @@ function ExplorerContent() {
   // Sync state with URL params
   const updateUrl = useCallback(
     (newParams: Record<string, string | number | undefined>) => {
+      setIsFetching(true);
       const params = new URLSearchParams(searchParams.toString());
       Object.entries(newParams).forEach(([k, v]) => {
         if (v !== undefined && v !== "" && v !== null) {
@@ -226,17 +235,14 @@ function ExplorerContent() {
   );
 
   const handlePageChange = (newPage: number) => {
+    setIsFetching(true);
     updateUrl({ page: newPage });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   // Fetch records
   const loadData = useCallback(async () => {
-    if (records.length === 0) {
-      setInitialLoading(true);
-    } else {
-      setIsFetching(true);
-    }
+    setIsFetching(true);
     try {
       const res = await getRecords({
         q: qParam,
@@ -288,6 +294,7 @@ function ExplorerContent() {
   };
 
   const handleResetFilters = () => {
+    setIsFetching(true);
     setSearchInput("");
     setSelectedState("");
     setSelectedEntity("");
@@ -316,8 +323,20 @@ function ExplorerContent() {
 
         {/* View Switcher & Result Count */}
         <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
-          <span className="text-xs font-mono text-brivo-slate">
-            Showing <strong className="text-brivo-navy"><RollingNumber value={meta.total} /></strong> results
+          <span className="text-xs font-mono text-brivo-slate flex items-center gap-2">
+            <span>
+              Showing{" "}
+              <strong className="text-brivo-navy">
+                {initialLoading ? "..." : <RollingNumber value={meta.total} />}
+              </strong>{" "}
+              results
+            </span>
+            {isFetching && (
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-white border border-brivo-navy/15 text-[0.65rem] font-mono text-brivo-navy shadow-2xs">
+                <Loader2 className="w-2.5 h-2.5 animate-spin text-brivo-navy" />
+                <span className="hidden sm:inline">Updating</span>
+              </span>
+            )}
           </span>
 
           <div className="flex items-center border border-brivo-navy/15 rounded-lg bg-white p-0.5 shadow-sm relative">
@@ -768,8 +787,35 @@ function ExplorerContent() {
         )}
       </div>
 
+      {/* Refined Archival Hairline Progress Bar */}
+      <div className="h-[3px] w-full -my-1 relative overflow-hidden rounded-full">
+        <AnimatePresence>
+          {isFetching && (
+            <motion.div
+              key="explorer-progress-bar"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              className="w-full h-full bg-brivo-navy/10 relative overflow-hidden rounded-full"
+            >
+              <motion.div
+                className="h-full w-1/3 bg-gradient-to-r from-brivo-navy/40 via-brivo-navy to-brivo-navy/40 rounded-full"
+                initial={{ x: "-100%" }}
+                animate={{ x: "320%" }}
+                transition={{
+                  repeat: Infinity,
+                  duration: 1.1,
+                  ease: [0.4, 0, 0.2, 1],
+                }}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
       {/* Results Section with smooth non-collapsing state */}
-      {initialLoading ? (
+      {(initialLoading || (isFetching && records.length === 0)) ? (
         viewMode === "cards" ? (
           <div className="space-y-4">
             {Array.from({ length: 5 }).map((_, i) => (
@@ -811,7 +857,7 @@ function ExplorerContent() {
           </button>
         </div>
       ) : (
-        <div className="relative z-10">
+        <div className={`relative z-10 transition-opacity duration-200 ${isFetching ? "opacity-60 pointer-events-none" : "opacity-100"}`}>
           <AnimatePresence mode="wait" initial={false}>
             {viewMode === "cards" ? (
               /* Card Grid View */

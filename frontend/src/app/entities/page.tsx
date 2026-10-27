@@ -8,13 +8,14 @@ import {
   Building2,
   User,
   Search,
-  RotateCcw,
   LayoutGrid,
   List as ListIcon,
   ChevronLeft,
   ChevronRight,
   FileText,
   ArrowRight,
+  RotateCcw,
+  Loader2,
 } from "lucide-react";
 import { CustomSelect, SelectOption } from "@/components/common/CustomSelect";
 import { HighlightedText } from "@/components/common/HighlightedText";
@@ -53,10 +54,12 @@ function EntitiesContent() {
   // Summary state for authoritative global KPIs
   const [summary, setSummary] = useState<EntitySummaryResponse | null>(null);
 
-  // Cache hydration
+  const isFiltered = Boolean(qParam || typeParam || sortByParam !== "total_penalty_amount" || sortOrderParam !== "desc" || pageParam !== 1 || pageSizeParam !== 24);
+
+  // Cache hydration: only use default fallback if no active filters
   const cacheKey = `/api/entities?page=${pageParam}&page_size=${pageSizeParam}&sort_by=${sortByParam}&sort_order=${sortOrderParam}${qParam ? `&q=${encodeURIComponent(qParam)}` : ""}${typeParam ? `&entity_type=${typeParam}` : ""}`;
   const defaultCacheKey = "/api/entities?page=1&page_size=24&sort_by=total_penalty_amount&sort_order=desc";
-  const cachedData = getCached<EnvelopeResponse<EntitySimple[]>>(cacheKey) || getCached<EnvelopeResponse<EntitySimple[]>>(defaultCacheKey);
+  const cachedData = getCached<EnvelopeResponse<EntitySimple[]>>(cacheKey) || (!isFiltered ? getCached<EnvelopeResponse<EntitySimple[]>>(defaultCacheKey) : null);
 
   const [entities, setEntities] = useState<EntitySimple[]>(() => cachedData?.data || []);
   const [meta, setMeta] = useState<PaginationMeta>(() => cachedData?.meta || {
@@ -87,6 +90,7 @@ function EntitiesContent() {
   // Sync state with URL params
   const updateUrl = useCallback(
     (newParams: Record<string, string | number | undefined>) => {
+      setIsFetching(true);
       const params = new URLSearchParams(searchParams.toString());
       Object.entries(newParams).forEach(([k, v]) => {
         if (v !== undefined && v !== "" && v !== null) {
@@ -124,11 +128,7 @@ function EntitiesContent() {
 
   // Fetch entities list
   const loadEntities = useCallback(async () => {
-    if (!hasLoadedRef.current) {
-      setLoading(true);
-    } else {
-      setIsFetching(true);
-    }
+    setIsFetching(true);
     try {
       const res = await getEntities({
         q: qParam || undefined,
@@ -176,13 +176,13 @@ function EntitiesContent() {
   };
 
   const handleResetFilters = () => {
+    setIsFetching(true);
     setSearchInput("");
     setSelectedType("");
     setSortCombined("total_penalty_amount_desc");
     router.push("/entities");
   };
 
-  const isFiltered = Boolean(qParam || typeParam || sortByParam !== "total_penalty_amount" || sortOrderParam !== "desc");
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 sm:pt-6 pb-12 sm:pb-20 space-y-6 sm:space-y-8">
@@ -200,8 +200,20 @@ function EntitiesContent() {
 
         {/* View Switcher & Result Count */}
         <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
-          <span className="text-xs font-mono text-brivo-slate whitespace-nowrap">
-            Showing <strong className="text-brivo-navy"><RollingNumber value={meta.total} /></strong> entities
+          <span className="text-xs font-mono text-brivo-slate whitespace-nowrap flex items-center gap-2">
+            <span>
+              Showing{" "}
+              <strong className="text-brivo-navy">
+                {loading ? "..." : <RollingNumber value={meta.total} />}
+              </strong>{" "}
+              entities
+            </span>
+            {isFetching && (
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-white border border-brivo-navy/15 text-[0.65rem] font-mono text-brivo-navy shadow-2xs">
+                <Loader2 className="w-2.5 h-2.5 animate-spin text-brivo-navy" />
+                <span className="hidden sm:inline">Updating</span>
+              </span>
+            )}
           </span>
 
           <div className="flex items-center border border-brivo-navy/15 rounded-lg bg-white p-0.5 shadow-2xs relative">
@@ -337,8 +349,35 @@ function EntitiesContent() {
         </div>
       </div>
 
+      {/* Refined Archival Hairline Progress Bar */}
+      <div className="h-[3px] w-full -my-1 relative overflow-hidden rounded-full">
+        <AnimatePresence>
+          {isFetching && (
+            <motion.div
+              key="entities-progress-bar"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              className="w-full h-full bg-brivo-navy/10 relative overflow-hidden rounded-full"
+            >
+              <motion.div
+                className="h-full w-1/3 bg-gradient-to-r from-brivo-navy/40 via-brivo-navy to-brivo-navy/40 rounded-full"
+                initial={{ x: "-100%" }}
+                animate={{ x: "320%" }}
+                transition={{
+                  repeat: Infinity,
+                  duration: 1.1,
+                  ease: [0.4, 0, 0.2, 1],
+                }}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
       {/* Main Results View */}
-      {loading ? (
+      {(loading || (isFetching && entities.length === 0)) ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="p-5 rounded-xl bg-white border border-brivo-navy/10 space-y-4 shadow-2xs">
@@ -368,7 +407,7 @@ function EntitiesContent() {
           </button>
         </div>
       ) : (
-        <div className="relative w-full min-h-[500px]">
+        <div className={`relative w-full min-h-[500px] transition-opacity duration-200 ${isFetching ? "opacity-60 pointer-events-none" : "opacity-100"}`}>
           <AnimatePresence mode="wait" initial={false}>
             {viewMode === "cards" ? (
               /* Editorial Cards Grid */
