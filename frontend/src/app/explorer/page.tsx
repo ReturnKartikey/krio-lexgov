@@ -135,7 +135,7 @@ function ExplorerContent() {
   const [focusedIndex, setFocusedIndex] = useState<number>(0);
 
   useEffect(() => {
-    document.title = "Explorer | KRIO.LEXGOV";
+    document.title = "Explorer";
   }, []);
 
   // Quick Look cycling handlers

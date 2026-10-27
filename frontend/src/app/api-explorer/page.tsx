@@ -137,7 +137,7 @@ export default function ApiExplorerPage() {
   const [copiedCurl, setCopiedCurl] = useState(false);
 
   React.useEffect(() => {
-    document.title = "API Console | KRIO.LEXGOV";
+    document.title = "API Console";
   }, []);
 
   const handleSelectEndpoint = (ep: ApiEndpoint) => {

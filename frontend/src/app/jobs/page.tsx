@@ -43,7 +43,7 @@ export default function JobsPage() {
   };
 
   useEffect(() => {
-    document.title = "Ingestion Jobs | KRIO.LEXGOV";
+    document.title = "Ingestion Jobs";
     fetchJobsList();
   }, []);
 

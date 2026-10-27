@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://krio-rust.vercel.app"),
   title: {
     default: "KRIO : Regulatory Intelligence Platform",
-    template: "%s | KRIO",
+    template: "%s",
   },
   description:
     "Audit-grade regulatory intelligence platform normalizing, searching, and analyzing enforcement orders from the Securities and Exchange Board of India (SEBI).",

@@ -72,7 +72,7 @@ function EntitiesContent() {
   const hasLoadedRef = useRef(Boolean(cachedData?.data?.length));
 
   useEffect(() => {
-    document.title = "Entity Directory & Intelligence | KRIO.LEXGOV";
+    document.title = "Entity Directory & Intelligence";
   }, []);
 
   // Fetch summary once

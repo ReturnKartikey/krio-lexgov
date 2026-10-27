@@ -91,7 +91,7 @@ export default function AnalyticsPage() {
   const [loading, setLoading] = useState<boolean>(() => !hasCachedData);
 
   useEffect(() => {
-    document.title = "Analytics & Trends | KRIO.LEXGOV";
+    document.title = "Analytics & Trends";
   }, []);
 
   useEffect(() => {
