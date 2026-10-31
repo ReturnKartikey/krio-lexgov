@@ -1,5 +1,7 @@
 <p align="center">
-  <img src="logo.png" alt="Krio LexGov" height="48" />
+  <a href="https://krio-rust.vercel.app">
+    <img src="icon_logo.png" alt="Krio LexGov" width="64" height="64" />
+  </a>
 </p>
 
 <h1 align="center">KRIO · LexGov</h1>
