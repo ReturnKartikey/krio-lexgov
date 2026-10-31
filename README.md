@@ -12,6 +12,7 @@
 <p align="center">
   <a href="https://krio-rust.vercel.app"><img src="https://img.shields.io/badge/Live_App-krio--rust.vercel.app-000000?style=flat-square&logo=vercel&logoColor=white" alt="Live App" /></a>
   <a href="https://krio-lexgov-api.onrender.com/docs"><img src="https://img.shields.io/badge/API_Docs-Swagger-009688?style=flat-square&logo=fastapi&logoColor=white" alt="API Docs" /></a>
+  <a href="https://hub.xerj.org/contributors/ReturnKartikey"><img src="https://hub.xerj.org/contributors/ReturnKartikey/badge.svg" alt="XERJ Corpus Hub Contributor" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square" alt="License" /></a>
 </p>
 
@@ -35,7 +36,7 @@ Every record carries **audit-grade provenance** — SHA-256 content hashes, veri
   <tr>
     <td width="50%">
       <img src="docs/screenshots/explorer-archive.png" alt="Explorer — Order Archive" width="100%" />
-      <p align="center"><sub><strong>Explorer</strong> — Full-text search across 127+ enforcement orders with AI Brief and filtering</sub></p>
+      <p align="center"><sub><strong>Explorer</strong> — Full-text search across 158+ enforcement orders with AI Brief and filtering</sub></p>
     </td>
     <td width="50%">
       <img src="docs/screenshots/analytics-dashboard.png" alt="Analytics Dashboard" width="100%" />
@@ -53,8 +54,8 @@ Every record carries **audit-grade provenance** — SHA-256 content hashes, veri
 | **Multi-Category Ingestion** | Automated scraping across Adjudication Orders, Chairperson/WTM Orders, and Settlement Orders via `httpx`, `BeautifulSoup4`, and `pypdf`. |
 | **Cryptographic Provenance** | Raw PDF and HTML payloads are SHA-256 hashed upon retrieval for tamper-proof audit trails. |
 | **Entity & Sanction Extraction** | Domain NLP extracts corporate noticees, individual respondents, violation statutes (PFUTP, LODR, PIT, CIS), and monetary penalty slabs. |
-| **Sub-Millisecond Search** | PostgreSQL 16 `tsvector` + `pg_trgm` GIN indexes enable full-text lexical search with typo tolerance. |
-| **AI Risk Synthesis** | Google Gemini integration synthesizes multi-page orders into structured legal risk briefs on demand. |
+| **Sub-Millisecond Search** | PostgreSQL 16 GIN indexes (`search_vector` tsvector & `pg_trgm` trigram ops) with multi-token lexical query matching across titles, entities, and summaries. |
+| **Automated Legal Synthesis** | Domain regulatory intelligence engine synthesizes multi-page orders into structured risk briefs, statutory mappings, precedent cases, and actionable compliance takeaways. |
 | **Executive PDF Memos** | Client-side `jsPDF` generates audit-grade briefing memos with verified provenance blocks and formatted INR currencies. |
 | **Quick Look Modal** | Keyboard-driven (`Space`, `Esc`, `Enter`) macOS Finder-style modal for instant order previews. |
 | **Responsible Crawling** | Token bucket rate limiting, `robots.txt` compliance, and transparent bot identification. |
@@ -65,13 +66,13 @@ Every record carries **audit-grade provenance** — SHA-256 content hashes, veri
 
 ### Backend
 
-- **Runtime:** Python 3.12+
+- **Runtime:** Python 3.12+ (supports Python 3.11+)
 - **Framework:** FastAPI — async endpoints, Pydantic v2 validation
-- **Database:** PostgreSQL 16, SQLAlchemy 2.0 (asyncpg), Alembic migrations
-- **Search:** Full-Text Search (`tsvector`), `pg_trgm` trigram index
-- **Scheduler:** APScheduler — async background crawling
+- **Database:** PostgreSQL 16 (or SQLite with zero-config fallback), SQLAlchemy 2.0 (asyncpg / aiosqlite), Alembic migrations
+- **Search:** PostgreSQL GIN Full-Text Search (`tsvector`), `pg_trgm` trigram index, multi-token lexical matching
+- **Scheduler:** APScheduler — async background crawling & automated ingestion
 - **Scraping:** `httpx` (HTTP/2), `BeautifulSoup4`, `pypdf`
-- **AI:** Google Gemini API (`google-generativeai`)
+- **Intelligence:** Domain Legal Synthesis & NLP Entity Extraction Engine
 
 ### Frontend
 
@@ -81,6 +82,7 @@ Every record carries **audit-grade provenance** — SHA-256 content hashes, veri
 - **Motion:** Framer Motion, Lenis smooth scroll, GSAP
 - **Charts:** Recharts — area, bar, radar, and timeline visualizations
 - **Export:** `jsPDF` for regulatory PDF memos
+- **Testing:** Vitest + React Testing Library
 
 ---
 
@@ -114,9 +116,10 @@ flowchart TD
     end
 
     subgraph UI["Next.js 14 Frontend"]
-        EXPLORER["/explorer"]
-        DOSSIER["/explorer/[id]"]
+        EXPLORER["/explorer & /explorer/[id]"]
+        ENTITIES_UI["/entities & /entities/[id]"]
         ANALYTICS["/analytics"]
+        API_UI["/api-explorer"]
         JOBS_UI["/jobs"]
     end
 
@@ -130,16 +133,19 @@ flowchart TD
 
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
+| `GET` | `/api/health` | Service health status, database connectivity, and scheduler state |
 | `GET` | `/api/records` | Search with full-text queries, penalty slabs, date ranges, jurisdiction, and sorting |
 | `GET` | `/api/records/{id}` | Full regulatory dossier with entities, regulations, metadata, and SHA-256 hash |
-| `GET` | `/api/entities` | List tracked noticees with order count and penalty exposure |
-| `GET` | `/api/entities/{id}` | Detailed entity dossier with risk score and chronological timeline |
-| `GET` | `/api/analytics/overview` | Aggregate stats — total penalties, order count, unique entities |
-| `GET` | `/api/analytics/trends` | Monthly enforcement volume and penalty velocity |
+| `GET` | `/api/records/{id}/preview` | Lightweight preview payload for instant modal inspection |
+| `GET` | `/api/entities` | List tracked noticees with order count, total exposure, and risk classification |
+| `GET` | `/api/entities/summary` | Aggregate exposure, entity count, and high-risk classification statistics |
+| `GET` | `/api/entities/{id}` | Detailed entity dossier with risk score and chronological order timeline |
+| `GET` | `/api/analytics/processing-stats` | Ingestion pipeline audit statistics, success rates, total penalties, and entity metrics |
+| `GET` | `/api/analytics/trends` | Monthly enforcement volume, penalty velocity, and statutory breakdown |
 | `GET` | `/api/analytics/duplicates` | Near-duplicate detection via multi-factor fuzzy similarity |
-| `GET` | `/api/jobs` | Crawler run history, execution status, audit metrics |
+| `GET` | `/api/jobs` | Crawler run history, execution status, and audit metrics |
 | `POST` | `/api/jobs/sync` | Trigger on-demand registry crawl (incremental or full) |
-| `POST` | `/api/ai/synthesize` | Generate AI risk analysis and legal findings brief via Gemini |
+| `POST` | `/api/ai/synthesize` | Domain AI risk analysis, precedent matching, and statutory compliance brief |
 
 > **Interactive docs:** [krio-lexgov-api.onrender.com/docs](https://krio-lexgov-api.onrender.com/docs)
 
@@ -149,9 +155,9 @@ flowchart TD
 
 ### Prerequisites
 
-- Python 3.12+
+- Python 3.12+ (or 3.11+)
 - Node.js 18+ and npm
-- PostgreSQL 16+ (or Docker)
+- PostgreSQL 16+ (optional: SQLite fallback runs with zero setup)
 
 ### Docker Compose
 
@@ -176,7 +182,7 @@ cd backend
 python -m venv venv
 source venv/bin/activate        # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-alembic upgrade head
+alembic upgrade head            # Optional for PostgreSQL; SQLite auto-seeds on startup
 uvicorn app.main:app --reload --port 8000
 
 # Frontend (in a separate terminal)
@@ -194,8 +200,9 @@ npm run dev
 pytest backend/tests -v --cov=backend/app --cov-report=term-missing
 ruff check backend/app --config backend/pyproject.toml
 
-# Frontend — type check and production build
+# Frontend — type check, unit tests, and production build
 cd frontend
+npm test
 npx tsc --noEmit
 npm run build
 ```
@@ -209,11 +216,13 @@ CI runs automatically on every pull request via GitHub Actions — lint, type ch
 | Surface | URL |
 | :--- | :--- |
 | **Web Application** | [krio-rust.vercel.app](https://krio-rust.vercel.app) |
-| **Explorer** | [krio-rust.vercel.app/explorer](https://krio-rust.vercel.app/explorer) |
-| **Analytics** | [krio-rust.vercel.app/analytics](https://krio-rust.vercel.app/analytics) |
+| **Explorer (Archive)** | [krio-rust.vercel.app/explorer](https://krio-rust.vercel.app/explorer) |
+| **Entities Directory** | [krio-rust.vercel.app/entities](https://krio-rust.vercel.app/entities) |
+| **Analytics & Trends** | [krio-rust.vercel.app/analytics](https://krio-rust.vercel.app/analytics) |
+| **API Console** | [krio-rust.vercel.app/api-explorer](https://krio-rust.vercel.app/api-explorer) |
 | **Ingestion Jobs** | [krio-rust.vercel.app/jobs](https://krio-rust.vercel.app/jobs) |
-| **Swagger (OpenAPI)** | [krio-lexgov-api.onrender.com/docs](https://krio-lexgov-api.onrender.com/docs) |
-| **ReDoc** | [krio-lexgov-api.onrender.com/redoc](https://krio-lexgov-api.onrender.com/redoc) |
+| **Swagger UI** | [krio-lexgov-api.onrender.com/docs](https://krio-lexgov-api.onrender.com/docs) |
+| **OpenAPI Schema** | [krio-lexgov-api.onrender.com/api/openapi.json](https://krio-lexgov-api.onrender.com/api/openapi.json) |
 
 ---
 
