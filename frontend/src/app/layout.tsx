@@ -5,6 +5,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { SmoothScrollProvider } from "@/components/motion/SmoothScrollProvider";
 import { ToastContainer } from "@/components/common/Toast";
+import { CommandPalette } from "@/components/common/CommandPalette";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -73,6 +74,7 @@ export default function RootLayout({
           <main className="flex-1 w-full">{children}</main>
           <Footer />
           <ToastContainer />
+          <CommandPalette />
         </SmoothScrollProvider>
       </body>
     </html>

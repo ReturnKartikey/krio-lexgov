@@ -132,16 +132,11 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [updatePill]);
 
-  // Global Cmd+K shortcut
+  // Listen for AI Modal trigger from Command Palette or external events
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
-        e.preventDefault();
-        setIsAiModalOpen((prev) => !prev);
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    const handleOpenAi = () => setIsAiModalOpen(true);
+    window.addEventListener("krio-open-ai-modal", handleOpenAi);
+    return () => window.removeEventListener("krio-open-ai-modal", handleOpenAi);
   }, []);
 
   return (
@@ -387,7 +382,7 @@ export function Navbar() {
         )}
       </AnimatePresence>
 
-      {/* Global Command Menu & Intelligence Modal */}
+      {/* Global AI Intelligence Modal */}
       <IntelligenceModal
         isOpen={isAiModalOpen}
         onClose={() => setIsAiModalOpen(false)}
@@ -395,3 +390,5 @@ export function Navbar() {
     </>
   );
 }
+
+export default Navbar;
