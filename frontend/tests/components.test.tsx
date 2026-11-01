@@ -1,11 +1,19 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, act, waitFor } from "@testing-library/react";
 import { formatINR, formatDate, truncateText } from "../src/lib/utils";
 import { MicroLabel } from "../src/components/common/MicroLabel";
 import { HighlightedText } from "../src/components/common/HighlightedText";
 import { ErrorState } from "../src/components/common/ErrorState";
 import { getAdminApiKey, setAdminApiKey, resetAdminApiKey } from "../src/lib/api";
+import { CommandPalette } from "../src/components/common/CommandPalette";
+
+// Mock next/navigation
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+  }),
+}));
 
 describe("Frontend Utilities", () => {
   it("formats Indian Rupee currency correctly", () => {
@@ -74,5 +82,30 @@ describe("UI Components", () => {
     expect(retryBtn).toBeDefined();
     fireEvent.click(retryBtn);
     expect(handleReset).toHaveBeenCalledTimes(1);
+  });
+
+  it("renders Global Command Palette and toggles via Cmd+K", async () => {
+    render(<CommandPalette />);
+
+    // Initially closed
+    expect(screen.queryByPlaceholderText(/Type a command/i)).toBeNull();
+
+    // Trigger Cmd+K
+    act(() => {
+      fireEvent.keyDown(window, { key: "k", metaKey: true });
+    });
+
+    expect(screen.getByPlaceholderText(/Type a command/i)).toBeDefined();
+    expect(screen.getByText(/Records Explorer/i)).toBeDefined();
+    expect(screen.getByText(/Entities & Noticees Directory/i)).toBeDefined();
+
+    // Trigger Escape to close
+    act(() => {
+      fireEvent.keyDown(window, { key: "Escape" });
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByPlaceholderText(/Type a command/i)).toBeNull();
+    });
   });
 });
