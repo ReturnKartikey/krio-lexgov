@@ -146,17 +146,8 @@ export function Navbar() {
 
   return (
     <>
-      {/* Dynamic Morphing Navigation Container */}
-      <header
-        className="sticky top-0 z-40 w-full pointer-events-none flex flex-col items-center"
-        style={{
-          transform: isScrolled ? "translate3d(0, 12px, 0)" : "translate3d(0, 0px, 0)",
-          transition: isMounted
-            ? "transform 0.34s cubic-bezier(0.16, 1, 0.3, 1)"
-            : "none",
-          willChange: isMounted ? "transform" : "auto",
-        }}
-      >
+      {/* Dynamic Morphing Navigation Container (Fixed h-20 anchor eliminates layout shift & jitter) */}
+      <header className="sticky top-0 z-40 w-full h-20 pointer-events-none flex flex-col items-center justify-start">
         <div
           className="relative pointer-events-auto flex items-center justify-between select-none overflow-hidden"
           style={{
@@ -169,11 +160,11 @@ export function Navbar() {
             borderWidth: 1,
             borderStyle: "solid",
             borderColor: isScrolled ? "rgba(255, 255, 255, 0.55)" : "rgba(255, 255, 255, 0)",
-            transform: "translateZ(0)",
+            transform: isScrolled ? "translate3d(0, 12px, 0)" : "translate3d(0, 0px, 0)",
             WebkitBackfaceVisibility: "hidden",
             backfaceVisibility: "hidden",
             transition: isMounted
-              ? "max-width 0.34s cubic-bezier(0.16, 1, 0.3, 1), height 0.34s cubic-bezier(0.16, 1, 0.3, 1), width 0.34s cubic-bezier(0.16, 1, 0.3, 1), border-radius 0.34s cubic-bezier(0.16, 1, 0.3, 1), padding 0.34s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.34s cubic-bezier(0.16, 1, 0.3, 1)"
+              ? "max-width 0.32s cubic-bezier(0.16, 1, 0.3, 1), height 0.32s cubic-bezier(0.16, 1, 0.3, 1), width 0.32s cubic-bezier(0.16, 1, 0.3, 1), border-radius 0.32s cubic-bezier(0.16, 1, 0.3, 1), padding 0.32s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.32s cubic-bezier(0.16, 1, 0.3, 1), transform 0.32s cubic-bezier(0.16, 1, 0.3, 1)"
               : "none",
           }}
         >
