@@ -147,46 +147,33 @@ export function Navbar() {
   return (
     <>
       {/* Dynamic Morphing Navigation Container */}
-      <motion.header
-        initial={false}
+      <header
         className="sticky top-0 z-40 w-full pointer-events-none flex flex-col items-center"
-        animate={{
-          paddingTop: isScrolled ? 12 : 0,
-        }}
-        transition={
-          isMounted
-            ? { duration: 0.34, ease: [0.16, 1, 0.3, 1] }
-            : { duration: 0 }
-        }
         style={{
-          transform: "translateZ(0)",
-          willChange: "padding-top",
+          transform: isScrolled ? "translate3d(0, 12px, 0)" : "translate3d(0, 0px, 0)",
+          transition: isMounted
+            ? "transform 0.34s cubic-bezier(0.16, 1, 0.3, 1)"
+            : "none",
+          willChange: isMounted ? "transform" : "auto",
         }}
       >
-        <motion.div
-          initial={false}
+        <div
           className="relative pointer-events-auto flex items-center justify-between select-none overflow-hidden"
-          animate={{
+          style={{
             width: isScrolled ? "calc(100% - 1.5rem)" : "100%",
             maxWidth: isScrolled ? "540px" : "1360px",
             height: isScrolled ? "54px" : "80px",
             borderRadius: isScrolled ? "9999px" : "0px",
             paddingLeft: isScrolled ? "18px" : horizontalPadding,
             paddingRight: isScrolled ? "18px" : horizontalPadding,
-          }}
-          transition={
-            isMounted
-              ? { duration: 0.34, ease: [0.16, 1, 0.3, 1] }
-              : { duration: 0 }
-          }
-          style={{
             borderWidth: 1,
             borderStyle: "solid",
             borderColor: isScrolled ? "rgba(255, 255, 255, 0.55)" : "rgba(255, 255, 255, 0)",
             transform: "translateZ(0)",
-            willChange: "max-width, height, width, border-radius",
+            WebkitBackfaceVisibility: "hidden",
+            backfaceVisibility: "hidden",
             transition: isMounted
-              ? "border-color 0.34s cubic-bezier(0.16, 1, 0.3, 1)"
+              ? "max-width 0.34s cubic-bezier(0.16, 1, 0.3, 1), height 0.34s cubic-bezier(0.16, 1, 0.3, 1), width 0.34s cubic-bezier(0.16, 1, 0.3, 1), border-radius 0.34s cubic-bezier(0.16, 1, 0.3, 1), padding 0.34s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.34s cubic-bezier(0.16, 1, 0.3, 1)"
               : "none",
           }}
         >
@@ -195,31 +182,35 @@ export function Navbar() {
             className="absolute inset-0 pointer-events-none rounded-[inherit] z-0"
             style={{
               opacity: isScrolled ? 1 : 0,
-              backgroundColor: "rgba(255, 255, 255, 0.38)",
-              backdropFilter: "blur(26px) saturate(200%) brightness(102%)",
-              WebkitBackdropFilter: "blur(26px) saturate(200%) brightness(102%)",
-              boxShadow:
-                "0 20px 48px -10px rgba(9, 13, 22, 0.10), 0 8px 16px -4px rgba(9, 13, 22, 0.04), inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.85), inset 0 -1px 1px 0 rgba(9, 13, 22, 0.04), inset 1px 0 1px 0 rgba(255, 255, 255, 0.3), inset -1px 0 1px 0 rgba(255, 255, 255, 0.3)",
+              backgroundColor: isScrolled ? "rgba(255, 255, 255, 0.45)" : "transparent",
+              backdropFilter: isScrolled ? "blur(14px) saturate(180%) brightness(102%)" : "none",
+              WebkitBackdropFilter: isScrolled ? "blur(14px) saturate(180%) brightness(102%)" : "none",
+              boxShadow: isScrolled
+                ? "0 12px 32px -4px rgba(9, 13, 22, 0.10), 0 4px 12px -2px rgba(9, 13, 22, 0.04), inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.85), inset 0 -1px 1px 0 rgba(9, 13, 22, 0.04)"
+                : "none",
               transform: "translateZ(0)",
+              WebkitBackfaceVisibility: "hidden",
+              backfaceVisibility: "hidden",
               transition: isMounted
-                ? "opacity 0.34s cubic-bezier(0.16, 1, 0.3, 1)"
+                ? "opacity 0.34s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.34s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.34s cubic-bezier(0.16, 1, 0.3, 1)"
                 : "none",
             }}
           />
 
           {/* iOS Specular Glass Bevel Reflection */}
-          <motion.div
-            initial={false}
-            animate={{ opacity: isScrolled ? 1 : 0 }}
-            transition={isMounted ? { duration: 0.26, ease: "easeOut" } : { duration: 0 }}
+          <div
             className="absolute inset-x-6 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-white to-transparent pointer-events-none rounded-full shadow-[0_1px_2px_rgba(255,255,255,0.7)] z-1"
+            style={{
+              opacity: isScrolled ? 1 : 0,
+              transition: isMounted ? "opacity 0.26s ease-out" : "none",
+            }}
           />
 
           {/* Left Wing - Brand Monogram & Name */}
           <div className="relative z-10 flex items-center shrink-0">
             <Link href="/" className="flex items-center gap-2 sm:gap-2.5 group shrink-0">
               <div
-                className={`rounded-xl flex items-center justify-center group-hover:scale-105 transition-all duration-300 overflow-hidden shrink-0 shadow-2xs border border-white/80 ${
+                className={`rounded-xl flex items-center justify-center group-hover:scale-105 transition-[width,height,transform] duration-300 overflow-hidden shrink-0 shadow-2xs border border-white/80 ${
                   isScrolled
                     ? "w-8 h-8 max-w-[32px] max-h-[32px]"
                     : "w-8 h-8 sm:w-9 sm:h-9 max-w-[36px] max-h-[36px]"
@@ -248,7 +239,7 @@ export function Navbar() {
 
           {/* Center Navigation - iOS Segmented Glass Track */}
           <div className="relative z-10 shrink-0 hidden md:flex items-center justify-center">
-            <motion.nav
+            <nav
               ref={navRef}
               className="relative flex items-center rounded-full bg-black/[0.035] backdrop-blur-md border border-white/80 shadow-[inset_0_1px_2px_rgba(0,0,0,0.04),0_1px_0_0_rgba(255,255,255,0.7)] select-none p-1"
             >
@@ -306,7 +297,7 @@ export function Navbar() {
                   </Link>
                 );
               })}
-            </motion.nav>
+            </nav>
           </div>
 
           {/* Mobile Hamburger Toggle (Always visible on mobile) */}
@@ -325,7 +316,7 @@ export function Navbar() {
               )}
             </button>
           </div>
-        </motion.div>
+        </div>
 
         {/* Mobile Slide-Down Navigation Drawer */}
         <AnimatePresence>
@@ -388,7 +379,7 @@ export function Navbar() {
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.header>
+      </header>
 
       {/* Tap-outside dismiss backdrop (Full viewport overlay) */}
       <AnimatePresence>
