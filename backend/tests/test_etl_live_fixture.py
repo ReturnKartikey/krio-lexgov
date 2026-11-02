@@ -1,7 +1,6 @@
 import hashlib
 import pathlib
-from datetime import UTC, date, datetime
-from typing import Any
+from datetime import date, datetime
 
 import pytest
 from sqlalchemy import func, select
@@ -10,12 +9,11 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from app.adapters.base import (
     RawDocumentPayload,
     RawRecordRef,
-    SourceAdapter,
 )
 from app.adapters.registry import registry
 from app.adapters.sebi_orders import SEBIOrdersAdapter
 from app.core.database import Base
-from app.db.models import Entity, IngestionRun, RawDocument, Record, RecordEntity, Source
+from app.db.models import Entity, RawDocument, Record, RecordEntity
 from app.etl.pipeline import ETLPipeline
 
 FIXTURES_DIR = pathlib.Path(__file__).parent / "fixtures"
@@ -241,9 +239,9 @@ async def test_e2e_html_and_pdf_ingestion_pipeline(isolated_db_session: AsyncSes
     links = links_result.scalars().all()
     assert len(links) >= 3
 
-    zenith_links = [l for l in links if l.record_id == zenith_rec.id]
+    zenith_links = [link for link in links if link.record_id == zenith_rec.id]
     assert len(zenith_links) >= 1
-    assert any(l.entity_id == zenith_entity.id for l in zenith_links)
+    assert any(link.entity_id == zenith_entity.id for link in zenith_links)
 
 
 @pytest.mark.asyncio
