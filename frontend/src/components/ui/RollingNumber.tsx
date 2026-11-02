@@ -54,6 +54,7 @@ export function RollingNumber({
   className = "",
 }: RollingNumberProps) {
   const [displayValue, setDisplayValue] = useState<number>(() => value);
+  const displayValRef = useRef<number>(value);
   const startValRef = useRef<number>(value);
   const prevTargetRef = useRef<number>(value);
   const startTimeRef = useRef<number | null>(null);
@@ -61,16 +62,17 @@ export function RollingNumber({
 
   useEffect(() => {
     if (prefersReducedMotion()) {
+      displayValRef.current = value;
       setDisplayValue(value);
       return;
     }
 
     // Avoid re-rolling if the value hasn't changed
-    if (prevTargetRef.current === value && displayValue === value) {
+    if (prevTargetRef.current === value && displayValRef.current === value) {
       return;
     }
 
-    startValRef.current = displayValue;
+    startValRef.current = displayValRef.current;
     prevTargetRef.current = value;
     startTimeRef.current = null;
     const targetVal = value;
@@ -84,11 +86,13 @@ export function RollingNumber({
       const easeOut = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
       const current = startValRef.current + (targetVal - startValRef.current) * easeOut;
 
+      displayValRef.current = current;
       setDisplayValue(current);
 
       if (progress < 1) {
         rafRef.current = requestAnimationFrame(animate);
       } else {
+        displayValRef.current = targetVal;
         setDisplayValue(targetVal);
       }
     };

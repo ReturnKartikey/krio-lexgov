@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
@@ -49,12 +49,51 @@ export function IntelligenceModal({
   const [isExportingPdf, setIsExportingPdf] = useState(false);
   const [pdfDownloaded, setPdfDownloaded] = useState(false);
 
-  // Initial load or query change
+  const queryRef = useRef(query);
+  queryRef.current = query;
+  const modeRef = useRef(mode);
+  modeRef.current = mode;
+  const dataRef = useRef(data);
+  dataRef.current = data;
+
+  const handleRunSynthesis = useCallback(
+    async (
+      qText?: string,
+      mType?: typeof mode,
+      isInitial: boolean = false
+    ) => {
+      if (isInitial || !dataRef.current) {
+        setInitialLoading(true);
+      } else {
+        setIsUpdatingMode(true);
+      }
+
+      const targetQuery = qText !== undefined ? qText : queryRef.current;
+      const targetMode = mType || modeRef.current;
+
+      try {
+        const res = await synthesizeIntelligence({
+          query: targetQuery,
+          mode: targetMode,
+        });
+        setData(res);
+      } catch (err) {
+        console.error("Synthesis failed:", err);
+        toast.error("Synthesis Error", "Failed to retrieve statutory risk analysis");
+      } finally {
+        setInitialLoading(false);
+        setIsUpdatingMode(false);
+      }
+    },
+    []
+  );
+
+  // Initial load when modal opens
   useEffect(() => {
     if (isOpen) {
-      handleRunSynthesis(query, mode, true);
+      handleRunSynthesis(queryRef.current, modeRef.current, true);
     }
-  }, [isOpen]);
+  }, [isOpen, handleRunSynthesis]);
 
   // Global ESC key to close
   useEffect(() => {
@@ -70,35 +109,6 @@ export function IntelligenceModal({
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
-
-  const handleRunSynthesis = async (
-    qText?: string,
-    mType?: typeof mode,
-    isInitial: boolean = false
-  ) => {
-    if (isInitial || !data) {
-      setInitialLoading(true);
-    } else {
-      setIsUpdatingMode(true);
-    }
-
-    const targetQuery = qText !== undefined ? qText : query;
-    const targetMode = mType || mode;
-
-    try {
-      const res = await synthesizeIntelligence({
-        query: targetQuery,
-        mode: targetMode,
-      });
-      setData(res);
-    } catch (err) {
-      console.error("Synthesis failed:", err);
-      toast.error("Synthesis Error", "Failed to retrieve statutory risk analysis");
-    } finally {
-      setInitialLoading(false);
-      setIsUpdatingMode(false);
-    }
-  };
 
   const handleModeSwitch = (newMode: typeof mode) => {
     if (newMode === mode) return;

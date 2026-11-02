@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
   TrendingUp,
@@ -89,6 +89,13 @@ export default function AnalyticsPage() {
   const [processingStats, setProcessingStats] = useState<ProcessingStatsResponse | null>(() => cachedStats);
   const [geoScope, setGeoScope] = useState<"head_office" | "regional">("head_office");
   const [loading, setLoading] = useState<boolean>(() => !hasCachedData);
+  const hasDataRef = useRef<boolean>(hasCachedData);
+
+  useEffect(() => {
+    if (trends && dailyData.length > 0) {
+      hasDataRef.current = true;
+    }
+  }, [trends, dailyData]);
 
   useEffect(() => {
     document.title = "Analytics & Trends";
@@ -98,7 +105,7 @@ export default function AnalyticsPage() {
     let isCurrent = true;
     async function fetchAllAnalytics() {
       // Only show skeleton if we have no cached data to display
-      if (!trends || dailyData.length === 0) {
+      if (!hasDataRef.current) {
         setLoading(true);
       }
       try {
