@@ -1,5 +1,6 @@
 from functools import lru_cache
 
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -53,6 +54,30 @@ class Settings(BaseSettings):
         "http://127.0.0.1:8001",
         "https://krio-rust.vercel.app",
     ]
+
+    @model_validator(mode="after")
+    def validate_production_security(self) -> "Settings":
+        """Enforce strict production secret and database configuration guards."""
+        if self.ENVIRONMENT.lower() == "production":
+            insecure_defaults = [
+                "krio_admin_secret_key_change_me",
+                "change_me",
+                "secret",
+                "admin",
+            ]
+            if not self.ADMIN_API_KEY or self.ADMIN_API_KEY.lower() in insecure_defaults:
+                raise ValueError(
+                    "CRITICAL SECURITY FAILURE: ADMIN_API_KEY cannot be empty or use default placeholder in production! "
+                    "Configure a strong cryptographic secret in production environment variables."
+                )
+
+            if "change_me_in_env" in self.DATABASE_URL or "change_me_in_env" in self.SYNC_DATABASE_URL:
+                raise ValueError(
+                    "CRITICAL CONFIGURATION FAILURE: DATABASE_URL must not contain placeholder credentials ('change_me_in_env') in production! "
+                    "Provide verified database credentials in environment variables."
+                )
+
+        return self
 
     model_config = SettingsConfigDict(
         env_file=".env",

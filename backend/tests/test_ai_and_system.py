@@ -139,4 +139,38 @@ async def test_inbound_rate_limiter_logic():
     # Different IP is unaffected
     allowed, retry_after = await limiter.is_allowed("192.168.1.101")
     assert allowed is True
+def test_production_secret_guard_validation():
+    from app.core.config import Settings
 
+    # 1. Insecure default admin key in production raises ValueError
+    with pytest.raises(ValueError, match="ADMIN_API_KEY cannot be empty or use default placeholder in production"):
+        Settings(
+            ENVIRONMENT="production",
+            ADMIN_API_KEY="krio_admin_secret_key_change_me",
+            DATABASE_URL="postgresql+asyncpg://user:pass@db:5432/db",
+            SYNC_DATABASE_URL="postgresql+psycopg://user:pass@db:5432/db",
+        )
+
+    # 2. Placeholder database credentials in production raises ValueError
+    with pytest.raises(ValueError, match="DATABASE_URL must not contain placeholder credentials"):
+        Settings(
+            ENVIRONMENT="production",
+            ADMIN_API_KEY="production_secure_token_999",
+            DATABASE_URL="postgresql+asyncpg://postgres:change_me_in_env@localhost:5432/db",
+            SYNC_DATABASE_URL="postgresql+psycopg://postgres:change_me_in_env@localhost:5432/db",
+        )
+
+    # 3. Valid production configuration succeeds
+    prod_settings = Settings(
+        ENVIRONMENT="production",
+        ADMIN_API_KEY="production_secure_token_999",
+        DATABASE_URL="postgresql+asyncpg://prod_user:secret_pass@prod-db.internal:5432/krio_prod",
+        SYNC_DATABASE_URL="postgresql+psycopg://prod_user:secret_pass@prod-db.internal:5432/krio_prod",
+    )
+    assert prod_settings.ENVIRONMENT == "production"
+    assert prod_settings.ADMIN_API_KEY == "production_secure_token_999"
+
+    # 4. Development environment allows default credentials
+    dev_settings = Settings(ENVIRONMENT="development")
+    assert dev_settings.ENVIRONMENT == "development"
+    assert dev_settings.ADMIN_API_KEY == "krio_admin_secret_key_change_me"
