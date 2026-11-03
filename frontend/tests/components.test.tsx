@@ -108,4 +108,23 @@ describe("UI Components", () => {
       expect(screen.queryByPlaceholderText(/Type a command/i)).toBeNull();
     });
   });
+
+  it("dynamically imports jsPDF and exports executive PDF memo without error", async () => {
+    const mockRecord: any = {
+      id: "test-uuid",
+      external_id: "SEBI-TEST-001",
+      record_type: "adjudication_order",
+      title: "Adjudication Order in the matter of Test Co",
+      summary: "Regulatory order imposing penalties",
+      published_date: "2024-03-15",
+      amount: 500000,
+      state: "Maharashtra",
+      jurisdiction: "Head Office",
+      source_url: "https://sebi.gov.in/test.html",
+      entities: [{ id: "e1", name: "Test Co", role: "Noticee", total_penalty_amount: 500000 }],
+    };
+
+    const { generateExecutivePdfMemo } = await import("../src/lib/pdfExport");
+    await expect(generateExecutivePdfMemo(mockRecord)).resolves.not.toThrow();
+  });
 });

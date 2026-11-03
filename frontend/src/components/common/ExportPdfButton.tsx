@@ -24,7 +24,7 @@ export function ExportPdfButton({
     e.stopPropagation();
     try {
       setIsExporting(true);
-      generateExecutivePdfMemo(record);
+      await generateExecutivePdfMemo(record);
       setDownloaded(true);
       toast.success("Executive Briefing Exported", `PDF compliance memo generated for ${record.external_id}`);
       setTimeout(() => setDownloaded(false), 2500);

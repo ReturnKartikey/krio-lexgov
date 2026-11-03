@@ -1,4 +1,3 @@
-import { jsPDF } from "jspdf";
 import { RecordDetailItem, SynthesisResponse } from "./types";
 import { formatDate } from "./utils";
 
@@ -81,7 +80,8 @@ function sanitizeExecutiveSummary(record: RecordDetailItem): string {
   return summary.replace(/^[\s»>|•\-]+/, "");
 }
 
-export function generateExecutivePdfMemo(record: RecordDetailItem): void {
+export async function generateExecutivePdfMemo(record: RecordDetailItem): Promise<void> {
+  const { jsPDF } = await import("jspdf");
   const doc = new jsPDF({
     orientation: "portrait",
     unit: "mm",
@@ -387,6 +387,7 @@ export async function generateSynthesisPdfReport(
   query: string = "",
   mode: string = "risk_brief"
 ): Promise<void> {
+  const { jsPDF } = await import("jspdf");
   const doc = new jsPDF({
     orientation: "portrait",
     unit: "mm",
