@@ -1,7 +1,7 @@
 from collections import defaultdict
 from datetime import date, timedelta
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy import and_, desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -24,6 +24,7 @@ router = APIRouter(prefix="/analytics", tags=["Analytics"])
 
 @router.get("/records-per-day", response_model=list[DailyCount])
 async def get_records_per_day(
+    response: Response,
     days: int = Query(90, ge=7, le=365),
     db: AsyncSession = Depends(get_db),
 ):
@@ -42,6 +43,8 @@ async def get_records_per_day(
     result = await db.execute(stmt)
     rows = result.all()
 
+    response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=300"
+
     return [
         DailyCount(
             date=r[0].isoformat() if r[0] else "unknown",
@@ -55,6 +58,7 @@ async def get_records_per_day(
 
 @router.get("/trends", response_model=TrendsResponse)
 async def get_trends(
+    response: Response,
     interval: str = Query("month", pattern="^(week|month)$"),
     db: AsyncSession = Depends(get_db),
 ):
@@ -118,6 +122,8 @@ async def get_trends(
         if r[0] is not None
     ]
 
+    response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=300"
+
     return TrendsResponse(
         interval=interval,
         total_orders_trend=TrendMetric(
@@ -147,6 +153,7 @@ async def get_trends(
 
 @router.get("/entity-frequency", response_model=list[EntityFrequencyItem])
 async def get_entity_frequency(
+    response: Response,
     top: int = Query(20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
 ):
@@ -168,6 +175,8 @@ async def get_entity_frequency(
     result = await db.execute(stmt)
     rows = result.all()
 
+    response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=300"
+
     return [
         EntityFrequencyItem(
             id=r[0],
@@ -181,7 +190,7 @@ async def get_entity_frequency(
 
 
 @router.get("/geo-distribution", response_model=list[GeoDistributionItem])
-async def get_geo_distribution(db: AsyncSession = Depends(get_db)):
+async def get_geo_distribution(response: Response, db: AsyncSession = Depends(get_db)):
     """Aggregate regulatory enforcement distribution across Indian states and jurisdictions."""
     # 1. Query state summary counts and penalties
     stmt = (
@@ -219,6 +228,8 @@ async def get_geo_distribution(db: AsyncSession = Depends(get_db)):
         if state and city and len(cities_by_state[state]) < 5:
             cities_by_state[state].append(city)
 
+    response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=300"
+
     return [
         GeoDistributionItem(
             state=r[0],
@@ -231,7 +242,7 @@ async def get_geo_distribution(db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/processing-stats", response_model=ProcessingStatsResponse)
-async def get_processing_stats(db: AsyncSession = Depends(get_db)):
+async def get_processing_stats(response: Response, db: AsyncSession = Depends(get_db)):
     """Ingestion pipeline audit statistics, success rates, and execution latency."""
     runs_stmt = select(IngestionRun).order_by(desc(IngestionRun.started_at)).limit(20)
     runs_res = await db.execute(runs_stmt)
@@ -271,6 +282,8 @@ async def get_processing_stats(db: AsyncSession = Depends(get_db)):
         for r in runs
     ]
 
+    response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=300"
+
     return ProcessingStatsResponse(
         total_runs=total_runs,
         success_rate_percent=success_rate,
@@ -287,6 +300,7 @@ async def get_processing_stats(db: AsyncSession = Depends(get_db)):
     dependencies=[Depends(check_rate_limit(max_per_minute=20))],
 )
 async def get_duplicates(
+    response: Response,
     threshold: float = Query(0.70, ge=0.5, le=1.0),
     db: AsyncSession = Depends(get_db),
 ):
@@ -310,6 +324,8 @@ async def get_duplicates(
     ]
 
     clusters = detect_near_duplicates(rec_dicts, similarity_threshold=threshold)
+
+    response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=300"
 
     return [
         DuplicateItemResponse(

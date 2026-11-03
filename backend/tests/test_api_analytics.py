@@ -16,6 +16,7 @@ async def test_analytics_records_per_day(client):
 @pytest.mark.asyncio
 async def test_analytics_trends(client):
     response = await client.get("/api/analytics/trends?interval=month")
+    assert response.headers.get("cache-control") == "public, max-age=60, stale-while-revalidate=300"
     assert response.status_code == 200
     data = response.json()
     assert "total_orders_trend" in data

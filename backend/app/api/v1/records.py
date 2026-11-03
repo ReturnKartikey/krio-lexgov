@@ -2,7 +2,7 @@ import math
 import uuid
 from datetime import date, datetime
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from sqlalchemy import String, and_, asc, cast, desc, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -45,6 +45,7 @@ async def list_records(
     sort_order: str = Query("desc", description="Sort order (asc, desc)"),
     page: int = Query(1, ge=1, description="Page number"),
     page_size: int = Query(10, ge=1, le=100, description="Records per page"),
+    response: Response = None,
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -184,6 +185,9 @@ async def list_records(
 
     total_pages = math.ceil(total_count / p_size) if p_size > 0 else 1
 
+    if response:
+        response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=300"
+
     return EnvelopeResponse(
         data=[RecordListItem.model_validate(r) for r in records],
         meta=PaginationMeta(
@@ -198,6 +202,7 @@ async def list_records(
 @router.get("/{record_id}", response_model=RecordDetailItem)
 async def get_record_detail(
     record_id: str,
+    response: Response = None,
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -257,6 +262,9 @@ async def get_record_detail(
     elif not isinstance(raw_meta, dict):
         raw_meta = {}
 
+    if response:
+        response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=300"
+
     return RecordDetailItem(
         id=record.id,
         source_id=record.source_id,
@@ -282,6 +290,7 @@ async def get_record_detail(
 @router.get("/{record_id}/preview", response_model=EnvelopeResponse[RecordListItem])
 async def get_record_preview(
     record_id: uuid.UUID,
+    response: Response = None,
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -294,6 +303,9 @@ async def get_record_preview(
 
     if not record:
         raise HTTPException(status_code=404, detail="Record not found")
+
+    if response:
+        response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=300"
 
     return EnvelopeResponse(
         data=RecordListItem(

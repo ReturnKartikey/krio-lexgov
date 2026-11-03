@@ -4,6 +4,7 @@ import pytest
 @pytest.mark.asyncio
 async def test_list_records_endpoint(client):
     response = await client.get("/api/records?page=1&page_size=10")
+    assert response.headers.get("cache-control") == "public, max-age=60, stale-while-revalidate=300"
     assert response.status_code == 200
     json_data = response.json()
     assert "data" in json_data
@@ -37,6 +38,7 @@ async def test_get_record_detail(client):
     rec_id = list_resp.json()["data"][0]["id"]
 
     detail_resp = await client.get(f"/api/records/{rec_id}")
+    assert detail_resp.headers.get("cache-control") == "public, max-age=60, stale-while-revalidate=300"
     assert detail_resp.status_code == 200
     detail = detail_resp.json()
     assert detail["id"] == rec_id
