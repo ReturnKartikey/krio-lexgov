@@ -34,7 +34,7 @@ async def get_health(db: AsyncSession = Depends(get_db)):
 
     redis_status = "disabled"
     try:
-        r = aioredis.from_url(settings.REDIS_URL, socket_timeout=2.0)
+        r = aioredis.from_url(settings.REDIS_URL, socket_timeout=0.2)
         await r.ping()
         redis_status = "healthy"
         await r.aclose()
